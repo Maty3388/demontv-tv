@@ -35,7 +35,14 @@ class _State extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildTV();
+    final size = MediaQuery.of(context).size;
+    return Stack(children: [
+      _buildTV(),
+      Positioned(top: 10, right: 10, child: Container(
+        color: Colors.red,
+        padding: const EdgeInsets.all(8),
+        child: Text("W:${size.width.toInt()} H:${size.height.toInt()}", style: const TextStyle(color: Colors.white, fontSize: 14)))),
+    ]);
   }
 
   Widget _buildTV() => Scaffold(
