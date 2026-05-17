@@ -63,7 +63,7 @@ class _State extends State<MainScreen> {
             child: Row(children: [
               Container(width: 42, height: 42,
                 decoration: BoxDecoration(gradient: const LinearGradient(colors: AppTheme.logoGradient), borderRadius: BorderRadius.circular(12)),
-                child: const Center(child: Text('∞', style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold)))),
+                child: const Center(child: Text('D+', style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold)))),
               const SizedBox(width: 10),
               const Text('DemonTv Plus', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
             ])),
