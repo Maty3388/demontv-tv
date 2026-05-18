@@ -15,13 +15,18 @@ class MainScreen extends StatefulWidget {
 class _State extends State<MainScreen> {
   int _idx = 0;
   bool _sidebarVisible = true;
-  final List<FocusNode> _navFocus = List.generate(9, (_) => FocusNode());
+  bool _profileExpanded = false;
+  String _userEmail = '';
+  String _userExpiry = '';
+  final List<FocusNode> _navFocus = List.generate(12, (_) => FocusNode());
+  static const String _adultPin = '1234';
 
   final _screens = const [
     HomeScreen(),
     LiveTvScreen(),
     VodScreen(type: 'movies'),
     VodScreen(type: 'series'),
+    LiveTvScreen(), // Adultos
     SettingsScreen(),
   ];
 
@@ -42,9 +47,20 @@ class _State extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
+    _loadProfile();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      FocusScope.of(context).requestFocus(_navFocus[0]);
+      FocusScope.of(context).requestFocus(_navFocus[1]);
     });
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final r = await ApiService.getProfile();
+      setState(() {
+        _userEmail  = r.email;
+        _userExpiry = r.subscriptionEnd ?? '';
+      });
+    } catch (_) {}
   }
 
   @override
@@ -64,23 +80,67 @@ class _State extends State<MainScreen> {
     } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
       setState(() => _sidebarVisible = false);
     } else if (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter) {
-      if (i < _navItems.length) {
-        setState(() { _idx = i; _sidebarVisible = false; });
+      if (i == 0) {
+        setState(() => _profileExpanded = !_profileExpanded);
+      } else if (i <= _navItems.length) {
+        final screenIdx = i - 1;
+        if (screenIdx == 4) {
+          _showAdultPin();
+        } else {
+          setState(() { _idx = screenIdx; _sidebarVisible = false; });
+        }
       } else {
-        _handleAction(i - _navItems.length);
+        _handleAction(i - _navItems.length - 1);
       }
     }
   }
 
+  void _showAdultPin() {
+    final pin = TextEditingController();
+    String? error;
+    showDialog(context: context, barrierDismissible: false, builder: (ctx) => StatefulBuilder(
+      builder: (ctx, set) => AlertDialog(
+        backgroundColor: const Color(0xFF1C1C1E),
+        title: const Text('Contenido para Adultos', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Icon(Icons.lock, color: AppTheme.accentCyan, size: 48),
+          const SizedBox(height: 16),
+          const Text('Ingresa el PIN para continuar', style: TextStyle(color: Colors.white70)),
+          const SizedBox(height: 16),
+          TextField(
+            controller: pin, obscureText: true, keyboardType: TextInputType.number,
+            maxLength: 4, textAlign: TextAlign.center, autofocus: true,
+            style: const TextStyle(color: Colors.white, fontSize: 24, letterSpacing: 8),
+            decoration: InputDecoration(
+              counterText: '',
+              filled: true, fillColor: const Color(0xFF2A2A2E),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+              errorText: error)),
+          ]),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar', style: TextStyle(color: AppTheme.textSecondary))),
+          TextButton(onPressed: () {
+            if (pin.text == _adultPin) {
+              Navigator.pop(ctx);
+              setState(() { _idx = 4; _sidebarVisible = false; });
+            } else {
+              set(() => error = 'PIN incorrecto');
+            }
+          }, child: const Text('ENTRAR', style: TextStyle(color: AppTheme.accentCyan, fontWeight: FontWeight.bold))),
+        ],
+      ),
+    ));
+  }
+
   void _handleAction(int i) {
     switch (i) {
-      case 0: // Borrar historial
+      case 0:
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Historial borrado'), backgroundColor: AppTheme.accentCyan));
         break;
-      case 1: // Actualizar lista
+      case 1:
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lista actualizada'), backgroundColor: AppTheme.accentCyan));
         break;
-      case 2: // Cerrar sesion
+      case 2:
         ApiService.clearToken();
         Navigator.pushReplacementNamed(context, '/login');
         break;
@@ -95,17 +155,14 @@ class _State extends State<MainScreen> {
       onKeyEvent: (event) {
         if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.arrowLeft && !_sidebarVisible) {
           setState(() => _sidebarVisible = true);
-          FocusScope.of(context).requestFocus(_navFocus[_idx]);
+          FocusScope.of(context).requestFocus(_navFocus[_idx + 1]);
         }
       },
       child: Row(children: [
-        // Barra lateral
         AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           width: _sidebarVisible ? 240 : 0,
-          child: _sidebarVisible ? _buildSidebar() : const SizedBox(),
-        ),
-        // Contenido
+          child: _sidebarVisible ? _buildSidebar() : const SizedBox()),
         Expanded(child: IndexedStack(index: _idx, children: _screens)),
       ]),
     ),
@@ -113,47 +170,77 @@ class _State extends State<MainScreen> {
 
   Widget _buildSidebar() => Container(
     width: 240,
-    decoration: BoxDecoration(
-      color: const Color(0xFF0A0A0A),
-      border: Border(right: BorderSide(color: AppTheme.border, width: 0.5))),
+    decoration: BoxDecoration(color: const Color(0xFF0A0A0A), border: Border(right: BorderSide(color: AppTheme.border, width: 0.5))),
     child: Column(children: [
-      const SizedBox(height: 30),
-      // Logo
-      Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(children: [
-          Container(width: 44, height: 44,
-            decoration: BoxDecoration(gradient: const LinearGradient(colors: AppTheme.logoGradient), borderRadius: BorderRadius.circular(12)),
-            child: const Center(child: Text('D+', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)))),
-          const SizedBox(width: 10),
-          const Text('DemonTv Plus', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-        ])),
-      const SizedBox(height: 10),
+      const SizedBox(height: 20),
+      // Mi Perfil (expandible)
+      Focus(
+        focusNode: _navFocus[0],
+        onFocusChange: (v) => setState(() {}),
+        onKeyEvent: (node, event) { _handleNavKey(0, event); return KeyEventResult.handled; },
+        child: Builder(builder: (ctx) {
+          final focused = _navFocus[0].hasFocus;
+          return GestureDetector(
+            onTap: () => setState(() => _profileExpanded = !_profileExpanded),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+              decoration: BoxDecoration(
+                color: focused ? AppTheme.accentCyan.withOpacity(0.15) : Colors.transparent,
+                borderRadius: BorderRadius.circular(10),
+                border: focused ? Border.all(color: AppTheme.accentCyan, width: 1.5) : null),
+              child: Row(children: [
+                const Icon(Icons.account_circle_outlined, color: AppTheme.accentCyan, size: 20),
+                const SizedBox(width: 10),
+                const Expanded(child: Text('Mi Perfil', style: TextStyle(color: AppTheme.accentCyan, fontSize: 14, fontWeight: FontWeight.bold))),
+                Icon(_profileExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: AppTheme.accentCyan, size: 18),
+              ]),
+            ),
+          );
+        }),
+      ),
+      // Info del perfil expandible
+      AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        height: _profileExpanded ? 80 : 0,
+        child: _profileExpanded ? Container(
+          margin: const EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(10)),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+            Row(children: [const Icon(Icons.email_outlined, color: AppTheme.textSecondary, size: 14), const SizedBox(width: 6), Expanded(child: Text(_userEmail, style: const TextStyle(color: Colors.white, fontSize: 11), overflow: TextOverflow.ellipsis))]),
+            const SizedBox(height: 6),
+            Row(children: [const Icon(Icons.calendar_today_outlined, color: AppTheme.textSecondary, size: 14), const SizedBox(width: 6), Text('Vence: $_userExpiry', style: const TextStyle(color: AppTheme.accentCyan, fontSize: 11))]),
+          ]),
+        ) : const SizedBox(),
+      ),
       const Divider(color: Colors.white12),
       // Nav items
-      ...List.generate(_navItems.length, (i) => _buildNavItem(i, _navItems[i], i == _idx)),
+      ...List.generate(_navItems.length, (i) => _buildNavItem(i + 1, _navItems[i], i == _idx)),
       const Divider(color: Colors.white12),
       // Bottom items
-      ...List.generate(_bottomItems.length, (i) => _buildNavItem(i + _navItems.length, _bottomItems[i], false, isBottom: true)),
+      ...List.generate(_bottomItems.length, (i) => _buildNavItem(i + _navItems.length + 1, _bottomItems[i], false, isBottom: true)),
       const Spacer(),
-      // Hint
       Padding(padding: const EdgeInsets.all(12),
-        child: Text('← Ocultar | → Navegar', style: TextStyle(color: AppTheme.textHint.withOpacity(0.6), fontSize: 10), textAlign: TextAlign.center)),
+        child: Text('← Menu | → Contenido', style: TextStyle(color: AppTheme.textHint.withOpacity(0.5), fontSize: 10), textAlign: TextAlign.center)),
     ]),
   );
 
   Widget _buildNavItem(int i, _NavData data, bool isSelected, {bool isBottom = false}) => Focus(
     focusNode: _navFocus[i],
     onFocusChange: (v) => setState(() {}),
-    onKeyEvent: (node, event) {
-      _handleNavKey(i, event);
-      return KeyEventResult.handled;
-    },
+    onKeyEvent: (node, event) { _handleNavKey(i, event); return KeyEventResult.handled; },
     child: Builder(builder: (ctx) {
       final focused = _navFocus[i].hasFocus;
       return GestureDetector(
         onTap: () {
-          if (i < _navItems.length) setState(() { _idx = i; _sidebarVisible = false; });
-          else _handleAction(i - _navItems.length);
+          if (i <= _navItems.length) {
+            final screenIdx = i - 1;
+            if (screenIdx == 4) _showAdultPin();
+            else setState(() { _idx = screenIdx; _sidebarVisible = false; });
+          } else {
+            _handleAction(i - _navItems.length - 1);
+          }
         },
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
@@ -169,6 +256,7 @@ class _State extends State<MainScreen> {
             Text(data.label, style: TextStyle(
               color: isBottom ? AppTheme.accentRed : isSelected || focused ? AppTheme.accentCyan : AppTheme.textSecondary,
               fontSize: 14, fontWeight: isSelected || focused ? FontWeight.bold : FontWeight.normal)),
+            if (data.label == 'Adultos') ...[const Spacer(), const Icon(Icons.lock, color: Colors.orange, size: 14)],
           ]),
         ),
       );
