@@ -298,7 +298,17 @@ class _TVChannelGridState extends State<_TVChannelGrid> {
     }
   }
 
-  void _scroll() {}
+  void _scroll() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollCtrl.hasClients) {
+        _scrollCtrl.animateTo(
+          _catIdx * 160.0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) => RawKeyboardListener(
