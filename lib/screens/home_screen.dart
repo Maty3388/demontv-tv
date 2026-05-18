@@ -15,7 +15,16 @@ class _State extends State<HomeScreen> {
   bool _loading = true;
 
   @override
-  void initState() { super.initState(); _load(); }
+  @override
+  void initState() {
+    super.initState();
+    _loadWithToken();
+  }
+
+  Future<void> _loadWithToken() async {
+    await ApiService.loadToken();
+    _load();
+  }
 
   Future<void> _load() async {
     try {

@@ -50,7 +50,9 @@ class _State extends State<MainScreen> {
     super.initState();
     _loadProfile();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      FocusScope.of(context).requestFocus(_navFocus[1]);
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) FocusScope.of(context).requestFocus(_navFocus[1]);
+      });
     });
   }
 
