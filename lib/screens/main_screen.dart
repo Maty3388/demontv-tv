@@ -13,7 +13,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _State extends State<MainScreen> {
-  int _sidebarIdx = 1;
+  int _sidebarIdx = 2;
   bool _inContent = false;
   String _userEmail = "";
   String _userExpiry = "";
