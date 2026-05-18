@@ -337,7 +337,7 @@ class _TVChannelGridState extends State<_TVChannelGrid> {
                 itemBuilder: (ctx, catIdx) {
                   final cat = _grouped.keys.elementAt(catIdx);
                   final channels = _grouped[cat]!;
-                  return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  return Column(key: (_catKeys[catIdx] ??= GlobalKey()), crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Padding(padding: const EdgeInsets.fromLTRB(4, 16, 4, 8),
                       child: Text(cat, style: const TextStyle(color: AppTheme.accentCyan, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 1))),
                     GridView.builder(
