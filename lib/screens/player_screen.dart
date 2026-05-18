@@ -36,7 +36,7 @@ class _State extends State<PlayerScreen> {
     if (url.contains('.mpd'))  fmt = BetterPlayerVideoFormat.dash;
     final ds = BetterPlayerDataSource(BetterPlayerDataSourceType.network, url,
       videoFormat: fmt, headers: headers.isNotEmpty ? headers : null, liveStream: channel.isLive,
-      bufferingConfiguration: const BetterPlayerBufferingConfiguration(minBufferMs: 2000, maxBufferMs: 15000, bufferForPlaybackMs: 1500, bufferForPlaybackAfterRebufferMs: 3000));
+      bufferingConfiguration: const BetterPlayerBufferingConfiguration(minBufferMs: 1000, maxBufferMs: 8000, bufferForPlaybackMs: 500, bufferForPlaybackAfterRebufferMs: 1000));
     setState(() { _ctrl?.dispose(); _ctrl = BetterPlayerController(const BetterPlayerConfiguration(autoPlay: true, fit: BoxFit.contain, controlsConfiguration: BetterPlayerControlsConfiguration(showControls: false), allowedScreenSleep: false)); _buffering = true; });
     _ctrl!.setupDataSource(ds).then((_) {
       _ctrl!.addEventsListener((e) {
