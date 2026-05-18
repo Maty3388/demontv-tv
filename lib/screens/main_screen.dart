@@ -333,7 +333,7 @@ class _TVChannelGridState extends State<_TVChannelGrid> {
                     GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 1.6),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, crossAxisSpacing: 10, mainAxisSpacing: 10, childAspectRatio: 1.3),
                       itemCount: channels.length,
                       itemBuilder: (ctx, i) {
                         final ch = channels[i];
@@ -350,7 +350,7 @@ class _TVChannelGridState extends State<_TVChannelGrid> {
                               boxShadow: sel ? [BoxShadow(color: AppTheme.accentCyan.withOpacity(0.4), blurRadius: 16)] : null),
                             child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                               ch.logoUrl.isNotEmpty
-                                ? Image.network(ch.logoUrl, width: 70, height: 52, fit: BoxFit.contain,
+                                ? Image.network(ch.logoUrl, width: 55, height: 42, fit: BoxFit.contain,
                                     errorBuilder: (_, __, ___) => const Icon(Icons.tv, color: AppTheme.textHint, size: 36))
                                 : const Icon(Icons.tv, color: AppTheme.textHint, size: 36),
                               const SizedBox(height: 8),
