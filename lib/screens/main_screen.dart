@@ -302,11 +302,13 @@ class _TVChannelGridState extends State<_TVChannelGrid> {
 
   void _scroll() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollCtrl.hasClients) {
-        _scrollCtrl.animateTo(
-          _catIdx * 160.0,
+      final key = _catKeys[_catIdx];
+      if (key != null && key.currentContext != null) {
+        Scrollable.ensureVisible(
+          key.currentContext!,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
+          alignment: 0.0,
         );
       }
     });
