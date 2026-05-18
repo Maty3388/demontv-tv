@@ -70,7 +70,7 @@ class _State extends State<ProfileScreen> {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 margin: const EdgeInsets.symmetric(horizontal: 16),
-                padding: const EdgeInsets.all(_focused == i ? 4 : 0),
+                padding: EdgeInsets.all(_focused == i ? 4 : 0),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(26),
                   border: _focused == i ? Border.all(color: AppTheme.accentCyan, width: 3) : null,
