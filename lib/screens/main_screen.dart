@@ -257,7 +257,8 @@ class _TVChannelGridState extends State<_TVChannelGrid> {
 
   Map<String, List<Channel>> _grouped = {};
   bool _loading = true;
-  int _selectedIdx = 0;
+  int _catIdx = 0;
+  int _chIdx = 0;
   final _scrollCtrl = ScrollController();
 
   @override
@@ -278,18 +279,20 @@ class _TVChannelGridState extends State<_TVChannelGrid> {
 
   void _onKey(RawKeyEvent event) {
     if (event is! RawKeyDownEvent) return;
-    const cols = 4;
+    final cats = _grouped.keys.toList();
+    if (cats.isEmpty) return;
+    final curCh = _grouped[cats[_catIdx]] ?? [];
     if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-      if (_selectedIdx == 0) { widget.onBack(); }
-      else { setState(() => _selectedIdx--); _scroll(); }
+      if (_chIdx == 0) { widget.onBack(); return; }
+      setState(() => _chIdx--);
     } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-      if (_selectedIdx < _all.length - 1) { setState(() => _selectedIdx++); _scroll(); }
+      if (_chIdx < curCh.length - 1) setState(() => _chIdx++);
     } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-      if (_selectedIdx + cols < _all.length) { setState(() => _selectedIdx += cols); _scroll(); }
+      if (_catIdx < cats.length - 1) setState(() { _catIdx++; _chIdx = 0; });
     } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-      if (_selectedIdx - cols >= 0) { setState(() => _selectedIdx -= cols); _scroll(); }
+      if (_catIdx > 0) setState(() { _catIdx--; _chIdx = 0; });
     } else if (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter) {
-      if (_all.isNotEmpty) Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: _all[_selectedIdx])));
+      if (curCh.isNotEmpty) Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: curCh[_chIdx])));
     } else if (event.logicalKey == LogicalKeyboardKey.goBack) {
       widget.onBack();
     }
@@ -335,9 +338,9 @@ class _TVChannelGridState extends State<_TVChannelGrid> {
                       itemBuilder: (ctx, i) {
                         final ch = channels[i];
                         final globalIdx = _all.indexOf(ch);
-                        final sel = globalIdx == _selectedIdx;
+                        final sel = catI == _catIdx && chI == _chIdx;
                         return GestureDetector(
-                          onTap: () { setState(() => _selectedIdx = globalIdx); Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: ch))); },
+                          onTap: () { setState(() { _catIdx = catI; _chIdx = chI; }); Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: ch))); },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 150),
                             decoration: BoxDecoration(
@@ -366,8 +369,7 @@ class _TVChannelGridState extends State<_TVChannelGrid> {
                 child: Row(children: [
                   const Icon(Icons.info_outline, color: AppTheme.textSecondary, size: 16),
                   const SizedBox(width: 8),
-                  Text(_all[_selectedIdx].name, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-                  Text("  •  ${_all[_selectedIdx].category}", style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                  Builder(builder: (ctx) { final cats = _grouped.keys.toList(); final ch = cats.isNotEmpty ? (_grouped[cats[_catIdx]] ?? [])[_chIdx.clamp(0, (_grouped[cats[_catIdx]]?.length ?? 1) - 1)] : null; return Row(children: [ const Icon(Icons.info_outline, color: AppTheme.textSecondary, size: 16), const SizedBox(width: 8), Text(ch?.name ?? "", style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)), Text("  •  \${ch?.category ?? ""}", style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)), const Spacer(), const Text("<- Volver   OK Reproducir", style: TextStyle(color: AppTheme.textHint, fontSize: 11)), ]); }),
                   const Spacer(),
                   const Text("<- Volver   OK Reproducir", style: TextStyle(color: AppTheme.textHint, fontSize: 11)),
                 ]),
