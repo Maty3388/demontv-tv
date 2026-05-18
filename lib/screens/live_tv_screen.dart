@@ -24,7 +24,16 @@ class _State extends State<LiveTvScreen> {
   final List<List<FocusNode>> _chFocusNodes = [];
 
   @override
-  void initState() { super.initState(); _load(); }
+  @override
+  void initState() {
+    super.initState();
+    _loadWithToken();
+  }
+
+  Future<void> _loadWithToken() async {
+    await ApiService.loadToken();
+    _load();
+  }
 
   @override
   void dispose() {
