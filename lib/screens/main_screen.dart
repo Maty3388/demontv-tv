@@ -128,9 +128,9 @@ class _State extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) => RawKeyboardListener(
-    focusNode: FocusNode()..requestFocus(),
-    autofocus: true,
-    onKey: _handleKey,
+    focusNode: FocusNode(),
+    autofocus: _sidebarVisible,
+    onKey: _sidebarVisible ? _handleKey : (_) {},
     child: Scaffold(
       backgroundColor: AppTheme.background,
       body: Row(children: [
