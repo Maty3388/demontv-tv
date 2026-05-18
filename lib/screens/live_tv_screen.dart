@@ -60,7 +60,9 @@ class _State extends State<LiveTvScreen> {
     setState(() => _loading = false);
     if (_chFocusNodes.isNotEmpty && _chFocusNodes[0].isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        FocusScope.of(context).requestFocus(_chFocusNodes[0][0]);
+        Future.delayed(const Duration(milliseconds: 400), () {
+          if (mounted) FocusScope.of(context).requestFocus(_chFocusNodes[0][0]);
+        });
       });
     }
   }
