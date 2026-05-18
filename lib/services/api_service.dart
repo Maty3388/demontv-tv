@@ -46,6 +46,11 @@ class ApiService {
     return data;
   }
 
+  static Future<Map<String, dynamic>> getProfile() async {
+    final r = await http.get(Uri.parse('\$baseUrl/profile'), headers: _headers);
+    return jsonDecode(r.body);
+  }
+
   static Future<List<Channel>> getChannels({String? search, String? category}) async {
     var url = '$baseUrl/channels';
     final p = <String>[];

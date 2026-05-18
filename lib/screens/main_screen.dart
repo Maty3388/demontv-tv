@@ -57,8 +57,8 @@ class _State extends State<MainScreen> {
     try {
       final r = await ApiService.getProfile();
       setState(() {
-        _userEmail  = r.email;
-        _userExpiry = r.subscriptionEnd ?? '';
+        _userEmail  = r['email'] ?? '';
+        _userExpiry = r['subscription_end'] ?? '';
       });
     } catch (_) {}
   }

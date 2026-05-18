@@ -19,16 +19,25 @@ class _State extends State<HomeScreen> {
 
   Future<void> _load() async {
     try {
-      final r1 = await ApiService.getChannels();
-      final r2 = await ApiService.getMovies(featuredOnly: true);
-      final r3 = await ApiService.getSeries(featuredOnly: true);
+      final channels = await ApiService.getChannels();
+      final movies = await ApiService.getMovies(featuredOnly: true);
+      final series = await ApiService.getSeries(featuredOnly: true);
       setState(() {
-        _channels = r1.map((c) => {"name": c.name, "logo": c.logoUrl, "id": c.id, "stream_url": c.streamUrl, "headers": c.headers, "is_live": c.isLive}).toList();
-        _movies = r2.map((m) => {"title": m.title, "poster": m.posterUrl, "id": m.id, "stream_url": m.streamUrl}).toList();
-        _series = r3.map((s) => {"title": s.title, "poster": s.posterUrl, "id": s.id}).toList();
-        _loading  = false;
+        _channels = channels.map((c) => {
+          'name': c.name, 'logo': c.logoUrl, 'id': c.id,
+          'stream_url': c.streamUrl, 'headers': c.headers, 'is_live': c.isLive
+        }).toList();
+        _movies = movies.map((m) => {
+          'title': m.title, 'poster': m.posterUrl, 'id': m.id, 'stream_url': m.streamUrl
+        }).toList();
+        _series = series.map((s) => {
+          'title': s.title, 'poster': s.posterUrl, 'id': s.id
+        }).toList();
+        _loading = false;
       });
-    } catch (_) { setState(() => _loading = false); }
+    } catch (e) {
+      setState(() => _loading = false);
+    }
   }
 
   @override
