@@ -279,7 +279,7 @@ class _TVChannelGridState extends State<_TVChannelGrid> {
     if (event is! RawKeyDownEvent) return;
     const cols = 4;
     if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-      if (_selectedIdx % cols == 0) { widget.onBack(); }
+      if (_selectedIdx == 0) { widget.onBack(); }
       else { setState(() => _selectedIdx--); _scroll(); }
     } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
       if (_selectedIdx < _all.length - 1) { setState(() => _selectedIdx++); _scroll(); }
