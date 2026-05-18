@@ -348,6 +348,7 @@ class _TVChannelGridState extends State<_TVChannelGrid> {
                         return GestureDetector(
                           onTap: () { setState(() => _selectedIdx = globalIdx); Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: ch))); },
                           child: AnimatedContainer(
+                            key: (_itemKeys[globalIdx] ??= GlobalKey()),
                             duration: const Duration(milliseconds: 150),
                             decoration: BoxDecoration(
                               color: sel ? AppTheme.accentCyan.withOpacity(0.2) : AppTheme.surface,
