@@ -254,6 +254,7 @@ class _TVChannelGrid extends StatefulWidget {
 
 class _TVChannelGridState extends State<_TVChannelGrid> {
   List<Channel> _all = [];
+  final Map<int, GlobalKey> _itemKeys = {};
   Map<String, List<Channel>> _grouped = {};
   bool _loading = true;
   int _selectedIdx = 0;
@@ -295,9 +296,14 @@ class _TVChannelGridState extends State<_TVChannelGrid> {
   }
 
   void _scroll() {
-    const cols = 4;
-    const h = 160.0;
-    _scrollCtrl.animateTo((_selectedIdx ~/ cols) * h, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollCtrl.hasClients) {
+        final ctx = _itemKeys[_selectedIdx]?.currentContext;
+        if (ctx != null) {
+          Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 200), curve: Curves.easeOut, alignment: 0.3);
+        }
+      }
+    });
   }
 
   @override
