@@ -20,6 +20,7 @@ class _State extends State<MainScreen> {
   static const String _adultPin = "1234";
   final _menuItems = [
     {'label': 'Mi Perfil',    'icon': Icons.person_outline},
+    {'label': 'Inicio',       'icon': Icons.home_outlined},
     {'label': 'TV en Vivo',   'icon': Icons.live_tv_outlined},
     {'label': 'Peliculas',    'icon': Icons.movie_outlined},
     {'label': 'Series',       'icon': Icons.video_library_outlined},
@@ -62,8 +63,8 @@ class _State extends State<MainScreen> {
   void _selectItem() {
     switch (_sidebarIdx) {
       case 0: break;
-      case 4: _showAdultPin(); break;
-      case 5: ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Historial borrado"), backgroundColor: AppTheme.accentCyan)); break;
+      case 5: _showAdultPin(); break;
+      case 6: ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Historial borrado"), backgroundColor: AppTheme.accentCyan)); break;
       case 6: ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lista actualizada"), backgroundColor: AppTheme.accentCyan)); break;
       case 7: ApiService.clearToken(); Navigator.pushReplacementNamed(context, "/login"); break;
       default: setState(() => _inContent = true);
@@ -107,6 +108,24 @@ class _State extends State<MainScreen> {
       default: return const SizedBox();
     }
   }
+
+
+  Widget _buildHomeContent() => Container(
+    color: AppTheme.background,
+    child: SingleChildScrollView(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Container(
+        width: double.infinity, padding: const EdgeInsets.fromLTRB(24, 40, 24, 30),
+        decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF1A0A2E), Color(0xFF0A0A0A)])),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('Bienvenido', style: TextStyle(color: AppTheme.textSecondary, fontSize: 16)),
+          const Text('que queres ver hoy?', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
+        ])),
+      const Padding(padding: EdgeInsets.fromLTRB(20, 20, 20, 10),
+        child: Text('TV en Vivo', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold))),
+      const Padding(padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
+        child: Text('Selecciona TV en Vivo desde el menu lateral para ver los canales', style: TextStyle(color: AppTheme.textSecondary, fontSize: 14))),
+    ])),
+  );
 
   Widget _buildHome() => Container(
     color: AppTheme.background,
