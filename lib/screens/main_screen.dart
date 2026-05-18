@@ -15,6 +15,7 @@ class MainScreen extends StatefulWidget {
 class _State extends State<MainScreen> {
   int _sidebarIdx = 2;
   bool _inContent = false;
+  bool _profileExpanded = false;
   String _userEmail = "";
   String _userExpiry = "";
   static const String _adultPin = "1234";
@@ -62,11 +63,10 @@ class _State extends State<MainScreen> {
 
   void _selectItem() {
     switch (_sidebarIdx) {
-      case 0: break;
       case 5: _showAdultPin(); break;
       case 6: ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Historial borrado"), backgroundColor: AppTheme.accentCyan)); break;
-      case 6: ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lista actualizada"), backgroundColor: AppTheme.accentCyan)); break;
-      case 7: ApiService.clearToken(); Navigator.pushReplacementNamed(context, "/login"); break;
+      case 7: ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lista actualizada"), backgroundColor: AppTheme.accentCyan)); break;
+      case 8: ApiService.clearToken(); Navigator.pushReplacementNamed(context, "/login"); break;
       default: setState(() => _inContent = true);
     }
   }
