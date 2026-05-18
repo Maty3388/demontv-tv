@@ -101,7 +101,7 @@ class ApiService {
         if (idx > 0) headers[kv.substring(0, idx).trim()] = kv.substring(idx + 1).trim();
       }
     }
-    return Channel(id: j['id'], name: j['name'], category: j['category'], logoUrl: j['logo'] ?? '', streamUrl: url, headers: headers, isLive: j['is_live'] ?? true, epgNow: j['epg_now'], epgNext: j['epg_next'], number: j['number']);
+    return Channel(id: (j['_id'] ?? j['id'] ?? '').toString(), name: j['name'], category: j['category'], logoUrl: j['logo'] ?? '', streamUrl: url, headers: headers, isLive: j['is_live'] ?? true, epgNow: j['epg_now'], epgNext: j['epg_next'], number: j['number']);
   }
 
   static Content _movieFromJson(Map<String, dynamic> j) => Content(
