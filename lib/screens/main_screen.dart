@@ -320,34 +320,47 @@ class _TVChannelGridState extends State<_TVChannelGrid> {
                   const Spacer(),
                   Text("${_selectedIdx + 1}/${_all.length}", style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
                 ])),
-              Expanded(child: GridView.builder(
+              Expanded(child: ListView.builder(
                 controller: _scrollCtrl,
                 padding: const EdgeInsets.all(16),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 1.4),
-                itemCount: _all.length,
-                itemBuilder: (ctx, i) {
-                  final ch = _all[i];
-                  final sel = i == _selectedIdx;
-                  return GestureDetector(
-                    onTap: () { setState(() => _selectedIdx = i); Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: ch))); },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 150),
-                      decoration: BoxDecoration(
-                        color: sel ? AppTheme.accentCyan.withOpacity(0.2) : AppTheme.surface,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: sel ? AppTheme.accentCyan : AppTheme.border, width: sel ? 2.5 : 0.5),
-                        boxShadow: sel ? [BoxShadow(color: AppTheme.accentCyan.withOpacity(0.4), blurRadius: 16)] : null),
-                      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                        ch.logoUrl.isNotEmpty
-                          ? Image.network(ch.logoUrl, width: 60, height: 45, fit: BoxFit.contain,
-                              errorBuilder: (_, __, ___) => const Icon(Icons.tv, color: AppTheme.textHint, size: 32))
-                          : const Icon(Icons.tv, color: AppTheme.textHint, size: 32),
-                        const SizedBox(height: 8),
-                        Padding(padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Text(ch.name, style: TextStyle(color: sel ? Colors.white : AppTheme.textSecondary, fontSize: 11, fontWeight: sel ? FontWeight.bold : FontWeight.normal), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)),
-                      ]),
-                    ),
-                  );
+                itemCount: _grouped.length,
+                itemBuilder: (ctx, catIdx) {
+                  final cat = _grouped.keys.elementAt(catIdx);
+                  final channels = _grouped[cat]!;
+                  return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Padding(padding: const EdgeInsets.fromLTRB(4, 16, 4, 8),
+                      child: Text(cat, style: const TextStyle(color: AppTheme.accentCyan, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 1))),
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 1.6),
+                      itemCount: channels.length,
+                      itemBuilder: (ctx, i) {
+                        final ch = channels[i];
+                        final globalIdx = _all.indexOf(ch);
+                        final sel = globalIdx == _selectedIdx;
+                        return GestureDetector(
+                          onTap: () { setState(() => _selectedIdx = globalIdx); Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: ch))); },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            decoration: BoxDecoration(
+                              color: sel ? AppTheme.accentCyan.withOpacity(0.2) : AppTheme.surface,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: sel ? AppTheme.accentCyan : AppTheme.border, width: sel ? 2.5 : 0.5),
+                              boxShadow: sel ? [BoxShadow(color: AppTheme.accentCyan.withOpacity(0.4), blurRadius: 16)] : null),
+                            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                              ch.logoUrl.isNotEmpty
+                                ? Image.network(ch.logoUrl, width: 70, height: 52, fit: BoxFit.contain,
+                                    errorBuilder: (_, __, ___) => const Icon(Icons.tv, color: AppTheme.textHint, size: 36))
+                                : const Icon(Icons.tv, color: AppTheme.textHint, size: 36),
+                              const SizedBox(height: 8),
+                              Padding(padding: const EdgeInsets.symmetric(horizontal: 8),
+                                child: Text(ch.name, style: TextStyle(color: sel ? Colors.white : AppTheme.textSecondary, fontSize: 12, fontWeight: sel ? FontWeight.bold : FontWeight.normal), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)),
+                            ]),
+                          ),
+                        );
+                      }),
+                  ]);
                 },
               )),
               Container(
