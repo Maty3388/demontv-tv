@@ -58,7 +58,7 @@ class _State extends State<PlayerScreen> {
       autofocus: true,
       onKey: (event) {
         if (event is RawKeyDownEvent) {
-          if (event.logicalKey == LogicalKeyboardKey.goBack) { if (Navigator.canPop(context)) Navigator.pop(context); }
+          if (event.logicalKey == LogicalKeyboardKey.goBack) { Navigator.pop(context); }
           if (event.logicalKey == LogicalKeyboardKey.select) {
             setState(() => _showControls = !_showControls);
             if (_showControls) _startHideTimer();
@@ -69,7 +69,7 @@ class _State extends State<PlayerScreen> {
         onTap: () { setState(() => _showControls = !_showControls); if (_showControls) _startHideTimer(); },
         child: Stack(children: [
           _initialized && _ctrl != null
-            ? Center(child: AspectRatio(aspectRatio: _ctrl!.value.aspectRatio, child: VideoPlayer(_ctrl!)))
+            ? SizedBox.expand(child: FittedBox(fit: BoxFit.cover, child: SizedBox(width: _ctrl!.value.size.width, height: _ctrl!.value.size.height, child: VideoPlayer(_ctrl!))))
             : const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan)),
           if (_showControls) _buildControls(),
         ]),
