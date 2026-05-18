@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
@@ -15,17 +16,44 @@ class _State extends State<LiveTvScreen> {
   bool _loading = true;
   String _search = '';
   final _searchCtrl = TextEditingController();
+  final _searchFocus = FocusNode();
+  bool _showSearch = false;
+  int _catIdx = 0;
+  int _chIdx = 0;
+  final List<FocusNode> _catFocusNodes = [];
+  final List<List<FocusNode>> _chFocusNodes = [];
 
   @override
   void initState() { super.initState(); _load(); }
+
+  @override
+  void dispose() {
+    _searchFocus.dispose();
+    for (final f in _catFocusNodes) f.dispose();
+    for (final row in _chFocusNodes) for (final f in row) f.dispose();
+    super.dispose();
+  }
 
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
       final channels = await ApiService.getChannels(search: _search.isEmpty ? null : _search);
-      setState(() => _channels = channels);
+      setState(() {
+        _channels = channels;
+        _catFocusNodes.clear();
+        _chFocusNodes.clear();
+        for (int i = 0; i < _grouped.length; i++) {
+          _catFocusNodes.add(FocusNode());
+          _chFocusNodes.add(List.generate(_grouped.values.elementAt(i).length, (_) => FocusNode()));
+        }
+      });
     } catch (_) {}
     setState(() => _loading = false);
+    if (_chFocusNodes.isNotEmpty && _chFocusNodes[0].isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        FocusScope.of(context).requestFocus(_chFocusNodes[0][0]);
+      });
+    }
   }
 
   Map<String, List<Channel>> get _grouped {
@@ -34,73 +62,129 @@ class _State extends State<LiveTvScreen> {
     return map;
   }
 
+  void _handleChannelKey(int catI, int chI, KeyEvent event) {
+    if (event is! KeyDownEvent) return;
+    final cats = _grouped.values.toList();
+    if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+      final nextCh = chI + 1;
+      if (nextCh < cats[catI].length) {
+        FocusScope.of(context).requestFocus(_chFocusNodes[catI][nextCh]);
+        setState(() { _catIdx = catI; _chIdx = nextCh; });
+      }
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+      final prevCh = chI - 1;
+      if (prevCh >= 0) {
+        FocusScope.of(context).requestFocus(_chFocusNodes[catI][prevCh]);
+        setState(() { _catIdx = catI; _chIdx = prevCh; });
+      }
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+      final nextCat = catI + 1;
+      if (nextCat < cats.length && _chFocusNodes[nextCat].isNotEmpty) {
+        FocusScope.of(context).requestFocus(_chFocusNodes[nextCat][0]);
+        setState(() { _catIdx = nextCat; _chIdx = 0; });
+      }
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+      if (catI == 0) {
+        setState(() => _showSearch = true);
+        FocusScope.of(context).requestFocus(_searchFocus);
+      } else {
+        final prevCat = catI - 1;
+        if (_chFocusNodes[prevCat].isNotEmpty) {
+          FocusScope.of(context).requestFocus(_chFocusNodes[prevCat][0]);
+          setState(() { _catIdx = prevCat; _chIdx = 0; });
+        }
+      }
+    } else if (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter) {
+      final channel = cats[catI][chI];
+      Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: channel)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: AppTheme.background,
     body: SafeArea(child: Column(children: [
+      // Header con busqueda
       Padding(padding: const EdgeInsets.fromLTRB(16,12,16,8),
         child: Row(children: [
-          const Icon(Icons.all_inclusive, color: Colors.white, size: 24),
-          const SizedBox(width: 8),
-          const Text('DemonTv Plus', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+          const Text('TV en Vivo', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
           const Spacer(),
-          Container(width: 40, height: 40,
-            decoration: BoxDecoration(gradient: const LinearGradient(colors: AppTheme.logoGradient, begin: Alignment.topLeft, end: Alignment.bottomRight), borderRadius: BorderRadius.circular(12)),
-            child: const Icon(Icons.person_outline, color: Colors.white, size: 22)),
+          GestureDetector(
+            onTap: () { setState(() => _showSearch = !_showSearch); if (_showSearch) FocusScope.of(context).requestFocus(_searchFocus); },
+            child: Container(padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(color: _showSearch ? AppTheme.accentCyan.withOpacity(0.2) : AppTheme.surface, borderRadius: BorderRadius.circular(10),
+                border: _showSearch ? Border.all(color: AppTheme.accentCyan) : null),
+              child: Icon(Icons.search, color: _showSearch ? AppTheme.accentCyan : AppTheme.textSecondary, size: 22))),
         ])),
-      Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        child: TextField(controller: _searchCtrl, onChanged: (v) { _search = v; _load(); },
-          style: const TextStyle(color: AppTheme.textPrimary),
+      // Barra de busqueda
+      if (_showSearch) Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        child: TextField(
+          controller: _searchCtrl, focusNode: _searchFocus,
+          onChanged: (v) { setState(() => _search = v); _load(); },
+          onSubmitted: (_) { setState(() => _showSearch = false); if (_chFocusNodes.isNotEmpty && _chFocusNodes[0].isNotEmpty) FocusScope.of(context).requestFocus(_chFocusNodes[0][0]); },
+          style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.search, color: AppTheme.textHint),
-            hintText: '¿Qué canal buscás?',
-            suffixIcon: _search.isNotEmpty ? IconButton(onPressed: () { _searchCtrl.clear(); setState(() => _search = ''); _load(); }, icon: const Icon(Icons.close, color: AppTheme.textHint)) : null,
-          ))),
+            hintText: 'Buscar canal...',
+            filled: true, fillColor: AppTheme.surface,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+            suffixIcon: _search.isNotEmpty ? IconButton(onPressed: () { _searchCtrl.clear(); setState(() => _search = ''); _load(); }, icon: const Icon(Icons.close, color: AppTheme.textHint)) : null))),
       const SizedBox(height: 8),
+      // Lista de canales
       Expanded(child: _loading
         ? const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan))
-        : ListView(padding: const EdgeInsets.only(bottom: 20),
-            children: _grouped.entries.map((e) => _CategorySection(category: e.key, channels: e.value)).toList())),
+        : _channels.isEmpty
+          ? const Center(child: Text('Sin canales', style: TextStyle(color: AppTheme.textSecondary)))
+          : ListView(padding: const EdgeInsets.only(bottom: 20),
+              children: _grouped.entries.toList().asMap().entries.map((entry) {
+                final catI = entry.key;
+                final cat = entry.value.key;
+                final channels = entry.value.value;
+                return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Padding(padding: const EdgeInsets.fromLTRB(16,16,16,10),
+                    child: Text(cat, style: const TextStyle(color: AppTheme.accentCyan, fontSize: 14, fontWeight: FontWeight.w800, letterSpacing: 1.1))),
+                  SizedBox(height: 130, child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    itemCount: channels.length,
+                    itemBuilder: (ctx, chI) {
+                      final ch = channels[chI];
+                      final isFocused = _catIdx == catI && _chIdx == chI;
+                      if (catI >= _chFocusNodes.length || chI >= _chFocusNodes[catI].length) {
+                        return const SizedBox();
+                      }
+                      return Focus(
+                        focusNode: _chFocusNodes[catI][chI],
+                        onFocusChange: (v) { if (v) setState(() { _catIdx = catI; _chIdx = chI; }); },
+                        onKeyEvent: (node, event) { _handleChannelKey(catI, chI, event); return KeyEventResult.handled; },
+                        child: GestureDetector(
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: ch))),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            width: isFocused ? 140 : 120,
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            decoration: BoxDecoration(
+                              color: isFocused ? AppTheme.accentCyan.withOpacity(0.15) : AppTheme.surface,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: isFocused ? AppTheme.accentCyan : AppTheme.border, width: isFocused ? 2 : 0.5),
+                              boxShadow: isFocused ? [BoxShadow(color: AppTheme.accentCyan.withOpacity(0.3), blurRadius: 12)] : null),
+                            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                              SizedBox(width: 70, height: 70, child: ClipRRect(borderRadius: BorderRadius.circular(10),
+                                child: ch.logoUrl.isNotEmpty
+                                  ? CachedNetworkImage(imageUrl: ch.logoUrl, fit: BoxFit.contain,
+                                      placeholder: (_, __) => Container(color: AppTheme.surfaceAlt, child: const Icon(Icons.tv, color: AppTheme.textHint)),
+                                      errorWidget: (_, __, ___) => Container(color: AppTheme.surfaceAlt, child: const Icon(Icons.tv, color: AppTheme.textHint)))
+                                  : Container(color: AppTheme.surfaceAlt, child: const Icon(Icons.tv, color: AppTheme.textHint, size: 30)))),
+                              const SizedBox(height: 8),
+                              Padding(padding: const EdgeInsets.symmetric(horizontal: 6),
+                                child: Text(ch.name, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(color: isFocused ? Colors.white : AppTheme.textSecondary, fontSize: 11, fontWeight: isFocused ? FontWeight.bold : FontWeight.w500))),
+                            ])),
+                        ),
+                      );
+                    })),
+                ]);
+              }).toList())),
     ])),
-  );
-}
-
-class _CategorySection extends StatelessWidget {
-  final String category;
-  final List<Channel> channels;
-  const _CategorySection({required this.category, required this.channels});
-
-  @override
-  Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    Padding(padding: const EdgeInsets.fromLTRB(16,16,16,10),
-      child: Text(category, style: const TextStyle(color: AppTheme.accentCyan, fontSize: 14, fontWeight: FontWeight.w800, letterSpacing: 1.1))),
-    SizedBox(height: 130, child: ListView.builder(
-      scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 12),
-      itemCount: channels.length,
-      itemBuilder: (ctx, i) => _ChannelCard(channel: channels[i]))),
-  ]);
-}
-
-class _ChannelCard extends StatelessWidget {
-  final Channel channel;
-  const _ChannelCard({required this.channel});
-
-  @override
-  Widget build(BuildContext context) => GestureDetector(
-    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: channel))),
-    child: Container(width: 120, margin: const EdgeInsets.symmetric(horizontal: 4),
-      decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.border, width: 0.5)),
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        SizedBox(width: 70, height: 70, child: ClipRRect(borderRadius: BorderRadius.circular(10),
-          child: channel.logoUrl.isNotEmpty
-            ? CachedNetworkImage(imageUrl: channel.logoUrl, fit: BoxFit.contain,
-                placeholder: (_, __) => Container(color: AppTheme.surfaceAlt, child: const Icon(Icons.tv, color: AppTheme.textHint)),
-                errorWidget: (_, __, ___) => Container(color: AppTheme.surfaceAlt, child: const Icon(Icons.tv, color: AppTheme.textHint)))
-            : Container(color: AppTheme.surfaceAlt, child: const Icon(Icons.tv, color: AppTheme.textHint)))),
-        const SizedBox(height: 8),
-        Padding(padding: const EdgeInsets.symmetric(horizontal: 6),
-          child: Text(channel.name, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11, fontWeight: FontWeight.w500))),
-      ])),
   );
 }
