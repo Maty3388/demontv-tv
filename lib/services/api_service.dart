@@ -53,7 +53,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> getProfile() async {
-    final r = await http.get(Uri.parse('\$baseUrl/profile'), headers: _headers);
+    final r = await http.get(Uri.parse('$baseUrl/profile'), headers: _headers);
     return jsonDecode(r.body);
   }
 
