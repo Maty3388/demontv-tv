@@ -260,6 +260,8 @@ class _TVChannelGridState extends State<_TVChannelGrid> {
   int _catIdx = 0;
   int _chIdx = 0;
   final _scrollCtrl = ScrollController();
+  final Map<int, GlobalKey> _catKeys = {};
+  final Map<int, ScrollController> _rowCtrls = {};
 
   @override
   void initState() { super.initState(); _load(); }
