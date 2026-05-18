@@ -338,9 +338,9 @@ class _TVChannelGridState extends State<_TVChannelGrid> {
                       itemBuilder: (ctx, i) {
                         final ch = channels[i];
                         final globalIdx = _all.indexOf(ch);
-                        final sel = catI == _catIdx && chI == _chIdx;
+                        final sel = catIdx == _catIdx && i == _chIdx;
                         return GestureDetector(
-                          onTap: () { setState(() { _catIdx = catI; _chIdx = chI; }); Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: ch))); },
+                          onTap: () { setState(() { _catIdx = catIdx; _chIdx = i; }); Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: ch))); },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 150),
                             decoration: BoxDecoration(
