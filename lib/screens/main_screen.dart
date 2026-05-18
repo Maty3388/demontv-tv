@@ -315,7 +315,7 @@ class _TVChannelGridState extends State<_TVChannelGrid> {
                   const SizedBox(width: 8),
                   const Text("TV en Vivo", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
                   const Spacer(),
-                  Text("${_selectedIdx + 1}/${_all.length}", style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
+                  Text("${_catIdx + 1}/${_grouped.length} cat", style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
                 ])),
               Expanded(child: ListView.builder(
                 controller: _scrollCtrl,
