@@ -42,7 +42,13 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'password': password}));
     final data = jsonDecode(res.body);
-    if (res.statusCode == 200) _token = data['token'];
+    if (res.statusCode == 200) {
+      _token = data['token'];
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', data['token'] ?? '');
+      await prefs.setString('userEmail', data['user']?['email'] ?? '');
+      await prefs.setString('userExpiry', data['user']?['subscription_end'] ?? '');
+    }
     return data;
   }
 

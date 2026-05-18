@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 import 'home_screen.dart';
@@ -55,10 +56,10 @@ class _State extends State<MainScreen> {
 
   Future<void> _loadProfile() async {
     try {
-      final r = await ApiService.getProfile();
+      final prefs = await SharedPreferences.getInstance();
       setState(() {
-        _userEmail  = r['email'] ?? '';
-        _userExpiry = r['subscription_end'] ?? '';
+        _userEmail  = prefs.getString('userEmail') ?? '';
+        _userExpiry = prefs.getString('userExpiry') ?? '';
       });
     } catch (_) {}
   }
