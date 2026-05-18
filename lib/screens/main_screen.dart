@@ -164,7 +164,12 @@ class _State extends State<MainScreen> {
           duration: const Duration(milliseconds: 250),
           width: _sidebarVisible ? 240 : 0,
           child: _sidebarVisible ? _buildSidebar() : const SizedBox()),
-        Expanded(child: IndexedStack(index: _idx, children: _screens)),
+        Expanded(child: GestureDetector(
+        onTap: () {
+          setState(() => _sidebarVisible = true);
+          FocusScope.of(context).requestFocus(_navFocus[_idx + 1]);
+        },
+        child: IndexedStack(index: _idx, children: _screens))),
       ]),
     ),
   );

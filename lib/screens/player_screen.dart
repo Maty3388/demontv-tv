@@ -56,7 +56,7 @@ class _State extends State<PlayerScreen> {
   void _togglePlay() { if (_ctrl?.isPlaying() == true) _ctrl?.pause(); else _ctrl?.play(); setState(() {}); _startHideTimer(); }
 
   @override
-  void dispose() { _hideTimer?.cancel(); _ctrl?.dispose(); SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]); SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge); super.dispose(); }
+  void dispose() { _hideTimer?.cancel(); _ctrl?.dispose(); SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]); SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky); super.dispose(); }
 
   String _fmt(Duration d) => '${d.inMinutes.toString().padLeft(2,'0')}:${d.inSeconds.remainder(60).toString().padLeft(2,'0')}';
 
