@@ -9,14 +9,15 @@ import 'vod_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
-  @override State<MainScreen> createState() => _State();
+  @override State<MainScreen> createState() => _MainState();
 }
 
-class _State extends State<MainScreen> {
-  // 0=MiPerfil 1=Inicio 2=TVenvivo 3=Peliculas 4=Series 5=Adultos 6=Historial 7=Actualizar 8=CerrarSesion
-  int _idx = 2;
+class _MainState extends State<MainScreen> {
+  // Sidebar: 0=MiPerfil 1=TVenVivo 2=Peliculas 3=Series 4=Adultos 5=Historial 6=Actualizar 7=CerrarSesion
+  int _sideIdx = 1;
   bool _inContent = false;
   bool _profileExpanded = false;
+  bool _sidebarCollapsed = false;
   String _userEmail = "";
   String _userExpiry = "";
   static const String _adultPin = "1234";
@@ -36,33 +37,30 @@ class _State extends State<MainScreen> {
     if (event is! RawKeyDownEvent) return;
     if (!_inContent) {
       if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-        if (_idx > 0) setState(() => _idx--);
+        if (_sideIdx > 0) setState(() => _sideIdx--);
       } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-        if (_idx < 8) setState(() => _idx++);
-      } else if (event.logicalKey == LogicalKeyboardKey.select ||
-                 event.logicalKey == LogicalKeyboardKey.enter ||
-                 event.logicalKey == LogicalKeyboardKey.arrowRight) {
+        if (_sideIdx < 7) setState(() => _sideIdx++);
+      } else if (event.logicalKey == LogicalKeyboardKey.arrowRight ||
+                 event.logicalKey == LogicalKeyboardKey.select ||
+                 event.logicalKey == LogicalKeyboardKey.enter) {
         _selectItem();
       }
     } else {
-      if (event.logicalKey == LogicalKeyboardKey.goBack ||
-          event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+      if (event.logicalKey == LogicalKeyboardKey.arrowLeft ||
+          event.logicalKey == LogicalKeyboardKey.goBack) {
         setState(() => _inContent = false);
       }
     }
   }
 
   void _selectItem() {
-    switch (_idx) {
+    switch (_sideIdx) {
       case 0: setState(() => _profileExpanded = !_profileExpanded); break;
-      case 1: setState(() => _inContent = true); break;
-      case 2: setState(() => _inContent = true); break;
-      case 3: setState(() => _inContent = true); break;
-      case 4: setState(() => _inContent = true); break;
-      case 5: _showAdultPin(); break;
-      case 6: ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Historial borrado"), backgroundColor: AppTheme.accentCyan)); break;
-      case 7: ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lista actualizada"), backgroundColor: AppTheme.accentCyan)); break;
-      case 8: ApiService.clearToken(); Navigator.pushReplacementNamed(context, "/login"); break;
+      case 4: _showAdultPin(); break;
+      case 5: ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Historial borrado"), backgroundColor: AppTheme.accentCyan)); break;
+      case 6: ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lista actualizada"), backgroundColor: AppTheme.accentCyan)); break;
+      case 7: ApiService.clearToken(); Navigator.pushReplacementNamed(context, "/login"); break;
+      default: setState(() => _inContent = true);
     }
   }
 
@@ -86,7 +84,7 @@ class _State extends State<MainScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancelar", style: TextStyle(color: AppTheme.textSecondary))),
           TextButton(onPressed: () {
-            if (pin.text == _adultPin) { Navigator.pop(ctx); setState(() { _idx = 5; _inContent = true; }); }
+            if (pin.text == _adultPin) { Navigator.pop(ctx); setState(() { _sideIdx = 4; _inContent = true; }); }
             else set(() => error = "PIN incorrecto");
           }, child: const Text("ENTRAR", style: TextStyle(color: AppTheme.accentCyan, fontWeight: FontWeight.bold))),
         ],
@@ -95,36 +93,14 @@ class _State extends State<MainScreen> {
   }
 
   Widget _buildContent() {
-    switch (_idx) {
-      case 1: return _buildHomeContent();
-      case 2: return _TVChannelGrid(onBack: () => setState(() => _inContent = false));
-      case 3: return const VodScreen(type: "movies");
-      case 4: return const VodScreen(type: "series");
-      case 5: return _TVChannelGrid(onBack: () => setState(() => _inContent = false));
+    switch (_sideIdx) {
+      case 1: return _TVLiveScreen(onBack: () => setState(() => _inContent = false), collapsed: _sidebarCollapsed);
+      case 2: return const VodScreen(type: "movies");
+      case 3: return const VodScreen(type: "series");
+      case 4: return _TVLiveScreen(onBack: () => setState(() => _inContent = false), collapsed: _sidebarCollapsed);
       default: return const SizedBox();
     }
   }
-
-  Widget _buildHomeContent() => Container(
-    color: AppTheme.background,
-    padding: const EdgeInsets.all(32),
-    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(width: double.infinity, padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF1A0A2E), Color(0xFF0A0A1E)], begin: Alignment.topLeft, end: Alignment.bottomRight), borderRadius: BorderRadius.circular(16)),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text("Bienvenido", style: TextStyle(color: AppTheme.textSecondary, fontSize: 16)),
-          const SizedBox(height: 4),
-          const Text("Que queres ver hoy?", style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
-        ])),
-      const SizedBox(height: 32),
-      const Text("Navegacion", style: TextStyle(color: AppTheme.accentCyan, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1)),
-      const SizedBox(height: 12),
-      _HelpRow(icon: Icons.arrow_upward, text: "Flecha arriba/abajo: navegar el menu"),
-      _HelpRow(icon: Icons.arrow_forward, text: "OK o flecha derecha: entrar al contenido"),
-      _HelpRow(icon: Icons.arrow_back, text: "Atras o flecha izquierda: volver al menu"),
-      _HelpRow(icon: Icons.tv, text: "TV en Vivo: navegar canales con flechas"),
-    ]),
-  );
 
   @override
   Widget build(BuildContext context) => RawKeyboardListener(
@@ -135,144 +111,158 @@ class _State extends State<MainScreen> {
       backgroundColor: Colors.black,
       body: Row(children: [
         _buildSidebar(),
-        Expanded(child: _inContent ? _buildContent() : _buildDefaultHome()),
+        Expanded(child: _inContent ? _buildContent() : _buildWelcome()),
       ]),
     ),
   );
 
-  Widget _buildDefaultHome() => Container(
+  Widget _buildWelcome() => Container(
     color: AppTheme.background,
-    child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Container(width: 100, height: 100,
-        decoration: BoxDecoration(gradient: const LinearGradient(colors: AppTheme.logoGradient), borderRadius: BorderRadius.circular(24)),
-        child: const Center(child: Text("D+", style: TextStyle(color: Colors.white, fontSize: 50, fontWeight: FontWeight.bold)))),
-      const SizedBox(height: 24),
-      const Text("DemonTv Plus", style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
-      const SizedBox(height: 8),
-      const Text("Selecciona una opcion del menu", style: TextStyle(color: AppTheme.textSecondary, fontSize: 16)),
-    ])),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(28, 36, 28, 24),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight,
+            colors: [Color(0xFF1A0A2E), Color(0xFF0A0A1A)])),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text("Hola!", style: TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
+          const SizedBox(height: 4),
+          const Text("Que queres ver hoy?", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(color: Colors.white.withOpacity(0.08), borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.white.withOpacity(0.1))),
+            child: const Row(children: [
+              Icon(Icons.search, color: Color(0xFF555555), size: 16),
+              SizedBox(width: 8),
+              Text("Buscar canal, pelicula, serie...", style: TextStyle(color: Color(0xFF555555), fontSize: 13)),
+            ])),
+        ])),
+      const Padding(padding: EdgeInsets.fromLTRB(20, 20, 20, 10),
+        child: Text("Selecciona una opcion del menu", style: TextStyle(color: AppTheme.textSecondary, fontSize: 14))),
+      const Padding(padding: EdgeInsets.symmetric(horizontal: 20),
+        child: Text("Flechas para navegar  OK para entrar", style: TextStyle(color: AppTheme.textHint, fontSize: 12))),
+    ]),
   );
 
   Widget _buildSidebar() {
     final items = [
-      _SideItem(0,  Icons.person_outline,           "Mi Perfil",      isProfile: true),
-      _SideItem(1,  Icons.home_outlined,            "Inicio"),
-      _SideItem(2,  Icons.live_tv_outlined,         "TV en Vivo"),
-      _SideItem(3,  Icons.movie_outlined,           "Peliculas"),
-      _SideItem(4,  Icons.video_library_outlined,   "Series"),
-      _SideItem(5,  Icons.eighteen_up_rating_outlined, "Adultos",   isAdult: true),
-      _SideItem(6,  Icons.history_outlined,         "Historial",     isRed: true),
-      _SideItem(7,  Icons.refresh_outlined,         "Actualizar",    isRed: true),
-      _SideItem(8,  Icons.logout,                   "Cerrar Sesion", isRed: true),
+      _SItem(0, Icons.person_outline, "Mi Perfil", isProfile: true),
+      _SItem(1, Icons.live_tv_outlined, "TV en Vivo"),
+      _SItem(2, Icons.movie_outlined, "Peliculas"),
+      _SItem(3, Icons.video_library_outlined, "Series"),
+      _SItem(4, Icons.eighteen_up_rating_outlined, "Adultos", isAdult: true),
+      _SItem(5, Icons.history_outlined, "Historial", isRed: true),
+      _SItem(6, Icons.refresh_outlined, "Actualizar", isRed: true),
+      _SItem(7, Icons.logout, "Cerrar Sesion", isRed: true),
     ];
-    return Container(
-      width: 220, color: const Color(0xFF0D0D0D),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      width: _sidebarCollapsed ? 60 : 200,
+      color: const Color(0xFF0D0D0D),
       child: Column(children: [
         const SizedBox(height: 20),
-        Padding(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        // Logo
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(children: [
-            Container(width: 36, height: 36,
-              decoration: BoxDecoration(gradient: const LinearGradient(colors: AppTheme.logoGradient), borderRadius: BorderRadius.circular(10)),
-              child: const Center(child: Text("D+", style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold)))),
-            const SizedBox(width: 8),
-            const Text("DemonTv Plus", style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+            Container(width: 34, height: 34,
+              decoration: BoxDecoration(gradient: const LinearGradient(colors: AppTheme.logoGradient), borderRadius: BorderRadius.circular(9)),
+              child: const Center(child: Text("D+", style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)))),
+            if (!_sidebarCollapsed) ...[const SizedBox(width: 8), const Expanded(child: Text("DemonTv Plus", style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis))],
           ])),
         const Divider(color: Colors.white12),
         Expanded(child: ListView(
           children: items.map((item) {
-            final isFocused = _idx == item.idx && !_inContent;
-            final isSelected = _idx == item.idx && _inContent;
+            final isFocused = _sideIdx == item.idx && !_inContent;
+            final isSelected = _sideIdx == item.idx && _inContent;
             return Column(children: [
               GestureDetector(
-                onTap: () { setState(() { _idx = item.idx; _inContent = false; }); _selectItem(); },
+                onTap: () { setState(() { _sideIdx = item.idx; _inContent = false; }); _selectItem(); },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
-                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: EdgeInsets.symmetric(horizontal: _sidebarCollapsed ? 8 : 10, vertical: 9),
                   decoration: BoxDecoration(
                     color: isFocused ? AppTheme.accentCyan.withOpacity(0.2) : isSelected ? AppTheme.accentCyan.withOpacity(0.1) : Colors.transparent,
                     borderRadius: BorderRadius.circular(10),
-                    border: isFocused ? Border.all(color: AppTheme.accentCyan, width: 2) : null),
-                  child: Row(children: [
+                    border: isFocused ? Border.all(color: AppTheme.accentCyan, width: 1.5) : null),
+                  child: Row(mainAxisAlignment: _sidebarCollapsed ? MainAxisAlignment.center : MainAxisAlignment.start, children: [
                     Icon(item.icon, color: item.isRed ? AppTheme.accentRed : isFocused || isSelected ? AppTheme.accentCyan : AppTheme.textSecondary, size: 18),
-                    const SizedBox(width: 10),
-                    Expanded(child: Text(item.label, style: TextStyle(color: item.isRed ? AppTheme.accentRed : isFocused || isSelected ? AppTheme.accentCyan : AppTheme.textSecondary, fontSize: 13, fontWeight: isFocused || isSelected ? FontWeight.bold : FontWeight.normal))),
-                    if (item.isProfile) Icon(_profileExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: AppTheme.accentCyan, size: 16),
-                    if (item.isAdult) const Icon(Icons.lock, color: Colors.orange, size: 12),
+                    if (!_sidebarCollapsed) ...[const SizedBox(width: 8),
+                      Expanded(child: Text(item.label, style: TextStyle(color: item.isRed ? AppTheme.accentRed : isFocused || isSelected ? AppTheme.accentCyan : AppTheme.textSecondary, fontSize: 12, fontWeight: isFocused || isSelected ? FontWeight.bold : FontWeight.normal), overflow: TextOverflow.ellipsis)),
+                      if (item.isProfile) Icon(_profileExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: AppTheme.accentCyan, size: 14),
+                      if (item.isAdult) const Icon(Icons.lock, color: Colors.orange, size: 11),
+                    ],
                   ]),
                 ),
               ),
-              // Info perfil expandible
-              if (item.isProfile && _profileExpanded) Container(
-                margin: const EdgeInsets.fromLTRB(10, 0, 10, 4),
-                padding: const EdgeInsets.all(10),
+              if (item.isProfile && _profileExpanded && !_sidebarCollapsed) Container(
+                margin: const EdgeInsets.fromLTRB(8, 0, 8, 4),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(color: const Color(0xFF1A1A1A), borderRadius: BorderRadius.circular(8)),
                 child: Column(children: [
-                  Row(children: [const Icon(Icons.email_outlined, color: AppTheme.accentCyan, size: 12), const SizedBox(width: 4), Expanded(child: Text(_userEmail, style: const TextStyle(color: Colors.white, fontSize: 10), overflow: TextOverflow.ellipsis))]),
+                  Row(children: [const Icon(Icons.email_outlined, color: AppTheme.accentCyan, size: 11), const SizedBox(width: 4), Expanded(child: Text(_userEmail, style: const TextStyle(color: Colors.white, fontSize: 10), overflow: TextOverflow.ellipsis))]),
                   const SizedBox(height: 4),
-                  Row(children: [const Icon(Icons.calendar_today, color: AppTheme.textSecondary, size: 12), const SizedBox(width: 4), Text("Vence: $_userExpiry", style: const TextStyle(color: AppTheme.accentCyan, fontSize: 10))]),
-                ]),
-              ),
+                  Row(children: [const Icon(Icons.calendar_today, color: AppTheme.textSecondary, size: 10), const SizedBox(width: 4), Text("Vence: $_userExpiry", style: const TextStyle(color: AppTheme.accentCyan, fontSize: 10))]),
+                ])),
             ]);
           }).toList(),
         )),
-        Padding(padding: const EdgeInsets.all(8),
-          child: Text(_inContent ? "Atras para volver" : "Flechas navegar  OK entrar",
-            style: TextStyle(color: AppTheme.textHint.withOpacity(0.5), fontSize: 9), textAlign: TextAlign.center)),
+        // Boton colapsar
+        GestureDetector(
+          onTap: () => setState(() => _sidebarCollapsed = !_sidebarCollapsed),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            child: Icon(_sidebarCollapsed ? Icons.chevron_right : Icons.chevron_left, color: AppTheme.textHint, size: 18))),
       ]),
     );
   }
 }
 
-class _SideItem {
+class _SItem {
   final int idx;
   final IconData icon;
   final String label;
   final bool isRed, isProfile, isAdult;
-  const _SideItem(this.idx, this.icon, this.label, {this.isRed=false, this.isProfile=false, this.isAdult=false});
+  const _SItem(this.idx, this.icon, this.label, {this.isRed=false, this.isProfile=false, this.isAdult=false});
 }
 
-class _HelpRow extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  const _HelpRow({required this.icon, required this.text});
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 6),
-    child: Row(children: [
-      Icon(icon, color: AppTheme.accentCyan, size: 18),
-      const SizedBox(width: 12),
-      Expanded(child: Text(text, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13))),
-    ]));
-}
-
-class _TVChannelGrid extends StatefulWidget {
+class _TVLiveScreen extends StatefulWidget {
   final VoidCallback onBack;
-  const _TVChannelGrid({required this.onBack});
-  @override State<_TVChannelGrid> createState() => _TVChannelGridState();
+  final bool collapsed;
+  const _TVLiveScreen({required this.onBack, this.collapsed = false});
+  @override State<_TVLiveScreen> createState() => _TVLiveState();
 }
 
-class _TVChannelGridState extends State<_TVChannelGrid> {
+class _TVLiveState extends State<_TVLiveScreen> {
   List<Channel> _all = [];
-
   Map<String, List<Channel>> _grouped = {};
   bool _loading = true;
   int _catIdx = 0;
   int _chIdx = 0;
+  String _search = "";
+  bool _showSearch = false;
+  final _searchCtrl = TextEditingController();
   final _scrollCtrl = ScrollController();
-  final Map<int, GlobalKey> _catKeys = {};
   final Map<int, ScrollController> _rowCtrls = {};
+  final Map<int, GlobalKey> _catKeys = {};
 
   @override
   void initState() { super.initState(); _load(); }
 
   @override
-  void dispose() { _scrollCtrl.dispose(); super.dispose(); }
+  void dispose() {
+    _searchCtrl.dispose();
+    _scrollCtrl.dispose();
+    for (final c in _rowCtrls.values) c.dispose();
+    super.dispose();
+  }
 
   Future<void> _load() async {
     await ApiService.loadToken();
     try {
-      final channels = await ApiService.getChannels();
+      final channels = await ApiService.getChannels(search: _search.isEmpty ? null : _search);
       final grouped = <String, List<Channel>>{};
       for (final ch in channels) grouped.putIfAbsent(ch.category, () => []).add(ch);
       setState(() { _all = channels; _grouped = grouped; _loading = false; });
@@ -287,12 +277,14 @@ class _TVChannelGridState extends State<_TVChannelGrid> {
     if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
       if (_chIdx == 0) { widget.onBack(); return; }
       setState(() => _chIdx--);
+      _scrollRow();
     } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-      if (_chIdx < curCh.length - 1) setState(() => _chIdx++);
+      if (_chIdx < curCh.length - 1) { setState(() => _chIdx++); _scrollRow(); }
     } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-      if (_catIdx < cats.length - 1) setState(() { _catIdx++; _chIdx = 0; });
+      if (_catIdx < cats.length - 1) { setState(() { _catIdx++; _chIdx = 0; }); _scrollCat(); }
     } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-      if (_catIdx > 0) setState(() { _catIdx--; _chIdx = 0; });
+      if (_catIdx > 0) { setState(() { _catIdx--; _chIdx = 0; }); _scrollCat(); }
+      else if (_catIdx == 0) { setState(() => _showSearch = true); }
     } else if (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter) {
       if (curCh.isNotEmpty) Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: curCh[_chIdx])));
     } else if (event.logicalKey == LogicalKeyboardKey.goBack) {
@@ -300,20 +292,21 @@ class _TVChannelGridState extends State<_TVChannelGrid> {
     }
   }
 
-  void _scroll() {
+  void _scrollCat() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollCtrl.hasClients) {
-        // Cada categoria tiene aprox 160px de alto
-        final pos = _catIdx * 160.0;
-        final maxScroll = _scrollCtrl.position.maxScrollExtent;
-        _scrollCtrl.animateTo(
-          pos > maxScroll ? maxScroll : pos,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
+      final key = _catKeys[_catIdx];
+      if (key?.currentContext != null) {
+        Scrollable.ensureVisible(key!.currentContext!, duration: const Duration(milliseconds: 300), curve: Curves.easeOut, alignment: 0.1);
       }
     });
   }
+
+  void _scrollRow() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctrl = _rowCtrls[_catIdx];
+      if (ctrl != null && ctrl.hasClients) {
+        ctrl.animateTo(_chIdx * 115.0, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+      }
     });
   }
 
@@ -324,74 +317,114 @@ class _TVChannelGridState extends State<_TVChannelGrid> {
     onKey: _onKey,
     child: Container(
       color: AppTheme.background,
-      child: _loading
-        ? const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan))
-        : _all.isEmpty
-          ? const Center(child: Text("Sin canales", style: TextStyle(color: AppTheme.textSecondary, fontSize: 18)))
-          : Column(children: [
-              Padding(padding: const EdgeInsets.fromLTRB(20,16,20,8),
-                child: Row(children: [
-                  const Icon(Icons.live_tv, color: AppTheme.accentCyan, size: 22),
-                  const SizedBox(width: 8),
-                  const Text("TV en Vivo", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                  const Spacer(),
-                  Text("${_all.length} canales", style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
-                ])),
-              Expanded(child: ListView.builder(
+      child: Column(children: [
+        // Header
+        Container(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF1A0A2E), Color(0xFF0A0A0A)])),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              const Icon(Icons.live_tv, color: AppTheme.accentCyan, size: 18),
+              const SizedBox(width: 8),
+              const Text("TV en Vivo", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+              const Spacer(),
+              Text("${_all.length} canales", style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+              const SizedBox(width: 12),
+              GestureDetector(
+                onTap: () => setState(() => _showSearch = !_showSearch),
+                child: Container(padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(color: _showSearch ? AppTheme.accentCyan.withOpacity(0.2) : Colors.transparent, borderRadius: BorderRadius.circular(8), border: _showSearch ? Border.all(color: AppTheme.accentCyan) : null),
+                  child: Icon(Icons.search, color: _showSearch ? AppTheme.accentCyan : AppTheme.textSecondary, size: 18))),
+            ]),
+            if (_showSearch) ...[const SizedBox(height: 10),
+              TextField(
+                controller: _searchCtrl, autofocus: true,
+                onChanged: (v) { _search = v; _load(); },
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search, color: AppTheme.textSecondary, size: 18),
+                  hintText: "Buscar canal...",
+                  hintStyle: const TextStyle(color: AppTheme.textHint, fontSize: 13),
+                  filled: true, fillColor: Colors.white.withOpacity(0.08),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  suffixIcon: _search.isNotEmpty ? IconButton(icon: const Icon(Icons.close, color: AppTheme.textHint, size: 16), onPressed: () { _searchCtrl.clear(); _search = ""; _load(); }) : null)),
+            ],
+          ])),
+        // Lista de categorias
+        Expanded(child: _loading
+          ? const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan))
+          : _all.isEmpty
+            ? const Center(child: Text("Sin canales", style: TextStyle(color: AppTheme.textSecondary, fontSize: 16)))
+            : ListView.builder(
                 controller: _scrollCtrl,
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(vertical: 8),
                 itemCount: _grouped.length,
                 itemBuilder: (ctx, catIdx) {
                   final cat = _grouped.keys.elementAt(catIdx);
                   final channels = _grouped[cat]!;
                   return Column(key: (_catKeys[catIdx] ??= GlobalKey()), crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Padding(padding: const EdgeInsets.fromLTRB(4, 16, 4, 8),
-                      child: Text(cat, style: const TextStyle(color: AppTheme.accentCyan, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 1))),
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, crossAxisSpacing: 10, mainAxisSpacing: 10, childAspectRatio: 1.3),
+                    Padding(padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+                      child: Row(children: [
+                        AnimatedContainer(duration: const Duration(milliseconds: 200), width: 3, height: 16,
+                          decoration: BoxDecoration(color: catIdx == _catIdx ? AppTheme.accentCyan : Colors.transparent, borderRadius: BorderRadius.circular(2))),
+                        const SizedBox(width: 8),
+                        Text(cat, style: TextStyle(color: catIdx == _catIdx ? AppTheme.accentCyan : AppTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.8)),
+                      ])),
+                    SizedBox(height: 110, child: ListView.builder(
+                      controller: (_rowCtrls[catIdx] ??= ScrollController()),
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
                       itemCount: channels.length,
-                      itemBuilder: (ctx, i) {
-                        final ch = channels[i];
-                        final globalIdx = _all.indexOf(ch);
-                        final sel = catIdx == _catIdx && i == _chIdx;
+                      itemBuilder: (ctx, chIdx) {
+                        final ch = channels[chIdx];
+                        final sel = catIdx == _catIdx && chIdx == _chIdx;
                         return GestureDetector(
-                          onTap: () { setState(() { _catIdx = catIdx; _chIdx = i; }); Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: ch))); },
+                          onTap: () { setState(() { _catIdx = catIdx; _chIdx = chIdx; }); Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: ch))); },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 150),
+                            width: sel ? 120 : 105,
+                            margin: const EdgeInsets.only(right: 8),
                             decoration: BoxDecoration(
-                              color: sel ? AppTheme.accentCyan.withOpacity(0.2) : AppTheme.surface,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: sel ? AppTheme.accentCyan : AppTheme.border, width: sel ? 2.5 : 0.5),
-                              boxShadow: sel ? [BoxShadow(color: AppTheme.accentCyan.withOpacity(0.4), blurRadius: 16)] : null),
+                              color: sel ? AppTheme.accentCyan.withOpacity(0.15) : AppTheme.surface,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: sel ? AppTheme.accentCyan : AppTheme.border, width: sel ? 2 : 0.5),
+                              boxShadow: sel ? [BoxShadow(color: AppTheme.accentCyan.withOpacity(0.3), blurRadius: 10)] : null),
                             child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                               ch.logoUrl.isNotEmpty
-                                ? Image.network(ch.logoUrl, width: 55, height: 42, fit: BoxFit.contain,
-                                    errorBuilder: (_, __, ___) => const Icon(Icons.tv, color: AppTheme.textHint, size: 36))
-                                : const Icon(Icons.tv, color: AppTheme.textHint, size: 36),
-                              const SizedBox(height: 8),
-                              Padding(padding: const EdgeInsets.symmetric(horizontal: 8),
-                                child: Text(ch.name, style: TextStyle(color: sel ? Colors.white : AppTheme.textSecondary, fontSize: 12, fontWeight: sel ? FontWeight.bold : FontWeight.normal), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)),
+                                ? Image.network(ch.logoUrl, width: 52, height: 38, fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Icon(Icons.tv, color: AppTheme.textHint, size: 28))
+                                : const Icon(Icons.tv, color: AppTheme.textHint, size: 28),
+                              const SizedBox(height: 6),
+                              Padding(padding: const EdgeInsets.symmetric(horizontal: 6),
+                                child: Text(ch.name, style: TextStyle(color: sel ? Colors.white : AppTheme.textSecondary, fontSize: 10, fontWeight: sel ? FontWeight.bold : FontWeight.normal), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)),
                             ]),
                           ),
                         );
-                      }),
+                      })),
                   ]);
-                },
-              )),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                color: const Color(0xFF0A0A0A),
-                child: Row(children: [
-                  const Icon(Icons.info_outline, color: AppTheme.textSecondary, size: 16),
-                  const SizedBox(width: 8),
-                  Builder(builder: (ctx) { final cats = _grouped.keys.toList(); final ch = cats.isNotEmpty ? (_grouped[cats[_catIdx]] ?? [])[_chIdx.clamp(0, (_grouped[cats[_catIdx]]?.length ?? 1) - 1)] : null; return Row(children: [ const Icon(Icons.info_outline, color: AppTheme.textSecondary, size: 16), const SizedBox(width: 8), Text(ch?.name ?? "", style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)), Text("  •  \${ch?.category ?? ""}", style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)), const Spacer(), const Text("<- Volver   OK Reproducir", style: TextStyle(color: AppTheme.textHint, fontSize: 11)), ]); }),
-                  const Spacer(),
-                  const Text("<- Volver   OK Reproducir", style: TextStyle(color: AppTheme.textHint, fontSize: 11)),
-                ]),
-              ),
-            ]),
+                })),
+        // Info bar
+        if (!_loading && _all.isNotEmpty) Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          color: const Color(0xFF0A0A0A),
+          child: Row(children: [
+            Builder(builder: (ctx) {
+              final cats = _grouped.keys.toList();
+              final ch = cats.isNotEmpty && _catIdx < cats.length
+                ? (_grouped[cats[_catIdx]] ?? []).elementAtOrNull(_chIdx)
+                : null;
+              return Row(children: [
+                const Icon(Icons.info_outline, color: AppTheme.textSecondary, size: 14),
+                const SizedBox(width: 6),
+                Text(ch?.name ?? "", style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                if (ch != null) Text("  •  ${ch.category}", style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
+              ]);
+            }),
+            const Spacer(),
+            const Text("<- Volver   OK Reproducir", style: TextStyle(color: AppTheme.textHint, fontSize: 10)),
+          ])),
+      ]),
     ),
   );
 }
