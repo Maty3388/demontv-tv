@@ -302,15 +302,18 @@ class _TVChannelGridState extends State<_TVChannelGrid> {
 
   void _scroll() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final key = _catKeys[_catIdx];
-      if (key != null && key.currentContext != null) {
-        Scrollable.ensureVisible(
-          key.currentContext!,
+      if (_scrollCtrl.hasClients) {
+        // Cada categoria tiene aprox 160px de alto
+        final pos = _catIdx * 160.0;
+        final maxScroll = _scrollCtrl.position.maxScrollExtent;
+        _scrollCtrl.animateTo(
+          pos > maxScroll ? maxScroll : pos,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
-          alignment: 0.0,
         );
       }
+    });
+  }
     });
   }
 
