@@ -121,28 +121,20 @@ class _MainState extends State<MainScreen> {
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Container(
         width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(28, 36, 28, 24),
+        padding: const EdgeInsets.fromLTRB(28, 32, 28, 20),
         decoration: const BoxDecoration(
           gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight,
             colors: [Color(0xFF1A0A2E), Color(0xFF0A0A1A)])),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text("Hola!", style: TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
+          const Text("Bienvenido a", style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+          const SizedBox(height: 2),
+          const Text("DemonTv Plus", style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
-          const Text("Que queres ver hoy?", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(color: Colors.white.withOpacity(0.08), borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.white.withOpacity(0.1))),
-            child: const Row(children: [
-              Icon(Icons.search, color: Color(0xFF555555), size: 16),
-              SizedBox(width: 8),
-              Text("Buscar canal, pelicula, serie...", style: TextStyle(color: Color(0xFF555555), fontSize: 13)),
-            ])),
+          const Text("Selecciona una opcion del menu con las flechas", style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
         ])),
-      const Padding(padding: EdgeInsets.fromLTRB(20, 20, 20, 10),
-        child: Text("Selecciona una opcion del menu", style: TextStyle(color: AppTheme.textSecondary, fontSize: 14))),
-      const Padding(padding: EdgeInsets.symmetric(horizontal: 20),
-        child: Text("Flechas para navegar  OK para entrar", style: TextStyle(color: AppTheme.textHint, fontSize: 12))),
+      Expanded(child: _WelcomeChannels(onPlay: (ch, playlist, idx) {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: ch, playlist: playlist, initialIndex: idx)));
+      })),
     ]),
   );
 
@@ -286,7 +278,7 @@ class _TVLiveState extends State<_TVLiveScreen> {
       if (_catIdx > 0) { setState(() { _catIdx--; _chIdx = 0; }); _scrollCat(); }
       else if (_catIdx == 0) { setState(() => _showSearch = true); }
     } else if (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter) {
-      if (curCh.isNotEmpty) Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: curCh[_chIdx])));
+      if (curCh.isNotEmpty) Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: curCh[_chIdx], playlist: curCh, initialIndex: _chIdx)));
     } else if (event.logicalKey == LogicalKeyboardKey.goBack) {
       widget.onBack();
     }
@@ -381,7 +373,7 @@ class _TVLiveState extends State<_TVLiveScreen> {
                         final ch = channels[chIdx];
                         final sel = catIdx == _catIdx && chIdx == _chIdx;
                         return GestureDetector(
-                          onTap: () { setState(() { _catIdx = catIdx; _chIdx = chIdx; }); Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: ch))); },
+                          onTap: () { setState(() { _catIdx = catIdx; _chIdx = chIdx; }); Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: ch, playlist: channels, initialIndex: chIdx))); },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 150),
                             width: sel ? 120 : 105,
@@ -427,4 +419,70 @@ class _TVLiveState extends State<_TVLiveScreen> {
       ]),
     ),
   );
+}
+
+class _WelcomeChannels extends StatefulWidget {
+  final Function(Channel, List<Channel>, int) onPlay;
+  const _WelcomeChannels({required this.onPlay});
+  @override State<_WelcomeChannels> createState() => _WelcomeChannelsState();
+}
+
+class _WelcomeChannelsState extends State<_WelcomeChannels> {
+  Map<String, List<Channel>> _grouped = {};
+  bool _loading = true;
+
+  @override void initState() { super.initState(); _load(); }
+
+  Future<void> _load() async {
+    await ApiService.loadToken();
+    try {
+      final channels = await ApiService.getChannels();
+      final grouped = <String, List<Channel>>{};
+      for (final ch in channels) grouped.putIfAbsent(ch.category, () => []).add(ch);
+      if (mounted) setState(() { _grouped = grouped; _loading = false; });
+    } catch (_) { if (mounted) setState(() => _loading = false); }
+  }
+
+  @override
+  Widget build(BuildContext context) => _loading
+    ? const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan))
+    : _grouped.isEmpty
+      ? const Center(child: Text("No hay canales", style: TextStyle(color: AppTheme.textSecondary)))
+      : ListView.builder(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          itemCount: _grouped.length,
+          itemBuilder: (ctx, catIdx) {
+            final cat = _grouped.keys.elementAt(catIdx);
+            final channels = _grouped[cat]!;
+            return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Padding(padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+                child: Row(children: [
+                  Container(width: 3, height: 14, decoration: BoxDecoration(color: AppTheme.accentCyan, borderRadius: BorderRadius.circular(2))),
+                  const SizedBox(width: 8),
+                  Text(cat, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.8)),
+                ])),
+              SizedBox(height: 110, child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                itemCount: channels.length,
+                itemBuilder: (ctx, chIdx) {
+                  final ch = channels[chIdx];
+                  return GestureDetector(
+                    onTap: () => widget.onPlay(ch, channels, chIdx),
+                    child: Container(
+                      width: 105, margin: const EdgeInsets.only(right: 8),
+                      decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.border, width: 0.5)),
+                      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                        ch.logoUrl.isNotEmpty
+                          ? Image.network(ch.logoUrl, width: 52, height: 38, fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Icon(Icons.tv, color: AppTheme.textHint, size: 28))
+                          : const Icon(Icons.tv, color: AppTheme.textHint, size: 28),
+                        const SizedBox(height: 6),
+                        Padding(padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: Text(ch.name, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 10), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)),
+                      ]),
+                    ),
+                  );
+                })),
+            ]);
+          });
 }
