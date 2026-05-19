@@ -21,7 +21,7 @@ class _State extends State<SplashScreen> with SingleTickerProviderStateMixin {
     Future.delayed(const Duration(seconds: 3), () async {
       if (mounted) {
         final hasToken = await ApiService.loadToken();
-        Navigator.pushReplacementNamed(context, hasToken ? '/profile' : '/login');
+        Navigator.pushReplacementNamed(context, hasToken ? '/main' : '/login');
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted) UpdateChecker.check(context);
       }
