@@ -58,7 +58,7 @@ class _State extends State<PlayerScreen> {
       autofocus: true,
       onKey: (event) {
         if (event is RawKeyDownEvent) {
-          if (event.logicalKey == LogicalKeyboardKey.goBack) { Navigator.pop(context); }
+          if (event.logicalKey == LogicalKeyboardKey.goBack) { if (Navigator.canPop(context)) Navigator.pop(context); }
           if (event.logicalKey == LogicalKeyboardKey.select) {
             setState(() => _showControls = !_showControls);
             if (_showControls) _startHideTimer();
