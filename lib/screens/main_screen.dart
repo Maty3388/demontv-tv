@@ -47,8 +47,8 @@ class _MainState extends State<MainScreen> {
         _selectItem();
       }
     } else {
-      if (event.logicalKey == LogicalKeyboardKey.arrowLeft ||
       if (event.logicalKey == LogicalKeyboardKey.goBack) {
+        setState(() => _inContent = false);
       }
     }
   }
