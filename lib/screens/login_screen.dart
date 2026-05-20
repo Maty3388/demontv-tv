@@ -58,29 +58,23 @@ class _LoginState extends State<LoginScreen> {
     if (mounted) setState(() => _loading = false);
   }
 
-  KeyEventResult _handleKey(KeyEvent event) {
-    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+  void _handleKey(RawKeyEvent event) {
+    if (event is! RawKeyDownEvent) return;
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
       if (_focusIdx < 2) _setFocus(_focusIdx + 1);
-      return KeyEventResult.handled;
-    }
-    if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
       if (_focusIdx > 0) _setFocus(_focusIdx - 1);
-      return KeyEventResult.handled;
-    }
-    if (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter) {
+    } else if (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter) {
       if (_focusIdx == 2) _login();
-      return KeyEventResult.handled;
     }
-    return KeyEventResult.ignored;
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: Colors.black,
-    body: KeyboardListener(
+    body: RawKeyboardListener(
       focusNode: FocusNode(),
-      onKeyEvent: _handleKey,
+      onKey: _handleKey,
       child: Row(children: [
         // Panel izquierdo
         Expanded(flex: 4, child: Container(
