@@ -27,6 +27,7 @@ class _State extends State<VodScreen> {
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
+      await ApiService.loadToken();
       if (isMovies) {
         _featured = await ApiService.getMovies(featuredOnly: true);
         _all = await ApiService.getMovies(search: _search.isEmpty ? null : _search);
