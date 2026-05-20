@@ -46,7 +46,7 @@ class UpdateChecker {
       if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(
         const SnackBar(content: Text('Descargando actualizacion...'), backgroundColor: Color(0xFF00CFDD), duration: Duration(seconds: 60)));
       await Dio().download(url, path);
-      await OpenFile.open(path);
+
     } catch (e) {
       if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(
         SnackBar(content: Text('Error: ' + e.toString()), backgroundColor: Colors.red));
