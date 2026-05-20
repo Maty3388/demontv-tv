@@ -151,7 +151,7 @@ class _PlayerState extends State<PlayerScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(8)),
       child: Text(
-        "\${_idx + 1}/\${_playlist.length}  < >  Cambiar canal",
+        '${_idx + 1}/${_playlist.length}  < >  Cambiar canal',
         style: const TextStyle(color: Colors.white70, fontSize: 11)))),
   ]);
 
@@ -163,7 +163,7 @@ class _PlayerState extends State<PlayerScreen> {
         const SizedBox(width: 10),
         Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(_playlist[_idx].name, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-          Text("\${_idx + 1} de \${_playlist.length} canales", style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+          Text('${_idx + 1} de ${_playlist.length} canales', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
         ]),
       ]),
     ));
