@@ -34,16 +34,11 @@ jobs:
           python3 -c "c=open('android/app/src/main/AndroidManifest.xml').read();open('android/app/src/main/AndroidManifest.xml','w').write(c.replace('<action android:name=\"android.intent.action.MAIN\"/>','<action android:name=\"android.intent.action.MAIN\"/><category android:name=\"android.intent.category.LEANBACK_LAUNCHER\"/>')) if 'LEANBACK' not in c else None"
       - name: Copy app icon
         run: |
-          mkdir -p android/app/src/main/res/mipmap-hdpi
-          mkdir -p android/app/src/main/res/mipmap-mdpi
-          mkdir -p android/app/src/main/res/mipmap-xhdpi
-          mkdir -p android/app/src/main/res/mipmap-xxhdpi
-          mkdir -p android/app/src/main/res/mipmap-xxxhdpi
-          cp icon.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png
-          cp icon.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png
-          cp icon.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
-          cp icon.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
-          cp icon.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+          cp android_icons/mipmap-mdpi/ic_launcher.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+          cp android_icons/mipmap-hdpi/ic_launcher.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+          cp android_icons/mipmap-xhdpi/ic_launcher.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+          cp android_icons/mipmap-xxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          cp android_icons/mipmap-xxxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
       - run: flutter pub get
       - run: flutter build apk --release --no-tree-shake-icons
       - uses: actions/upload-artifact@v4
