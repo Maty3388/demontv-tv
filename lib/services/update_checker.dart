@@ -47,14 +47,15 @@ class UpdateChecker {
       if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(
         const SnackBar(content: Text('Descargando actualizacion...'), backgroundColor: Color(0xFF00CFDD), duration: Duration(seconds: 60)));
       await Dio().download(url, path);
+      await Dio().download(url, path);
+      final fileUri = 'content://com.demontv.demon_tv_plus.fileprovider/external_files/demontv_update.apk';
       final intent = AndroidIntent(
         action: 'action_view',
-        data: Uri.file(path).toString(),
+        data: fileUri,
         type: 'application/vnd.android.package-archive',
         flags: [Flag.FLAG_ACTIVITY_NEW_TASK, Flag.FLAG_GRANT_READ_URI_PERMISSION],
       );
       await intent.launch();
-    } catch (e) {
       if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(
         SnackBar(content: Text('Error: ' + e.toString()), backgroundColor: Colors.red));
     }
