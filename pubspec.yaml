@@ -16,7 +16,7 @@ dependencies:
   dio: ^5.4.0
   permission_handler: ^11.3.1
   path_provider: ^2.1.2
-  open_file: ^3.3.2
+  android_intent_plus: ^4.0.3
   provider: ^6.1.1
   cached_network_image: ^3.3.0
   carousel_slider: ^4.2.1
