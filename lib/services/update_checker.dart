@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
-import 'dart:convert';
+import 'package:android_intent_plus/android_intent.dart';
+import 'package:android_intent_plus/flag.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:convert';
 
 class UpdateChecker {
   static const _currentVersion = '1.2.0';
@@ -37,7 +39,6 @@ class UpdateChecker {
 
   static Future<void> _downloadAndInstall(String url, BuildContext ctx) async {
     try {
-      // Pedir permiso de instalacion
       if (await Permission.requestInstallPackages.isDenied) {
         await Permission.requestInstallPackages.request();
       }
@@ -46,7 +47,13 @@ class UpdateChecker {
       if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(
         const SnackBar(content: Text('Descargando actualizacion...'), backgroundColor: Color(0xFF00CFDD), duration: Duration(seconds: 60)));
       await Dio().download(url, path);
-
+      final intent = AndroidIntent(
+        action: 'action_view',
+        data: Uri.file(path).toString(),
+        type: 'application/vnd.android.package-archive',
+        flags: [Flag.FLAG_ACTIVITY_NEW_TASK, Flag.FLAG_GRANT_READ_URI_PERMISSION],
+      );
+      await intent.launch();
     } catch (e) {
       if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(
         SnackBar(content: Text('Error: ' + e.toString()), backgroundColor: Colors.red));
@@ -68,6 +75,9 @@ class UpdateChecker {
             const Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Icon(Icons.arrow_forward, color: Colors.white)),
             Column(children: [const Text('Nueva', style: TextStyle(color: Color(0xFF9E9E9E), fontSize: 12)), Text(newVersion, style: const TextStyle(color: Color(0xFF00CFDD), fontSize: 22, fontWeight: FontWeight.bold))]),
           ]),
+          if (changelog.isNotEmpty) ...[const SizedBox(height: 16),
+            Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: const Color(0xFF2A2A2E), borderRadius: BorderRadius.circular(10)),
+              child: Text(changelog, style: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 12), textAlign: TextAlign.center))],
           const SizedBox(height: 24),
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             if (!forceUpdate) TextButton(onPressed: () => Navigator.pop(c), child: const Text('MAS TARDE', style: TextStyle(color: Color(0xFF00CFDD), fontWeight: FontWeight.bold))),
