@@ -102,9 +102,8 @@ class ApiService {
       }
     }
     return Channel(id: (j['_id'] ?? j['id'] ?? '').toString(), name: j['name'], category: j['category'], logoUrl: j['logo'] ?? '', streamUrl: url, headers: headers, isLive: j['is_live'] ?? true, epgNow: j['epg_now'], epgNext: j['epg_next'], number: j['number']);
-  }
+    type: ContentType.movie, year: j['year']?.toString(), rating: j['rating']?.toString(),
 
-  static Content _movieFromJson(Map<String, dynamic> j) => Content(
   static Content _movieFromJson(Map<String, dynamic> j) => Content(
     id: (j['_id'] ?? j['id'] ?? '').toString(), title: j['title'] ?? '', posterUrl: j['poster'] ?? '',
     description: j['description'], streamUrl: j['stream_url']?.isEmpty == true ? null : j['stream_url'],
