@@ -76,6 +76,7 @@ class _UpdateDialogState extends State<_UpdateDialog> {
       final path = dir.path + '/demontv_update.apk';
       _cancelToken = CancelToken();
       await Dio().download(
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Path: ' + path), duration: const Duration(seconds: 5)));
         widget.apkUrl, path,
         cancelToken: _cancelToken,
         onReceiveProgress: (received, total) {
