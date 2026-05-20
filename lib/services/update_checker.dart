@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'dart:convert';
+import 'package:permission_handler/permission_handler.dart';
 
 class UpdateChecker {
   static const _currentVersion = '1.0.0';
@@ -37,6 +38,10 @@ class UpdateChecker {
 
   static Future<void> _downloadAndInstall(String url, BuildContext ctx) async {
     try {
+      // Pedir permiso de instalacion
+      if (await Permission.requestInstallPackages.isDenied) {
+        await Permission.requestInstallPackages.request();
+      }
       final dir = await getExternalStorageDirectory() ?? await getTemporaryDirectory();
       final path = dir.path + '/demontv_update.apk';
       if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(
