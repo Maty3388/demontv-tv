@@ -44,9 +44,12 @@ class UpdateChecker {
       }
       final dir = await getExternalStorageDirectory() ?? await getTemporaryDirectory();
       final path = dir.path + '/demontv_update.apk';
-      if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(
-        const SnackBar(content: Text('Descargando actualizacion...'), backgroundColor: Color(0xFF00CFDD), duration: Duration(seconds: 60)));
-      await Dio().download(url, path);
+      if (ctx.mounted) {
+        ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
+          content: Text('Descargando actualizacion...'),
+          backgroundColor: Color(0xFF00CFDD),
+          duration: Duration(seconds: 60)));
+      }
       await Dio().download(url, path);
       final fileUri = 'content://com.demontv.demon_tv_plus.fileprovider/external_files/demontv_update.apk';
       final intent = AndroidIntent(
@@ -57,9 +60,12 @@ class UpdateChecker {
       );
       await intent.launch();
     } catch (e) {
-        SnackBar(content: Text('Error: ' + e.toString()), backgroundColor: Colors.red));
-      if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(
-        SnackBar(content: Text('Error: ' + e.toString()), backgroundColor: Colors.red));
+      if (ctx.mounted) {
+        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
+          content: Text('Error: ' + e.toString()),
+          backgroundColor: Colors.red));
+      }
+    }
   }
 
   static void _showDialog(BuildContext ctx, String newVersion, String changelog, String apkUrl, bool forceUpdate) {
@@ -73,18 +79,35 @@ class UpdateChecker {
           const Text('NUEVA ACTUALIZACION', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
           const SizedBox(height: 24),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Column(children: [const Text('Actual', style: TextStyle(color: Color(0xFF9E9E9E), fontSize: 12)), const Text(_currentVersion, style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold))]),
+            Column(children: [
+              const Text('Actual', style: TextStyle(color: Color(0xFF9E9E9E), fontSize: 12)),
+              const Text(_currentVersion, style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+            ]),
             const Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Icon(Icons.arrow_forward, color: Colors.white)),
-            Column(children: [const Text('Nueva', style: TextStyle(color: Color(0xFF9E9E9E), fontSize: 12)), Text(newVersion, style: const TextStyle(color: Color(0xFF00CFDD), fontSize: 22, fontWeight: FontWeight.bold))]),
+            Column(children: [
+              const Text('Nueva', style: TextStyle(color: Color(0xFF9E9E9E), fontSize: 12)),
+              Text(newVersion, style: const TextStyle(color: Color(0xFF00CFDD), fontSize: 22, fontWeight: FontWeight.bold)),
+            ]),
           ]),
-          if (changelog.isNotEmpty) ...[const SizedBox(height: 16),
-            Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: const Color(0xFF2A2A2E), borderRadius: BorderRadius.circular(10)),
-              child: Text(changelog, style: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 12), textAlign: TextAlign.center))],
+          if (changelog.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: const Color(0xFF2A2A2E), borderRadius: BorderRadius.circular(10)),
+              child: Text(changelog, style: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 12), textAlign: TextAlign.center)),
+          ],
           const SizedBox(height: 24),
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            if (!forceUpdate) TextButton(onPressed: () => Navigator.pop(c), child: const Text('MAS TARDE', style: TextStyle(color: Color(0xFF00CFDD), fontWeight: FontWeight.bold))),
-            ElevatedButton(onPressed: () { Navigator.pop(c); _downloadAndInstall(apkUrl, ctx); },
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00CFDD), foregroundColor: Colors.black, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
+            if (!forceUpdate) TextButton(
+              onPressed: () => Navigator.pop(c),
+              child: const Text('MAS TARDE', style: TextStyle(color: Color(0xFF00CFDD), fontWeight: FontWeight.bold))),
+            ElevatedButton(
+              onPressed: () { Navigator.pop(c); _downloadAndInstall(apkUrl, ctx); },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF00CFDD),
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
               child: const Text('ACTUALIZAR', style: TextStyle(fontWeight: FontWeight.bold))),
           ]),
         ]),
