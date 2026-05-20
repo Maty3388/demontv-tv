@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:url_launcher/url_launcher.dart';
 
 class UpdateChecker {
   static const _currentVersion = '1.0.0';
@@ -11,7 +12,8 @@ class UpdateChecker {
       final r = await http.get(Uri.parse(_apiUrl)).timeout(const Duration(seconds: 5));
       if (r.statusCode != 200) return;
       final data = jsonDecode(r.body);
-      final newVersion = data['version'] ?? '1.0.0';
+      final rawVersion = data['version'] ?? '1.0.0';
+      final newVersion = rawVersion.replaceAll(RegExp(r'[^0-9.]'), '').replaceAll(RegExp(r'^\.+|\.+$'), '');
       final apkUrl = data['apkUrl'] ?? '';
       final changelog = data['changelog'] ?? '';
       final forceUpdate = data['forceUpdate'] == true;
@@ -99,9 +101,11 @@ class UpdateChecker {
     try {
       Navigator.pop(ctx);
       final uri = Uri.parse(url);
-      final client = http.Client();
-      ScaffoldMessenger.of(ctx).showSnackBar(
-        const SnackBar(content: Text('Descargando actualizacion...'), backgroundColor: Color(0xFF00CFDD)));
+      if (await canLaunchUrl(uri)) await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (ctx.mounted) {
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          const SnackBar(content: Text('Abriendo descarga...'), backgroundColor: Color(0xFF00CFDD)));
+      }
     } catch (_) {}
   }
 }
