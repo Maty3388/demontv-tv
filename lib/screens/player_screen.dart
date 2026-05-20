@@ -91,17 +91,16 @@ class _PlayerState extends State<PlayerScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) => PopScope(
+    canPop: true,
+    child: Scaffold(
     backgroundColor: Colors.black,
     body: RawKeyboardListener(
       focusNode: FocusNode()..requestFocus(),
       autofocus: true,
       onKey: (event) {
         if (event is! RawKeyDownEvent) return;
-        if (event.logicalKey == LogicalKeyboardKey.goBack ||
-            event.logicalKey == LogicalKeyboardKey.escape) {
-          if (Navigator.canPop(context)) Navigator.pop(context);
-        } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+        if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
           _nextChannel();
         } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
           _prevChannel();
@@ -121,14 +120,14 @@ class _PlayerState extends State<PlayerScreen> {
         },
         child: Stack(children: [
           _initialized && _ctrl != null
-            ? Center(child: AspectRatio(aspectRatio: (_ctrl!.value.aspectRatio < 1.0 || _ctrl!.value.aspectRatio > 3.0) ? 16/9 : _ctrl!.value.aspectRatio, child: VideoPlayer(_ctrl!)))
+            ? SizedBox.expand(child: FittedBox(fit: BoxFit.fill, child: SizedBox(width: 1920, height: 1080, child: VideoPlayer(_ctrl!))))
             : const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan)),
           if (_showControls) _buildControls(),
           if (_showChannelInfo) Positioned(left: 0, right: 0, bottom: 60, child: _buildChannelInfo()),
         ]),
       ),
     ),
-  );
+  ));
 
   Widget _buildControls() => Stack(children: [
     Positioned(top: 0, left: 0, right: 0, child: Container(
