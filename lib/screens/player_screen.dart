@@ -124,7 +124,7 @@ class _PlayerState extends State<PlayerScreen> {
             ? Center(child: AspectRatio(aspectRatio: _ctrl!.value.aspectRatio, child: VideoPlayer(_ctrl!)))
             : const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan)),
           if (_showControls) _buildControls(),
-          if (_showChannelInfo) _buildChannelInfo(),
+          if (_showChannelInfo) Positioned(left: 0, right: 0, bottom: 60, child: _buildChannelInfo()),
         ]),
       ),
     ),
@@ -156,9 +156,7 @@ class _PlayerState extends State<PlayerScreen> {
         style: const TextStyle(color: Colors.white70, fontSize: 11)))),
   ]);
 
-  Widget _buildChannelInfo() => Positioned(
-    left: 0, right: 0, bottom: 60,
-    child: Center(child: Container(
+  Widget _buildChannelInfo() => Center(child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(color: Colors.black.withOpacity(0.8), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.accentCyan, width: 1.5)),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -169,6 +167,5 @@ class _PlayerState extends State<PlayerScreen> {
           Text("\${_idx + 1} de \${_playlist.length} canales", style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
         ]),
       ]),
-    )),
-  );
+    ));
 }
