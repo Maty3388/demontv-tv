@@ -121,7 +121,7 @@ class _PlayerState extends State<PlayerScreen> {
         },
         child: Stack(children: [
           _initialized && _ctrl != null
-            ? SizedBox.expand(child: FittedBox(fit: BoxFit.contain, child: SizedBox(width: _ctrl!.value.size.width, height: _ctrl!.value.size.height, child: VideoPlayer(_ctrl!))))
+            ? Center(child: AspectRatio(aspectRatio: (_ctrl!.value.aspectRatio < 1.0 || _ctrl!.value.aspectRatio > 3.0) ? 16/9 : _ctrl!.value.aspectRatio, child: VideoPlayer(_ctrl!)))
             : const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan)),
           if (_showControls) _buildControls(),
           if (_showChannelInfo) Positioned(left: 0, right: 0, bottom: 60, child: _buildChannelInfo()),
