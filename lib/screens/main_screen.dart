@@ -268,8 +268,7 @@ class _TVLiveState extends State<_TVLiveScreen> {
     if (cats.isEmpty) return;
     final curCh = _grouped[cats[_catIdx]] ?? [];
     if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-      if (_chIdx == 0) { widget.onBack(); return; }
-      setState(() => _chIdx--);
+      if (_chIdx > 0) { setState(() => _chIdx--); _scrollRow(); }
       _scrollRow();
     } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
       if (_chIdx < curCh.length - 1) { setState(() => _chIdx++); _scrollRow(); }
