@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
-import '../services/update_checker.dart';
 import '../services/api_service.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -22,8 +21,7 @@ class _State extends State<SplashScreen> with SingleTickerProviderStateMixin {
       if (mounted) {
         final hasToken = await ApiService.loadToken();
         Navigator.pushReplacementNamed(context, hasToken ? '/main' : '/login');
-        await Future.delayed(const Duration(milliseconds: 500));
-        if (mounted) UpdateChecker.check(context);
+
       }
     });
   }

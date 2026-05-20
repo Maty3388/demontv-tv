@@ -5,6 +5,7 @@ import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 import '../models/models.dart';
 import 'player_screen.dart';
+import '../services/update_checker.dart';
 import 'vod_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -23,7 +24,7 @@ class _MainState extends State<MainScreen> {
   static const String _adultPin = "1234";
 
   @override
-  void initState() { super.initState(); _loadProfile(); }
+  void initState() { super.initState(); _loadProfile(); WidgetsBinding.instance.addPostFrameCallback((_) { UpdateChecker.check(context); }); }
 
   Future<void> _loadProfile() async {
     final prefs = await SharedPreferences.getInstance();
