@@ -58,7 +58,8 @@ class UpdateChecker {
       await intent.launch();
     } catch (e) {
         SnackBar(content: Text('Error: ' + e.toString()), backgroundColor: Colors.red));
-    }
+      if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(content: Text('Error: ' + e.toString()), backgroundColor: Colors.red));
   }
 
   static void _showDialog(BuildContext ctx, String newVersion, String changelog, String apkUrl, bool forceUpdate) {
