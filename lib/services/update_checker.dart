@@ -49,7 +49,7 @@ class UpdateChecker {
       await Dio().download(url, path);
       final intent = AndroidIntent(
         action: 'action_view',
-        data: Uri.file(path).toString(),
+        data: 'content://com.demontv.demontv_plus.fileprovider/external/demontv_update.apk',
         type: 'application/vnd.android.package-archive',
         flags: [Flag.FLAG_ACTIVITY_NEW_TASK, Flag.FLAG_GRANT_READ_URI_PERMISSION],
       );
