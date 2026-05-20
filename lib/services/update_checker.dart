@@ -56,7 +56,7 @@ class UpdateChecker {
         flags: [Flag.FLAG_ACTIVITY_NEW_TASK, Flag.FLAG_GRANT_READ_URI_PERMISSION],
       );
       await intent.launch();
-      if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(
+    } catch (e) {
         SnackBar(content: Text('Error: ' + e.toString()), backgroundColor: Colors.red));
     }
   }
