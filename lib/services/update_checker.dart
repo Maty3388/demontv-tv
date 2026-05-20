@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:url_launcher/url_launcher.dart';
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:android_intent_plus/android_intent.dart';
+import 'package:android_intent_plus/flag.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:convert';
 
 class UpdateChecker {
@@ -33,10 +37,23 @@ class UpdateChecker {
     return 0;
   }
 
-  static Future<void> _openApk(String url, BuildContext ctx) async {
+  static Future<void> _downloadAndInstall(String url, BuildContext ctx) async {
     try {
-      final uri = Uri.parse(url);
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (await Permission.requestInstallPackages.isDenied) {
+        await Permission.requestInstallPackages.request();
+      }
+      final dir = await getExternalStorageDirectory() ?? await getTemporaryDirectory();
+      final path = dir.path + '/demontv_update.apk';
+      if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(
+        const SnackBar(content: Text('Descargando actualizacion...'), backgroundColor: Color(0xFF00CFDD), duration: Duration(seconds: 60)));
+      await Dio().download(url, path);
+      final intent = AndroidIntent(
+        action: 'action_view',
+        data: Uri.file(path).toString(),
+        type: 'application/vnd.android.package-archive',
+        flags: [Flag.FLAG_ACTIVITY_NEW_TASK, Flag.FLAG_GRANT_READ_URI_PERMISSION],
+      );
+      await intent.launch();
     } catch (e) {
       if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(
         SnackBar(content: Text('Error: ' + e.toString()), backgroundColor: Colors.red));
@@ -64,7 +81,7 @@ class UpdateChecker {
           const SizedBox(height: 24),
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             if (!forceUpdate) TextButton(onPressed: () => Navigator.pop(c), child: const Text('MAS TARDE', style: TextStyle(color: Color(0xFF00CFDD), fontWeight: FontWeight.bold))),
-            ElevatedButton(onPressed: () { Navigator.pop(c); _openApk(apkUrl, ctx); },
+            ElevatedButton(onPressed: () { Navigator.pop(c); _downloadAndInstall(apkUrl, ctx); },
               style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00CFDD), foregroundColor: Colors.black, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
               child: const Text('ACTUALIZAR', style: TextStyle(fontWeight: FontWeight.bold))),
           ]),
