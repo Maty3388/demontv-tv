@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'package:permission_handler/permission_handler.dart';
 
 class UpdateChecker {
-  static const _currentVersion = '1.1.0';
+  static const _currentVersion = '1.2.0';
   static const _apiUrl = 'http://149.104.92.205:25461/app/version';
 
   static Future<void> check(BuildContext context) async {
