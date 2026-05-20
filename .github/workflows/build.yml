@@ -33,3 +33,11 @@ jobs:
         with:
           name: demontv-plus-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v1.1.0
+          name: DemonTv Plus v1.1.0
+          files: build/app/outputs/flutter-apk/app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
