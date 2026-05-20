@@ -51,6 +51,8 @@ class UpdateChecker {
           duration: Duration(seconds: 60)));
       }
       await Dio().download(url, path);
+      // Mostrar path para debug
+      if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('Path: ' + path), duration: const Duration(seconds: 5)));
       final fileUri = 'content://com.demontv.demon_tv_plus.fileprovider/external_files/demontv_update.apk';
       final intent = AndroidIntent(
         action: 'action_view',
