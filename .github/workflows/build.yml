@@ -20,25 +20,7 @@ jobs:
       - name: Setup project
         run: |
           flutter create --org com.demontv --project-name demon_tv_plus tmp_app
-          # Configurar signing en build.gradle
-          python3 -c "
-c=open('android/app/build.gradle').read()
-signing='''
-    signingConfigs {
-        release {
-            def props=new Properties()
-            props.load(new FileInputStream(rootProject.file('key.properties')))
-            storeFile file(props['storeFile'])
-            storePassword props['storePassword']
-            keyAlias props['keyAlias']
-            keyPassword props['keyPassword']
-        }
-    }'''
-if 'signingConfigs' not in c:
-    c=c.replace('buildTypes {',signing+'\n    buildTypes {')
-    c=c.replace('release {\n','release {\n            signingConfig signingConfigs.release\n')
-    open('android/app/build.gradle','w').write(c)
-" 
+          python3 -c "c=open('android/app/build.gradle').read();s='\n    signingConfigs { release { def p=new Properties();p.load(new FileInputStream(rootProject.file(\'key.properties\')));storeFile file(p[\'storeFile\']);storePassword p[\'storePassword\'];keyAlias p[\'keyAlias\'];keyPassword p[\'keyPassword\'] } }';c=c.replace('buildTypes {',s+'\n    buildTypes {') if 'signingConfigs' not in c else c;c=c.replace('release {\n','release {\n            signingConfig signingConfigs.release\n') if 'signingConfig' not in c else c;open('android/app/build.gradle','w').write(c)"
           cp -r tmp_app/android .
           rm -rf tmp_app
           # Permiso internet
