@@ -58,6 +58,8 @@ jobs:
           VERSION=$(grep 'version:' pubspec.yaml | head -1 | awk '{print $2}' | cut -d'+' -f1)
           sed -i "s/static const _currentVersion = '[^']*'/static const _currentVersion = '$VERSION'/" lib/services/update_checker.dart
       - run: flutter pub get
+      - name: Debug gradle
+        run: cat android/app/build.gradle | grep -A5 "buildTypes\|signingConfig"
       - name: Setup keystore
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/demontv.keystore
