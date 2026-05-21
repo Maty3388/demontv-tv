@@ -20,6 +20,7 @@ dependencies:
   provider: ^6.1.1
   cached_network_image: ^3.3.0
   carousel_slider: ^4.2.1
+  uuid: ^4.3.3
   shared_preferences: ^2.2.2
   cupertino_icons: ^1.0.6
 

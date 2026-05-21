@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../models/models.dart';
+import 'package:uuid/uuid.dart';
 
 class ApiService {
   static const String baseUrl = 'http://149.104.92.205:25461';
@@ -37,10 +38,20 @@ class ApiService {
   }
   static bool get isLoggedIn => _token != null;
 
+
+  static Future<String> getDeviceId() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? id = prefs.getString('device_id');
+    if (id == null) {
+      id = const Uuid().v4();
+      await prefs.setString('device_id', id);
+    }
+    return id;
+  }
   static Future<Map<String, dynamic>> login(String email, String password) async {
     final res = await http.post(Uri.parse('$baseUrl/auth/login'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email, 'password': password}));
+      body: jsonEncode({'email': email, 'password': password, 'device_id': await getDeviceId()}));
     final data = jsonDecode(res.body);
     if (res.statusCode == 200) {
       _token = data['token'];
