@@ -55,12 +55,7 @@ jobs:
       - name: Setup keystore
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/demontv.keystore
-          cat > android/key.properties << 'KEYPROP'
-          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
-          keyPassword=${{ secrets.KEY_PASSWORD }}
-          keyAlias=${{ secrets.KEY_ALIAS }}
-          storeFile=demontv.keystore
-          KEYPROP
+          printf "storePassword=${{ secrets.KEYSTORE_PASSWORD }}\nkeyPassword=${{ secrets.KEY_PASSWORD }}\nkeyAlias=${{ secrets.KEY_ALIAS }}\nstoreFile=demontv.keystore\n" > android/key.properties
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
         env:
