@@ -45,7 +45,14 @@ jobs:
           cp android_icons/mipmap-xxxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
       - run: flutter pub get
       - name: Setup keystore
-        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/demontv.keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/demontv.keystore
+          cat > android/key.properties << 'KEYPROP'
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          storeFile=demontv.keystore
+          KEYPROP
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
         env:
