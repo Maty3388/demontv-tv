@@ -53,6 +53,10 @@ jobs:
           cp android_icons/mipmap-xhdpi/ic_launcher.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
           cp android_icons/mipmap-xxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
           cp android_icons/mipmap-xxxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+      - name: Set version
+        run: |
+          VERSION=$(grep 'version:' pubspec.yaml | head -1 | awk '{print $2}' | cut -d'+' -f1)
+          sed -i "s/static const _currentVersion = '[^']*'/static const _currentVersion = '$VERSION'/" lib/services/update_checker.dart
       - run: flutter pub get
       - name: Setup keystore
         run: |
