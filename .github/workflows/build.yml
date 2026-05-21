@@ -34,7 +34,11 @@ jobs:
           python3 -c "c=open('android/app/src/main/AndroidManifest.xml').read();open('android/app/src/main/AndroidManifest.xml','w').write(c.replace('<action android:name=\"android.intent.action.MAIN\"/>','<action android:name=\"android.intent.action.MAIN\"/><category android:name=\"android.intent.category.LEANBACK_LAUNCHER\"/>')) if 'LEANBACK' not in c else None"
       - name: Copy app icon
         run: |
+          # Eliminar icono vectorial y usar PNG
+          rm -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+          rm -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
           cp android_icons/mipmap-mdpi/ic_launcher.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+          cp android_icons/mipmap-mdpi/ic_launcher.png android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png
           cp android_icons/mipmap-hdpi/ic_launcher.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png
           cp android_icons/mipmap-xhdpi/ic_launcher.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
           cp android_icons/mipmap-xxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
