@@ -50,7 +50,8 @@ class _LoginState extends State<LoginScreen> {
       if (r['token'] != null) {
         Navigator.pushReplacementNamed(context, '/main');
       } else {
-        setState(() => _error = r['error'] ?? 'Error al iniciar sesion');
+        final msg = r['error'] ?? 'Error al iniciar sesion';
+        setState(() => _error = msg);
       }
     } catch (e) {
       setState(() => _error = 'Sin conexion con el servidor');
