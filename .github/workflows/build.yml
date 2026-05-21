@@ -21,7 +21,8 @@ jobs:
         run: |
           flutter create --org com.demontv --project-name demon_tv_plus tmp_app
           cp -r tmp_app/android .
-          python3 -c "c=open('android/app/build.gradle').read();s='\n    signingConfigs { release { def p=new Properties();p.load(new FileInputStream(rootProject.file(\'key.properties\')));storeFile file(p[\'storeFile\']);storePassword p[\'storePassword\'];keyAlias p[\'keyAlias\'];keyPassword p[\'keyPassword\'] } }';c=c.replace('buildTypes {',s+'\n    buildTypes {') if 'signingConfigs' not in c else c;c=c.replace('release {\n','release {\n            signingConfig signingConfigs.release\n') if 'signingConfig' not in c else c;open('android/app/build.gradle','w').write(c)"
+          sed -i 's/signingConfig signingConfigs.debug/signingConfig signingConfigs.release/' android/app/build.gradle
+          sed -i '/buildTypes {/i\    signingConfigs { release { def p=new Properties(); p.load(new FileInputStream(rootProject.file("key.properties"))); storeFile file(p["storeFile"]); storePassword p["storePassword"]; keyAlias p["keyAlias"]; keyPassword p["keyPassword"] } }' android/app/build.gradle
           rm -rf tmp_app
           # Permiso internet
           sed -i 's/<manifest xmlns:android="http:\/\/schemas.android.com\/apk\/res\/android">/<manifest xmlns:android="http:\/\/schemas.android.com\/apk\/res\/android">\n    <uses-permission android:name="android.permission.INTERNET"\/>\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"\/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"\/>\n    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"\/><uses-permission android:name=\"android.permission.REQUEST_INSTALL_PACKAGES\"\/>\n    <uses-feature android:name="android.software.leanback" android:required="false"\/>\n    <uses-feature android:name="android.hardware.touchscreen" android:required="false"\/>/' android/app/src/main/AndroidManifest.xml
