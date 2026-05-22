@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import '../services/vix_service.dart';
-import 'dash_player_screen.dart';
 import '../models/models.dart';
 import '../theme/app_theme.dart';
 
@@ -43,49 +42,7 @@ class _PlayerState extends State<PlayerScreen> {
       final stream = await VixService.extractStream(url);
       if (stream != null) url = stream;
     }
-    // Si es DASH abrir DashPlayerScreen
-    if (url.contains('.mpd')) {
-      if (mounted) Navigator.pushReplacement(context, MaterialPageRoute(
-        builder: (_) => DashPlayerScreen(channel: ch, streamUrl: url)));
-      return;
-    }
-    final headers = Map<String, String>.from(ch.headers);
-    if (parts.length > 1) {
-      for (final kv in parts[1].split("&")) {
-        final i = kv.indexOf("=");
-        if (i > 0) headers[kv.substring(0, i).trim()] = kv.substring(i + 1).trim();
       }
-    }
-    _ctrl = VideoPlayerController.networkUrl(Uri.parse(url), httpHeaders: headers);
-    await _ctrl!.initialize();
-    await _ctrl!.play();
-    if (mounted) setState(() => _initialized = true);
-    _startHideTimer();
-  }
-
-  void _nextChannel() {
-    if (_idx < _playlist.length - 1) {
-      setState(() => _idx++);
-      _initPlayer(_playlist[_idx]);
-      _showChannelInfoBriefly();
-    }
-  }
-
-  void _prevChannel() {
-    if (_idx > 0) {
-      setState(() => _idx--);
-      _initPlayer(_playlist[_idx]);
-      _showChannelInfoBriefly();
-    }
-  }
-
-  void _showChannelInfoBriefly() {
-    setState(() => _showChannelInfo = true);
-    _infoTimer?.cancel();
-    _infoTimer = Timer(const Duration(seconds: 3), () {
-      if (mounted) setState(() => _showChannelInfo = false);
-    });
-  }
 
   void _startHideTimer() {
     _hideTimer?.cancel();
