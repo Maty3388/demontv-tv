@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:better_player/better_player.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 import '../models/models.dart';
 
 class DashPlayerScreen extends StatefulWidget {
@@ -11,29 +12,28 @@ class DashPlayerScreen extends StatefulWidget {
 }
 
 class _DashPlayerScreenState extends State<DashPlayerScreen> {
-  BetterPlayerController? _controller;
+  late final Player _player;
+  late final VideoController _controller;
 
   @override
   void initState() {
     super.initState();
     SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
-    final src = BetterPlayerDataSource(BetterPlayerDataSourceType.network, widget.streamUrl, videoFormat: BetterPlayerVideoFormat.dash);
-    _controller = BetterPlayerController(
-      const BetterPlayerConfiguration(autoPlay: true, fullScreenByDefault: true, deviceOrientationsOnFullScreen: [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]),
-      betterPlayerDataSource: src,
-    );
+    _player = Player();
+    _controller = VideoController(_player);
+    _player.open(Media(widget.streamUrl));
   }
 
   @override
   void dispose() {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    _controller?.dispose();
+    _player.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: Colors.black,
-    body: BetterPlayer(controller: _controller!),
+    body: Video(controller: _controller),
   );
 }
