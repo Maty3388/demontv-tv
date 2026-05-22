@@ -63,16 +63,16 @@ class _PlayerState extends State<PlayerScreen> {
 
   void _nextChannel() {
     if (_playlist.isEmpty) return;
-    final next = (_currentIndex + 1) % _playlist.length;
-    setState(() => _currentIndex = next);
-    _loadChannel(_playlist[next]);
+    final next = (_idx + 1) % _playlist.length;
+    setState(() => _idx = next);
+    _initPlayer(_playlist[next]);
   }
 
   void _prevChannel() {
     if (_playlist.isEmpty) return;
-    final prev = (_currentIndex - 1 + _playlist.length) % _playlist.length;
-    setState(() => _currentIndex = prev);
-    _loadChannel(_playlist[prev]);
+    final prev = (_idx - 1 + _playlist.length) % _playlist.length;
+    setState(() => _idx = prev);
+    _initPlayer(_playlist[prev]);
   }
 
   @override
