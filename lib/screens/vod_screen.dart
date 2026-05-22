@@ -65,7 +65,7 @@ class _VodState extends State<VodScreen> {
           ? Center(child: Text(isMovies ? 'No hay películas' : 'No hay series', style: const TextStyle(color: AppTheme.textHint)))
           : GridView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, crossAxisSpacing: 8, mainAxisSpacing: 8, childAspectRatio: 0.75),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, crossAxisSpacing: 8, mainAxisSpacing: 8, childAspectRatio: 0.7),
               itemCount: _all.length,
               itemBuilder: (ctx, i) => _ContentCard(content: _all[i]))),
     ])));
