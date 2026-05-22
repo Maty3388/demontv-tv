@@ -60,6 +60,21 @@ class _PlayerState extends State<PlayerScreen> {
     super.dispose();
   }
 
+
+  void _nextChannel() {
+    if (_playlist.isEmpty) return;
+    final next = (_currentIndex + 1) % _playlist.length;
+    setState(() => _currentIndex = next);
+    _loadChannel(_playlist[next]);
+  }
+
+  void _prevChannel() {
+    if (_playlist.isEmpty) return;
+    final prev = (_currentIndex - 1 + _playlist.length) % _playlist.length;
+    setState(() => _currentIndex = prev);
+    _loadChannel(_playlist[prev]);
+  }
+
   @override
   Widget build(BuildContext context) => PopScope(
     canPop: true,
