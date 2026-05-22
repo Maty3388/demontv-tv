@@ -55,17 +55,7 @@ jobs:
           cp android_icons/mipmap-xxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
           cp android_icons/mipmap-xxxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
       - name: Set version
-        run: |
-          VERSION=$(grep 'version:' pubspec.yaml | head -1 | awk '{print $2}' | cut -d'+' -f1)
-          python3 -c "c=open('lib/services/update_checker.dart').read();c=c.replace(c[c.find('_currentVersion = ')+len('_currentVersion = '):c.find('_currentVersion = ')+len('_currentVersion = ')+7],'\"$VERSION\"');open('lib/services/update_checker.dart','w').write(c)" || true
-          python3 -c "
-import re
-c=open('lib/services/update_checker.dart').read()
-import subprocess
-v=subprocess.check_output(['bash','-c','grep version: pubspec.yaml | head -1 | awk "{print \$2}" | cut -d+ -f1']).decode().strip()
-c=re.sub(r"static const _currentVersion = '[^']*'",f"static const _currentVersion = '{v}'",c)
-open('lib/services/update_checker.dart','w').write(c)
-" 
+        run: python3 -c "import re,subprocess; v=subprocess.check_output(['grep','version:','pubspec.yaml']).decode().split('+')[0].split()[-1]; c=open('lib/services/update_checker.dart').read(); c=re.sub(r\"static const _currentVersion = '[^']*'\",f\"static const _currentVersion = '{v}'\",c); open('lib/services/update_checker.dart','w').write(c)"
       - run: flutter pub get
       - name: Debug gradle
         run: cat android/app/build.gradle | grep -A5 "buildTypes\|signingConfig"
