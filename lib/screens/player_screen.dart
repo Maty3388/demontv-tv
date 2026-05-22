@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
-import '../services/vix_service.dart';
 import '../models/models.dart';
 import '../theme/app_theme.dart';
 
@@ -37,12 +36,18 @@ class _PlayerState extends State<PlayerScreen> {
     setState(() => _initialized = false);
     final parts = ch.streamUrl.split("|");
     String url = parts[0].trim();
-    // Si es canal de Vix, obtener stream fresco
-    if (VixService.isVixUrl(url)) {
-      final stream = await VixService.extractStream(url);
-      if (stream != null) url = stream;
+    final headers = ch.headers;
+    try {
+      final ctrl = VideoPlayerController.networkUrl(Uri.parse(url), httpHeaders: headers);
+      await ctrl.initialize();
+      if (!mounted) return;
+      _ctrl = ctrl;
+      _ctrl!.play();
+      setState(() => _initialized = true);
+    } catch (e) {
+      if (mounted) setState(() => _initialized = false);
     }
-      }
+  }
 
   void _startHideTimer() {
     _hideTimer?.cancel();
