@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import '../services/vix_service.dart';
+import 'dash_player_screen.dart';
 import '../models/models.dart';
 import '../theme/app_theme.dart';
 
@@ -41,6 +42,12 @@ class _PlayerState extends State<PlayerScreen> {
     if (VixService.isVixUrl(url)) {
       final stream = await VixService.extractStream(url);
       if (stream != null) url = stream;
+    }
+    // Si es DASH abrir DashPlayerScreen
+    if (url.contains('.mpd')) {
+      if (mounted) Navigator.pushReplacement(context, MaterialPageRoute(
+        builder: (_) => DashPlayerScreen(channel: ch, streamUrl: url)));
+      return;
     }
     final headers = Map<String, String>.from(ch.headers);
     if (parts.length > 1) {
