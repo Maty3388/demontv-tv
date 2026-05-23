@@ -76,10 +76,13 @@ jobs:
           name: demontv-plus-apk
           path: build/app/outputs/flutter-apk/app-release.apk
       - name: Create Release
+      - name: Get version
+        id: version
+        run: echo "VERSION=$(grep 'version:' pubspec.yaml | head -1 | awk '{print $2}' | cut -d'+' -f1)" >> $GITHUB_OUTPUT
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v1.2.5
-          name: DemonTv Plus v1.2.5
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          name: DemonTv Plus v${{ steps.version.outputs.VERSION }}
           files: build/app/outputs/flutter-apk/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
