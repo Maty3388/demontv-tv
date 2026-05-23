@@ -1,3 +1,4 @@
+import '../services/stream_proxy.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -36,9 +37,12 @@ class _PlayerState extends State<PlayerScreen> {
     setState(() => _initialized = false);
     final parts = ch.streamUrl.split("|");
     String url = parts[0].trim();
-    final headers = ch.headers;
+    final headers = Map<String, String>.from(ch.headers);
+    headers['User-Agent'] = 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36';
     try {
-      final ctrl = VideoPlayerController.networkUrl(Uri.parse(url), httpHeaders: headers);
+      // Usar proxy si hay headers especiales
+      final playUrl = headers.length > 1 ? StreamProxy.proxyUrl(url, headers) : url;
+      final ctrl = VideoPlayerController.networkUrl(Uri.parse(playUrl), httpHeaders: headers.length <= 1 ? headers : {});
       await ctrl.initialize();
       if (!mounted) return;
       _ctrl = ctrl;

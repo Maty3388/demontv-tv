@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'services/stream_proxy.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:flutter/services.dart';
 import 'theme/app_theme.dart';
@@ -7,8 +8,9 @@ import 'screens/login_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/main_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await StreamProxy.start();
   WakelockPlus.enable();
   SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
