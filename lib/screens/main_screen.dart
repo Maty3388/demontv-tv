@@ -140,12 +140,12 @@ class _MainState extends State<MainScreen> {
         return exit ?? false;
       },
       child: Scaffold(
-      backgroundColor: Colors.black,
-      body: Row(children: [
+        backgroundColor: Colors.black,
+        body: Row(children: [
         _buildSidebar(),
         Expanded(child: _inContent ? _buildContent() : _buildWelcome()),
       ]),
-    ),
+      )),
   );
 
   Widget _buildWelcome() => Container(
