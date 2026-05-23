@@ -484,4 +484,3 @@ class _WelcomeChannelsState extends State<_WelcomeChannels> {
             ]);
           });
 }
-    );
