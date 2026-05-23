@@ -67,7 +67,6 @@ jobs:
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/demontv.keystore
           printf "storePassword=${{ secrets.KEYSTORE_PASSWORD }}\nkeyPassword=${{ secrets.KEY_PASSWORD }}\nkeyAlias=${{ secrets.KEY_ALIAS }}\nstoreFile=demontv.keystore\n" > android/key.properties
-      - name: Build APK
       - name: Fix wakelock
         run: find /home/runner/.pub-cache -name "build.gradle" | xargs grep -l "1.3.50" 2>/dev/null | xargs sed -i 's/1\.3\.50/1.6.10/g' 2>/dev/null || true
       - name: Build APK
