@@ -20,6 +20,8 @@ jobs:
       - name: Setup project
         run: |
           flutter create --org com.demontv --project-name demon_tv_plus tmp_app
+          # Fix wakelock kotlin version
+          find /home/runner/.pub-cache -name "build.gradle" -path "*/wakelock*" -exec sed -i "s/ext.kotlin_version = .*/ext.kotlin_version = '1.6.10'/" {} \;
           cp -r tmp_app/android .
           sed -i 's/signingConfig signingConfigs.debug/signingConfig signingConfigs.release/' android/app/build.gradle
           sed -i '/buildTypes {/i\    signingConfigs { release { def p=new Properties(); p.load(new FileInputStream(rootProject.file("key.properties"))); storeFile file(p["storeFile"]); storePassword p["storePassword"]; keyAlias p["keyAlias"]; keyPassword p["keyPassword"] } }' android/app/build.gradle
