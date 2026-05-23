@@ -48,7 +48,7 @@ class _LoginState extends State<LoginScreen> {
       final r = await ApiService.login(_email.text.trim(), _pass.text.trim());
       if (!mounted) return;
       if (r['token'] != null) {
-        Navigator.pushReplacementNamed(context, '/main');
+        Navigator.pushReplacementNamed(context, '/profile');
       } else {
         final msg = r['error'] ?? 'Error al iniciar sesion';
         setState(() => _error = msg);
