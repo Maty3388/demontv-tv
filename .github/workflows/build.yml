@@ -79,6 +79,7 @@ jobs:
         id: version
         run: echo "VERSION=$(grep 'version:' pubspec.yaml | head -1 | awk '{print $2}' | cut -d'+' -f1)" >> $GITHUB_OUTPUT
       - name: Create Release
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.version.outputs.VERSION }}
           name: DemonTv Plus v${{ steps.version.outputs.VERSION }}
