@@ -109,7 +109,6 @@ class _MainState extends State<MainScreen> {
       ),
     ));
   }
-  }
 
   Widget _buildContent() {
     switch (_sideIdx) {
