@@ -126,19 +126,7 @@ class _MainState extends State<MainScreen> {
     autofocus: true,
     onKey: _onKey,
     child: WillPopScope(
-      onWillPop: () async {
-        if (_inContent) { setState(() => _inContent = false); return false; }
-        final exit = await showDialog<bool>(context: context, builder: (c) => AlertDialog(
-          backgroundColor: const Color(0xFF1C1C1E),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text("Salir", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          content: const Text("¿Deseás salir de DemonTv Plus?", style: TextStyle(color: Colors.white70)),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(c, false), child: const Text("Cancelar", style: TextStyle(color: Color(0xFF00CFDD)))),
-            ElevatedButton(onPressed: () => Navigator.pop(c, true), style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white), child: const Text("Salir")),
-          ]));
-        return exit ?? false;
-      },
+      onWillPop: () async => false,
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Row(children: [
