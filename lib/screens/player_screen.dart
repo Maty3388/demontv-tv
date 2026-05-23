@@ -15,7 +15,7 @@ class PlayerScreen extends StatefulWidget {
 
 class _PlayerState extends State<PlayerScreen> {
   VideoPlayerController? _ctrl;
-  bool _showControls = true;
+  bool _showControls = false;
   bool _showChannelInfo = false;
   Timer? _hideTimer;
   Timer? _infoTimer;
