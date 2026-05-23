@@ -107,8 +107,8 @@ class _MainState extends State<MainScreen> {
           }, child: const Text("ENTRAR", style: TextStyle(color: AppTheme.accentCyan, fontWeight: FontWeight.bold))),
         ],
       ),
-    ))
-  );
+    ));
+  }
   }
 
   Widget _buildContent() {
