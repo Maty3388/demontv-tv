@@ -21,6 +21,8 @@ class _PlayerState extends State<PlayerScreen> {
   Timer? _hideTimer;
   Timer? _infoTimer;
   bool _initialized = false;
+  Timer? _reconnectTimer;
+  int _reconnectAttempts = 0;
   late List<Channel> _playlist;
   late int _idx;
 
@@ -33,6 +35,7 @@ class _PlayerState extends State<PlayerScreen> {
   }
 
   Future<void> _initPlayer(Channel ch) async {
+    _reconnectTimer?.cancel();
     _ctrl?.dispose();
     setState(() => _initialized = false);
     final parts = ch.streamUrl.split("|");
@@ -44,6 +47,19 @@ class _PlayerState extends State<PlayerScreen> {
       final playUrl = headers.length > 1 ? StreamProxy.proxyUrl(url, headers) : url;
       final ctrl = VideoPlayerController.networkUrl(Uri.parse(playUrl), httpHeaders: headers.length <= 1 ? headers : {});
       await ctrl.initialize();
+      ctrl.addListener(() {
+        if (!mounted) return;
+        final val = ctrl.value;
+        if (val.hasError && _reconnectAttempts < 5) {
+          _reconnectTimer?.cancel();
+          _reconnectTimer = Timer(const Duration(seconds: 3), () {
+            _reconnectAttempts++;
+            _initPlayer(ch);
+          });
+        } else if (!val.hasError) {
+          _reconnectAttempts = 0;
+        }
+      });
       if (!mounted) return;
       _ctrl = ctrl;
       _ctrl!.play();
@@ -64,6 +80,7 @@ class _PlayerState extends State<PlayerScreen> {
   void dispose() {
     _hideTimer?.cancel();
     _infoTimer?.cancel();
+    _reconnectTimer?.cancel();
     _ctrl?.dispose();
     SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
     super.dispose();
