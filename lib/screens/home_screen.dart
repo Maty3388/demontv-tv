@@ -93,7 +93,7 @@ class _State extends State<HomeScreen> {
         shaderCallback: (bounds) => const LinearGradient(
           colors: [Color(0xFF7B2FFF), Color(0xFFFF6B9D)],
         ).createShader(bounds),
-        child: const Text('Bienvenido', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold))),
+        child: Text('Bienvenido', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold))),
       const Text('¿Qué querés ver hoy?', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
     ]),
   );
@@ -178,5 +178,5 @@ class _SectionTitle extends StatelessWidget {
         shaderCallback: (bounds) => const LinearGradient(
           colors: [Color(0xFF7B2FFF), Color(0xFFFF6B9D)],
         ).createShader(bounds),
-        child: Text(title, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)))));
+        child: Text(title, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700))),
 }
