@@ -11,6 +11,9 @@ class HomeScreen extends StatefulWidget {
 class _State extends State<HomeScreen> {
   List<dynamic> _channels = [];
   List<dynamic> _movies = [];
+  List<dynamic> _estrenos = [];
+  List<dynamic> _comedia = [];
+  List<dynamic> _animacion = [];
   List<dynamic> _series = [];
   bool _loading = true;
 
@@ -30,12 +33,18 @@ class _State extends State<HomeScreen> {
     try {
       final channels = await ApiService.getChannels();
       final movies = await ApiService.getMovies(featuredOnly: true);
+      final estrenos = await ApiService.getMovies(category: 'Estrenos 2026');
+      final comedia = await ApiService.getMovies(category: 'Comedia');
+      final animacion = await ApiService.getMovies(category: 'Animacion');
       final series = await ApiService.getSeries(featuredOnly: true);
       setState(() {
         _channels = channels.map((c) => {
           'name': c.name, 'logo': c.logoUrl, 'id': c.id,
           'stream_url': c.streamUrl, 'headers': c.headers, 'is_live': c.isLive
         }).toList();
+        _estrenos = estrenos.map((m) => {'id': m.id, 'title': m.title, 'poster': m.posterUrl, 'content': m}).toList();
+        _comedia = comedia.map((m) => {'id': m.id, 'title': m.title, 'poster': m.posterUrl, 'content': m}).toList();
+        _animacion = animacion.map((m) => {'id': m.id, 'title': m.title, 'poster': m.posterUrl, 'content': m}).toList();
         _movies = movies.map((m) => {
           'title': m.title, 'poster': m.posterUrl, 'id': m.id, 'stream_url': m.streamUrl
         }).toList();
@@ -65,6 +74,18 @@ class _State extends State<HomeScreen> {
               _SectionTitle(title: '🎬 Películas Destacadas'),
               SliverToBoxAdapter(child: _buildMovies()),
             ],
+            if (_estrenos.isNotEmpty) ...[
+              _SectionTitle(title: '🎬 Estrenos 2026'),
+              SliverToBoxAdapter(child: _buildMovieList(_estrenos)),
+            ],
+            if (_comedia.isNotEmpty) ...[
+              _SectionTitle(title: '😂 Comedia'),
+              SliverToBoxAdapter(child: _buildMovieList(_comedia)),
+            ],
+            if (_animacion.isNotEmpty) ...[
+              _SectionTitle(title: '🎨 Animación'),
+              SliverToBoxAdapter(child: _buildMovieList(_animacion)),
+            ],
             if (_series.isNotEmpty) ...[
               _SectionTitle(title: '📱 Series Destacadas'),
               SliverToBoxAdapter(child: _buildSeries()),
@@ -89,11 +110,7 @@ class _State extends State<HomeScreen> {
         const Text('DemonTv Plus', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
       ]),
       const Spacer(),
-      ShaderMask(
-        shaderCallback: (bounds) => const LinearGradient(
-          colors: [Color(0xFF7B2FFF), Color(0xFFFF6B9D)],
-        ).createShader(bounds),
-        child: Text('Bienvenido', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold))),
+      Text('Bienvenido', style: const TextStyle(color: Color(0xFF7B2FFF), fontSize: 16, fontWeight: FontWeight.bold)),
       const Text('¿Qué querés ver hoy?', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
     ]),
   );
@@ -142,6 +159,23 @@ class _State extends State<HomeScreen> {
                   : const Center(child: Icon(Icons.movie, color: AppTheme.textHint, size: 40)))),
               Padding(padding: const EdgeInsets.all(6),
                 child: Text(m['title'] ?? '', style: const TextStyle(color: Colors.white, fontSize: 10), maxLines: 1, overflow: TextOverflow.ellipsis)),
+            ])));
+      }));
+
+  Widget _buildMovieList(List<dynamic> items) => SizedBox(height: 180,
+    child: ListView.builder(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: items.length,
+      itemBuilder: (ctx, i) {
+        final m = items[i];
+        return GestureDetector(
+          onTap: () => Navigator.push(ctx, MaterialPageRoute(builder: (_) => ContentPlayerScreen(content: m['content']))),
+          child: Container(width: 110, margin: const EdgeInsets.only(right: 10),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              ClipRRect(borderRadius: BorderRadius.circular(8),
+                child: CachedNetworkImage(imageUrl: m['poster'] ?? '', height: 140, width: 110, fit: BoxFit.cover,
+                  errorWidget: (_, __, ___) => Container(height: 140, color: const Color(0xFF1A1A1A), child: const Icon(Icons.movie, color: Colors.white54)))),
+              const SizedBox(height: 4),
+              Text(m['title'] ?? '', style: const TextStyle(color: Colors.white, fontSize: 11), maxLines: 2, overflow: TextOverflow.ellipsis),
             ])));
       }));
 

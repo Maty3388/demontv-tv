@@ -79,10 +79,11 @@ class ApiService {
     return (data['channels'] as List).map((c) => _channelFromJson(c)).toList();
   }
 
-  static Future<List<Content>> getMovies({bool featuredOnly = false, String? search}) async {
+  static Future<List<Content>> getMovies({bool featuredOnly = false, String? search, String? category}) async {
     var url = '$baseUrl/movies';
     final p = <String>[];
     if (featuredOnly) p.add('featured=true');
+    if (category != null) p.add('category=\${Uri.encodeComponent(category)}');
     if (search != null) p.add('search=${Uri.encodeComponent(search)}');
     if (p.isNotEmpty) url += '?${p.join('&')}';
     final res = await http.get(Uri.parse(url), headers: _headers);
@@ -94,6 +95,7 @@ class ApiService {
     var url = '$baseUrl/series';
     final p = <String>[];
     if (featuredOnly) p.add('featured=true');
+    if (category != null) p.add('category=\${Uri.encodeComponent(category)}');
     if (search != null) p.add('search=${Uri.encodeComponent(search)}');
     if (p.isNotEmpty) url += '?${p.join('&')}';
     final res = await http.get(Uri.parse(url), headers: _headers);
