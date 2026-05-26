@@ -126,7 +126,7 @@ class _MainState extends State<MainScreen> {
     autofocus: true,
     onKey: _onKey,
     child: WillPopScope(
-      onWillPop: () async => false,
+      onWillPop: () async { _showExitDialog(); return false; },
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Row(children: [
