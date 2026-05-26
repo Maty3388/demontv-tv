@@ -36,8 +36,9 @@ class _State extends State<SplashScreen> with SingleTickerProviderStateMixin {
       Positioned.fill(child: CustomPaint(painter: _WavePainter())),
       Center(child: FadeTransition(opacity: _fade, child: Column(mainAxisSize: MainAxisSize.min, children: [
         Row(mainAxisSize: MainAxisSize.min, children: [
-          ShaderMask(blendMode: BlendMode.srcIn, shaderCallback: (b) => const LinearGradient(colors: [Colors.white, Colors.white70]).createShader(b),
-            child: const Icon(Icons.all_inclusive, size: 42, color: Colors.white)),
+          ShaderMask(
+            shaderCallback: (b) => const LinearGradient(colors: [Color(0xFFFFD700), Color(0xFFFFA500)]).createShader(b),
+            child: const Text('D+', style: TextStyle(color: Colors.white, fontSize: 52, fontWeight: FontWeight.w900, shadows: [Shadow(color: Color(0xFFFFD700), blurRadius: 10)]))),
           const SizedBox(width: 12),
           const Text('DemonTv Plus', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w700)),
         ]),
