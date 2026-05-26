@@ -72,7 +72,7 @@ class ApiService {
     var url = '$baseUrl/channels';
     final p = <String>[];
     if (search != null) p.add('search=${Uri.encodeComponent(search)}');
-    if (category != null) p.add('category=${Uri.encodeComponent(category)}');
+    if (category != null) p.add('category='+Uri.encodeComponent(category));
     if (p.isNotEmpty) url += '?${p.join('&')}';
     final res = await http.get(Uri.parse(url), headers: _headers);
     final data = jsonDecode(res.body);
@@ -83,7 +83,7 @@ class ApiService {
     var url = '$baseUrl/movies';
     final p = <String>[];
     if (featuredOnly) p.add('featured=true');
-    if (category != null) p.add('category=\${Uri.encodeComponent(category)}');
+    if (category != null) p.add('category='+Uri.encodeComponent(category));
     if (search != null) p.add('search=${Uri.encodeComponent(search)}');
     if (p.isNotEmpty) url += '?${p.join('&')}';
     final res = await http.get(Uri.parse(url), headers: _headers);
@@ -95,7 +95,7 @@ class ApiService {
     var url = '$baseUrl/series';
     final p = <String>[];
     if (featuredOnly) p.add('featured=true');
-    if (category != null) p.add('category=\${Uri.encodeComponent(category)}');
+    if (category != null) p.add('category='+Uri.encodeComponent(category));
     if (search != null) p.add('search=${Uri.encodeComponent(search)}');
     if (p.isNotEmpty) url += '?${p.join('&')}';
     final res = await http.get(Uri.parse(url), headers: _headers);
