@@ -89,7 +89,11 @@ class _State extends State<HomeScreen> {
         const Text('DemonTv Plus', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
       ]),
       const Spacer(),
-      const Text('Bienvenido', style: TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
+      ShaderMask(
+        shaderCallback: (bounds) => const LinearGradient(
+          colors: [Color(0xFF7B2FFF), Color(0xFFFF6B9D)],
+        ).createShader(bounds),
+        child: const Text('Bienvenido', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold))),
       const Text('¿Qué querés ver hoy?', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
     ]),
   );
@@ -170,5 +174,9 @@ class _SectionTitle extends StatelessWidget {
   const _SectionTitle({required this.title});
   @override Widget build(BuildContext context) => SliverToBoxAdapter(
     child: Padding(padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
-      child: Text(title, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold))));
+      child: ShaderMask(
+        shaderCallback: (bounds) => const LinearGradient(
+          colors: [Color(0xFF7B2FFF), Color(0xFFFF6B9D)],
+        ).createShader(bounds),
+        child: Text(title, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)))));
 }
