@@ -78,7 +78,7 @@ class ApiService {
     return (data['channels'] as List).map((c) => _channelFromJson(c)).toList();
   }
 
-  static Future<List<Content>> getMovies({bool featuredOnly = false, String? search}) async {
+  static Future<List<Content>> getMovies({bool featuredOnly = false, String? search, String? category}) async {
     var url = '$baseUrl/movies';
     final p = <String>[];
     if (featuredOnly) p.add('featured=true');
