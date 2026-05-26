@@ -15,7 +15,6 @@ class _State extends State<HomeScreen> {
   bool _loading = true;
 
   @override
-  @override
   void initState() {
     super.initState();
     _loadWithToken();
