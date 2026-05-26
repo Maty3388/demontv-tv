@@ -75,7 +75,7 @@ class _MainState extends State<MainScreen> {
   void _selectItem() {
     switch (_sideIdx) {
       case 0: setState(() => _profileExpanded = !_profileExpanded); break;
-      case 4: _showAdultPin(); break;
+      case 5: _showAdultPin(); break;
       
       case 6: ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lista actualizada"), backgroundColor: AppTheme.accentCyan)); break;
       case 7: ApiService.clearToken(); Navigator.pushReplacementNamed(context, "/login"); break;
@@ -164,10 +164,10 @@ class _MainState extends State<MainScreen> {
     final items = [
       _SItem(0, Icons.person_outline, "Mi Perfil", isProfile: true),
       _SItem(1, Icons.home_outlined, "Inicio"),
-      _SItem(1, Icons.live_tv_outlined, "TV en Vivo"),
-      _SItem(2, Icons.movie_outlined, "Peliculas"),
-      _SItem(3, Icons.video_library_outlined, "Series"),
-      _SItem(4, Icons.eighteen_up_rating_outlined, "Adultos", isAdult: true),
+      _SItem(2, Icons.live_tv_outlined, "TV en Vivo"),
+      _SItem(3, Icons.movie_outlined, "Peliculas"),
+      _SItem(4, Icons.video_library_outlined, "Series"),
+      _SItem(5, Icons.eighteen_up_rating_outlined, "Adultos", isAdult: true),
       
       _SItem(6, Icons.refresh_outlined, "Actualizar", isRed: true),
       _SItem(7, Icons.logout, "Cerrar Sesion", isRed: true),
