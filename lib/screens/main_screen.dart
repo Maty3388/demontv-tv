@@ -49,7 +49,7 @@ class _MainState extends State<MainScreen> {
       }
     } else {
       if (event.logicalKey == LogicalKeyboardKey.goBack || event.logicalKey == LogicalKeyboardKey.escape) {
-        if (_inContent && _sideIdx != 1) { setState(() => _inContent = false); } else if (!_inContent) { _showExitDialog(); } else { _showExitDialog(); }
+        if (_inContent) { setState(() => _inContent = false); } else { _showExitDialog(); }
       }
     }
   }
