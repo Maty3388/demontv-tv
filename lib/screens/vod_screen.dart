@@ -17,7 +17,7 @@ class _VodState extends State<VodScreen> {
   String _search = '';
   final _searchCtrl = TextEditingController();
   int _selectedIdx = 0;
-  final int _cols = 4;
+  final int _cols = 5;
   final List<GlobalKey> _keys = [];
 
   bool get isMovies => widget.type == 'movies';
@@ -88,7 +88,7 @@ class _VodState extends State<VodScreen> {
             ? Center(child: Text(isMovies ? 'No hay películas' : 'No hay series', style: const TextStyle(color: AppTheme.textHint)))
             : GridView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, crossAxisSpacing: 8, mainAxisSpacing: 8, childAspectRatio: 0.7),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5, crossAxisSpacing: 6, mainAxisSpacing: 6, childAspectRatio: 0.65),
                 itemCount: _all.length,
                 itemBuilder: (ctx, i) => _ContentCard(
                   content: _all[i],
