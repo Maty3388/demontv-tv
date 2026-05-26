@@ -69,7 +69,10 @@ class _State extends State<HomeScreen> {
       : RefreshIndicator(onRefresh: _load, color: AppTheme.accentCyan,
           child: CustomScrollView(slivers: [
             SliverToBoxAdapter(child: _buildHero()),
-            if (_popularChannels.isNotEmpty) ...[              _SectionTitle(title: '⚽ Deportes'),              SliverToBoxAdapter(child: _buildChannelList(_popularChannels)),            ],
+            if (_popularChannels.isNotEmpty) ...[
+              _SectionTitle(title: '⚽ Deportes'),
+              SliverToBoxAdapter(child: _buildChannelList(_popularChannels)),
+            ],
             if (_channels.isNotEmpty) ...[
               _SectionTitle(title: '📺 TV en Vivo'),
               SliverToBoxAdapter(child: _buildChannels()),
