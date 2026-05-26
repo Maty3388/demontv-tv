@@ -14,7 +14,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainState extends State<MainScreen> {
-  // Sidebar: 0=MiPerfil 1=TVenVivo 2=Peliculas 3=Series 4=Adultos 5=Historial 6=Actualizar 7=CerrarSesion
+  // Sidebar: 0=MiPerfil 1=Inicio 2=TVenVivo 3=Peliculas 4=Series 5=Adultos 6=Actualizar 7=CerrarSesion
   int _sideIdx = 1;
   bool _inContent = false;
   bool _profileExpanded = false;
@@ -75,7 +75,7 @@ class _MainState extends State<MainScreen> {
     switch (_sideIdx) {
       case 0: setState(() => _profileExpanded = !_profileExpanded); break;
       case 4: _showAdultPin(); break;
-      case 5: ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Historial borrado"), backgroundColor: AppTheme.accentCyan)); break;
+      
       case 6: ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lista actualizada"), backgroundColor: AppTheme.accentCyan)); break;
       case 7: ApiService.clearToken(); Navigator.pushReplacementNamed(context, "/login"); break;
       default: setState(() => _inContent = true);
@@ -112,10 +112,11 @@ class _MainState extends State<MainScreen> {
 
   Widget _buildContent() {
     switch (_sideIdx) {
-      case 1: return _TVLiveScreen(onBack: () => setState(() => _inContent = false), collapsed: _sidebarCollapsed);
-      case 2: return const VodScreen(type: "movies");
-      case 3: return const VodScreen(type: "series");
-      case 4: return _TVLiveScreen(onBack: () => setState(() => _inContent = false), collapsed: _sidebarCollapsed);
+      case 1: return const HomeScreen();
+      case 2: return _TVLiveScreen(onBack: () => setState(() => _inContent = false), collapsed: _sidebarCollapsed);
+      case 3: return const VodScreen(type: "movies");
+      case 4: return const VodScreen(type: "series");
+      case 5: return _TVLiveScreen(onBack: () => setState(() => _inContent = false), collapsed: _sidebarCollapsed);
       default: return const SizedBox();
     }
   }
@@ -161,11 +162,12 @@ class _MainState extends State<MainScreen> {
   Widget _buildSidebar() {
     final items = [
       _SItem(0, Icons.person_outline, "Mi Perfil", isProfile: true),
+      _SItem(1, Icons.home_outlined, "Inicio"),
       _SItem(1, Icons.live_tv_outlined, "TV en Vivo"),
       _SItem(2, Icons.movie_outlined, "Peliculas"),
       _SItem(3, Icons.video_library_outlined, "Series"),
       _SItem(4, Icons.eighteen_up_rating_outlined, "Adultos", isAdult: true),
-      _SItem(5, Icons.history_outlined, "Historial", isRed: true),
+      
       _SItem(6, Icons.refresh_outlined, "Actualizar", isRed: true),
       _SItem(7, Icons.logout, "Cerrar Sesion", isRed: true),
     ];
