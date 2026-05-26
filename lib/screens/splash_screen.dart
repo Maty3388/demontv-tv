@@ -54,15 +54,15 @@ class _WavePainter extends CustomPainter {
     final rect = Offset.zero & size;
     canvas.drawRect(rect, Paint()..shader = const LinearGradient(
       begin: Alignment.bottomLeft, end: Alignment.topRight,
-      colors: [Color(0xFF006D75), Color(0xFF1A1040), Color(0xFF2D0A3E), Color(0xFF8B1A1A), Color(0xFFFF6600)],
+      colors: [Color(0xFF0A0A0A), Color(0xFF1A1500), Color(0xFF0A0A0A), Color(0xFF1A1200), Color(0xFF0A0A0A)],
       stops: [0.0, 0.25, 0.5, 0.75, 1.0],
     ).createShader(rect));
     for (int w = 0; w < 6; w++) {
-      _drawWave(canvas, size, 0.15 + w * 0.15, const Color(0xFF005F6B), 2.0);
+      _drawWave(canvas, size, 0.15 + w * 0.15, const Color(0xFFFFD700), 1.0);
     }
   }
   void _drawWave(Canvas canvas, Size size, double yFraction, Color color, double stroke) {
-    final paint = Paint()..color = color.withOpacity(0.5)..style = PaintingStyle.stroke..strokeWidth = stroke;
+    final paint = Paint()..color = color.withOpacity(0.2)..style = PaintingStyle.stroke..strokeWidth = stroke;
     for (int i = 0; i < 4; i++) {
       final path = Path();
       final baseY = size.height * yFraction + i * 20.0;
