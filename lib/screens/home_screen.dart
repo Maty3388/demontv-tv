@@ -10,7 +10,6 @@ class HomeScreen extends StatefulWidget {
 
 class _State extends State<HomeScreen> {
   List<dynamic> _channels = [];
-  List<dynamic> _popularChannels = [];
   List<dynamic> _movies = [];
   List<dynamic> _estrenos = [];
   List<dynamic> _comedia = [];
@@ -34,7 +33,6 @@ class _State extends State<HomeScreen> {
     try {
       final channels = await ApiService.getChannels();
       final movies = await ApiService.getMovies(featuredOnly: true);
-      final popular = await ApiService.getChannels(category: 'Deportes');
       final estrenos = await ApiService.getMovies(category: 'Estrenos 2026');
       final comedia = await ApiService.getMovies(category: 'Comedia');
       final animacion = await ApiService.getMovies(category: 'Animacion');
@@ -44,7 +42,6 @@ class _State extends State<HomeScreen> {
           'name': c.name, 'logo': c.logoUrl, 'id': c.id,
           'stream_url': c.streamUrl, 'headers': c.headers, 'is_live': c.isLive
         }).toList();
-        _popularChannels = popular.take(10).map((c) => {'id': c.id, 'title': c.name, 'poster': c.logoUrl, 'channel': c}).toList();
         _estrenos = estrenos.map((m) => {'id': m.id, 'title': m.title, 'poster': m.posterUrl, 'content': m}).toList();
         _comedia = comedia.map((m) => {'id': m.id, 'title': m.title, 'poster': m.posterUrl, 'content': m}).toList();
         _animacion = animacion.map((m) => {'id': m.id, 'title': m.title, 'poster': m.posterUrl, 'content': m}).toList();
@@ -69,7 +66,6 @@ class _State extends State<HomeScreen> {
       : RefreshIndicator(onRefresh: _load, color: AppTheme.accentCyan,
           child: CustomScrollView(slivers: [
             SliverToBoxAdapter(child: _buildHero()),
-            if (_popularChannels.isNotEmpty) ...[              _SectionTitle(title: '⚽ Deportes'),              SliverToBoxAdapter(child: _buildChannelList(_popularChannels)),            ],
             if (_channels.isNotEmpty) ...[
               _SectionTitle(title: '📺 TV en Vivo'),
               SliverToBoxAdapter(child: _buildChannels()),
@@ -140,23 +136,6 @@ class _State extends State<HomeScreen> {
               const SizedBox(height: 6),
               Padding(padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: Text(ch['name'] ?? '', style: const TextStyle(color: Colors.white, fontSize: 10), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)),
-            ])));
-      }));
-
-  Widget _buildChannelList(List<dynamic> items) => SizedBox(height: 90,
-    child: ListView.builder(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: items.length,
-      itemBuilder: (ctx, i) {
-        final c = items[i];
-        return GestureDetector(
-          onTap: () => Navigator.push(ctx, MaterialPageRoute(builder: (_) => PlayerScreen(channel: c['channel']))),
-          child: Container(width: 120, margin: const EdgeInsets.only(right: 10),
-            decoration: BoxDecoration(color: const Color(0xFF1A1A1A), borderRadius: BorderRadius.circular(8)),
-            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              CachedNetworkImage(imageUrl: c['poster'] ?? '', height: 45, width: 80, fit: BoxFit.contain,
-                errorWidget: (_, __, ___) => const Icon(Icons.tv, color: Colors.white54, size: 30)),
-              const SizedBox(height: 4),
-              Text(c['title'] ?? '', style: const TextStyle(color: Colors.white, fontSize: 10), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
             ])));
       }));
 
