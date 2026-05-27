@@ -301,7 +301,7 @@ class _TVLiveState extends State<_TVLiveScreen> {
     } else if (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter) {
       if (curCh.isNotEmpty) Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: curCh[_chIdx], playlist: curCh, initialIndex: _chIdx)));
     } else if (event.logicalKey == LogicalKeyboardKey.goBack || event.logicalKey == LogicalKeyboardKey.escape) {
-      widget.onBack();
+      widget.onBack(); return;
     }
   }
 
