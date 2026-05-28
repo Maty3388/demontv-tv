@@ -118,7 +118,7 @@ class _State extends State<LiveTvScreen> {
       // Header con busqueda
       Padding(padding: const EdgeInsets.fromLTRB(16,12,16,8),
         child: Row(children: [
-          const Text('TV en Vivo', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+          const Text('TV en Vivo', style: TextStyle(color: Color(0xFFFFD700), fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1)),
           const Spacer(),
           GestureDetector(
             onTap: () { setState(() => _showSearch = !_showSearch); if (_showSearch) FocusScope.of(context).requestFocus(_searchFocus); },

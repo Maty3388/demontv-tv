@@ -66,7 +66,7 @@ class _VodState extends State<VodScreen> {
       body: SafeArea(child: Column(children: [
         Padding(padding: const EdgeInsets.fromLTRB(16,12,16,0),
           child: Row(children: [
-            Text(isMovies ? 'Películas' : 'Series', style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+            Text(isMovies ? 'Películas' : 'Series', style: const TextStyle(color: Color(0xFFFFD700), fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1)),
             const Spacer(),
           ])),
         Padding(padding: const EdgeInsets.fromLTRB(16,12,16,8),
