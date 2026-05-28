@@ -383,7 +383,9 @@ class _TVLiveState extends State<_TVLiveScreen> {
                         AnimatedContainer(duration: const Duration(milliseconds: 200), width: 3, height: 16,
                           decoration: BoxDecoration(color: catIdx == _catIdx ? AppTheme.accentCyan : Colors.transparent, borderRadius: BorderRadius.circular(2))),
                         const SizedBox(width: 8),
-                        Text(cat, style: TextStyle(color: catIdx == _catIdx ? const Color(0xFFFFD700) : AppTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.8)),
+                        Text(cat, style: TextStyle(color: catIdx == _catIdx ? const Color(0xFFFFD700) : const Color(0xFFFFD700), fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.8)),
+                        const SizedBox(width: 8),
+                        Expanded(child: Container(height: 1, decoration: const BoxDecoration(gradient: LinearGradient(colors: [Color(0xFFFFD700), Colors.transparent])))),
                       ])),
                     SizedBox(height: 110, child: ListView.builder(
                       controller: (_rowCtrls[catIdx] ??= ScrollController()),
