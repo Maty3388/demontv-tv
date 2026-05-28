@@ -17,7 +17,7 @@ class MainScreen extends StatefulWidget {
 class _MainState extends State<MainScreen> {
   // Sidebar: 0=MiPerfil 1=Inicio 2=TVenVivo 3=Peliculas 4=Series 5=Adultos 6=Actualizar 7=CerrarSesion
   int _sideIdx = 1;
-  bool _inContent = true;
+  bool _inContent = false;
   bool _profileExpanded = false;
   bool _sidebarCollapsed = false;
   String _userEmail = "";
