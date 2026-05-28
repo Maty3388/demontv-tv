@@ -1,5 +1,6 @@
 import 'home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:palette_generator/palette_generator.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
@@ -396,27 +397,7 @@ class _TVLiveState extends State<_TVLiveScreen> {
                       itemBuilder: (ctx, chIdx) {
                         final ch = channels[chIdx];
                         final sel = catIdx == _catIdx && chIdx == _chIdx;
-                        return GestureDetector(
-                          onTap: () { setState(() { _catIdx = catIdx; _chIdx = chIdx; }); Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: ch, playlist: channels, initialIndex: chIdx))); },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 150),
-                            width: sel ? 120 : 105,
-                            margin: const EdgeInsets.only(right: 8),
-                            decoration: BoxDecoration(
-                              color: sel ? AppTheme.accentCyan.withOpacity(0.15) : AppTheme.surface,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: sel ? AppTheme.accentCyan : AppTheme.border, width: sel ? 2 : 0.5),
-                              boxShadow: sel ? [BoxShadow(color: AppTheme.accentCyan.withOpacity(0.3), blurRadius: 10)] : null),
-                            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                              ch.logoUrl.isNotEmpty
-                                ? Image.network(ch.logoUrl, width: 52, height: 38, fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Icon(Icons.tv, color: AppTheme.textHint, size: 28))
-                                : const Icon(Icons.tv, color: AppTheme.textHint, size: 28),
-                              const SizedBox(height: 6),
-                              Padding(padding: const EdgeInsets.symmetric(horizontal: 6),
-                                child: Text(ch.name, style: TextStyle(color: sel ? Colors.white : AppTheme.textSecondary, fontSize: 10, fontWeight: sel ? FontWeight.bold : FontWeight.normal), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)),
-                            ]),
-                          ),
-                        );
+                        return _ChannelCard(channel: ch, selected: sel, onTap: () { setState(() { _catIdx = catIdx; _chIdx = chIdx; }); Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: ch, playlist: channels, initialIndex: chIdx))); });
                       })),
                   ]);
                 })),
@@ -509,4 +490,58 @@ class _WelcomeChannelsState extends State<_WelcomeChannels> {
                 })),
             ]);
           });
+}
+
+class _ChannelCard extends StatefulWidget {
+  final dynamic channel;
+  final bool selected;
+  final VoidCallback onTap;
+  const _ChannelCard({required this.channel, required this.selected, required this.onTap});
+  @override State<_ChannelCard> createState() => _ChannelCardState();
+}
+
+class _ChannelCardState extends State<_ChannelCard> {
+  Color _bgColor = const Color(0xFF1A1A1A);
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.channel.logoUrl.isNotEmpty) _extractColor();
+  }
+
+  Future<void> _extractColor() async {
+    try {
+      final gen = await PaletteGenerator.fromImageProvider(
+        NetworkImage(widget.channel.logoUrl),
+        size: const Size(50, 50),
+      );
+      final color = gen.dominantColor?.color ?? gen.vibrantColor?.color;
+      if (color != null && mounted) {
+        setState(() => _bgColor = color.withOpacity(0.3));
+      }
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: widget.onTap,
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      width: widget.selected ? 120 : 105,
+      margin: const EdgeInsets.only(right: 8),
+      decoration: BoxDecoration(
+        color: widget.selected ? AppTheme.accentCyan.withOpacity(0.15) : _bgColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: widget.selected ? AppTheme.accentCyan : AppTheme.border, width: widget.selected ? 2 : 0.5),
+        boxShadow: widget.selected ? [BoxShadow(color: AppTheme.accentCyan.withOpacity(0.3), blurRadius: 10)] : null),
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        widget.channel.logoUrl.isNotEmpty
+          ? Image.network(widget.channel.logoUrl, width: 52, height: 38, fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Icon(Icons.tv, color: AppTheme.textHint, size: 28))
+          : const Icon(Icons.tv, color: AppTheme.textHint, size: 28),
+        const SizedBox(height: 6),
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 6),
+          child: Text(widget.channel.name, style: TextStyle(color: widget.selected ? Colors.white : AppTheme.textSecondary, fontSize: 10, fontWeight: widget.selected ? FontWeight.bold : FontWeight.normal), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)),
+      ]),
+    ),
+  );
 }
