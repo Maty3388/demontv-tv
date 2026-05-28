@@ -1,5 +1,6 @@
 import 'home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -479,7 +480,7 @@ class _WelcomeChannelsState extends State<_WelcomeChannels> {
                       decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.border, width: 0.5)),
                       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                         ch.logoUrl.isNotEmpty
-                          ? Image.network(ch.logoUrl, width: 52, height: 38, fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Icon(Icons.tv, color: AppTheme.textHint, size: 28))
+                          ? CachedNetworkImage(imageUrl: ch.logoUrl, width: 52, height: 38, fit: BoxFit.contain, errorWidget: (_, __, ___) => const Icon(Icons.tv, color: AppTheme.textHint, size: 28), fadeInDuration: Duration.zero)
                           : const Icon(Icons.tv, color: AppTheme.textHint, size: 28),
                         const SizedBox(height: 6),
                         Padding(padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -536,7 +537,7 @@ class _ChannelCardState extends State<_ChannelCard> {
         boxShadow: widget.selected ? [BoxShadow(color: AppTheme.accentCyan.withOpacity(0.3), blurRadius: 10)] : null),
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         widget.channel.logoUrl.isNotEmpty
-          ? Image.network(widget.channel.logoUrl, width: 52, height: 38, fit: BoxFit.contain, errorBuilder: (_, __, ___) => const Icon(Icons.tv, color: AppTheme.textHint, size: 28))
+          ? CachedNetworkImage(imageUrl: widget.channel.logoUrl, width: 52, height: 38, fit: BoxFit.contain, errorWidget: (_, __, ___) => const Icon(Icons.tv, color: AppTheme.textHint, size: 28), fadeInDuration: Duration.zero)
           : const Icon(Icons.tv, color: AppTheme.textHint, size: 28),
         const SizedBox(height: 6),
         Padding(padding: const EdgeInsets.symmetric(horizontal: 6),

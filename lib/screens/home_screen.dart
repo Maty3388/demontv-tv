@@ -11,12 +11,15 @@ class HomeScreen extends StatefulWidget {
   @override State<HomeScreen> createState() => _HomeState();
 }
 
-class _HomeState extends State<HomeScreen> {
+class _HomeState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
   List<Content> _movies = [];
   List<Content> _estrenos = [];
   List<Content> _series = [];
   List<Channel> _deportes = [];
   bool _loading = true;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -45,6 +48,7 @@ class _HomeState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (_loading) return const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan));
     return RefreshIndicator(
       onRefresh: _load,
