@@ -1,6 +1,6 @@
 name: demon_tv_plus
 description: DemonTv Plus - App de Streaming
-version: 1.6.9+34
+version: 1.7.0+35
 publish_to: 'none'
 
 environment:
@@ -19,7 +19,6 @@ dependencies:
   android_intent_plus: ^4.0.3
   provider: ^6.1.1
   cached_network_image: ^3.3.0
-  palette_generator: ^0.3.3
   carousel_slider: ^4.2.1
   uuid: ^4.3.3
   shared_preferences: ^2.2.2

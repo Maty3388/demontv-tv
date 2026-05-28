@@ -1,7 +1,6 @@
 import 'home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:palette_generator/palette_generator.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
@@ -502,26 +501,19 @@ class _ChannelCard extends StatefulWidget {
 }
 
 class _ChannelCardState extends State<_ChannelCard> {
-  Color _bgColor = const Color(0xFF1A1A1A);
+  static const List<Color> _catColors = [
+    Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF0F3460),
+    Color(0xFF1B262C), Color(0xFF2C003E), Color(0xFF1A0A2E),
+    Color(0xFF0D2137), Color(0xFF1E2D40), Color(0xFF2D1B33),
+  ];
+  
+  Color get _bgColor {
+    final idx = widget.channel.name.length % _catColors.length;
+    return _catColors[idx];
+  }
 
   @override
-  void initState() {
-    super.initState();
-    if (widget.channel.logoUrl.isNotEmpty) _extractColor();
-  }
-
-  Future<void> _extractColor() async {
-    try {
-      final gen = await PaletteGenerator.fromImageProvider(
-        NetworkImage(widget.channel.logoUrl),
-        size: const Size(50, 50),
-      );
-      final color = gen.dominantColor?.color ?? gen.vibrantColor?.color;
-      if (color != null && mounted) {
-        setState(() => _bgColor = color.withOpacity(0.3));
-      }
-    } catch (_) {}
-  }
+  void initState() { super.initState(); }
 
   @override
   Widget build(BuildContext context) => GestureDetector(
