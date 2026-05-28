@@ -134,7 +134,7 @@ class _MainState extends State<MainScreen> {
         backgroundColor: Colors.black,
         body: Row(children: [
         _buildSidebar(),
-        Expanded(child: _inContent ? _buildContent() : _buildWelcome()),
+        Expanded(child: _inContent ? _buildContent() : const HomeScreen()),
       ]),
       )),
   );
