@@ -95,6 +95,7 @@ class _MainState extends State<MainScreen> {
           const SizedBox(height: 16),
           TextField(controller: pin, obscureText: true, keyboardType: TextInputType.number,
             maxLength: 4, textAlign: TextAlign.center, autofocus: true,
+            onChanged: (v) { if (v.length == 4) { if (v == _adultPin) { Navigator.pop(ctx); setState(() { _sideIdx = 5; _inContent = true; }); } else { set(() => error = 'PIN incorrecto'); pin.clear(); } } },
             style: const TextStyle(color: Colors.white, fontSize: 24, letterSpacing: 8),
             decoration: InputDecoration(counterText: "", filled: true, fillColor: const Color(0xFF2A2A2E),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
