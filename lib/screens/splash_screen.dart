@@ -17,6 +17,11 @@ class _State extends State<SplashScreen> with SingleTickerProviderStateMixin {
     _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
     _fade = CurvedAnimation(parent: _ctrl, curve: Curves.easeIn);
     _ctrl.forward();
+    // Precargar datos en paralelo con el splash
+    Future.delayed(const Duration(milliseconds: 500), () async {
+      ApiService.getChannels().catchError((_) {});
+      ApiService.getMovies(featuredOnly: true).catchError((_) {});
+    });
     Future.delayed(const Duration(seconds: 2), () async {
       if (mounted) {
         final hasToken = await ApiService.loadToken();

@@ -48,7 +48,7 @@ class _PlayerState extends State<PlayerScreen> {
       // Usar proxy solo si hay Referer u otros headers especiales
       final hasSpecialHeaders = ch.headers.containsKey('Referer') || ch.headers.containsKey('Origin');
       final playUrl = hasSpecialHeaders ? StreamProxy.proxyUrl(url, headers) : url;
-      final ctrl = VideoPlayerController.networkUrl(Uri.parse(playUrl), httpHeaders: hasSpecialHeaders ? {} : {'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36'});
+      final ctrl = VideoPlayerController.networkUrl(Uri.parse(playUrl), httpHeaders: hasSpecialHeaders ? {} : {'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36'}, videoPlayerOptions: VideoPlayerOptions(mixWithOthers: false));
       await ctrl.initialize();
       ctrl.addListener(() {
         if (!mounted) return;
