@@ -103,7 +103,7 @@ class _MainState extends State<MainScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancelar", style: TextStyle(color: AppTheme.textSecondary))),
           TextButton(onPressed: () {
-            if (pin.text == _adultPin) { Navigator.pop(ctx); setState(() { _sideIdx = 4; _inContent = true; }); }
+            if (pin.text == _adultPin) { Navigator.pop(ctx); setState(() { _sideIdx = 5; _inContent = true; }); }
             else set(() => error = "PIN incorrecto");
           }, child: const Text("ENTRAR", style: TextStyle(color: AppTheme.accentCyan, fontWeight: FontWeight.bold))),
         ],
