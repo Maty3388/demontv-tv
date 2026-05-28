@@ -1,0 +1,3 @@
+
+android.buildTypes.release.minifyEnabled = true
+android.buildTypes.release.shrinkResources = true

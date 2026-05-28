@@ -17,7 +17,7 @@ class _State extends State<SplashScreen> with SingleTickerProviderStateMixin {
     _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
     _fade = CurvedAnimation(parent: _ctrl, curve: Curves.easeIn);
     _ctrl.forward();
-    Future.delayed(const Duration(seconds: 3), () async {
+    Future.delayed(const Duration(seconds: 2), () async {
       if (mounted) {
         final hasToken = await ApiService.loadToken();
         Navigator.pushReplacementNamed(context, hasToken ? '/main' : '/login');

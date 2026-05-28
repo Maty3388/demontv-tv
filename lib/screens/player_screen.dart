@@ -35,6 +35,8 @@ class _PlayerState extends State<PlayerScreen> {
   }
 
   Future<void> _initPlayer(Channel ch) async {
+    _ctrl?.dispose();
+    setState(() => _initialized = false);
     _reconnectTimer?.cancel();
     _ctrl?.dispose();
     setState(() => _initialized = false);
