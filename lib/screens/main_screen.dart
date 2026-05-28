@@ -340,7 +340,7 @@ class _TVLiveState extends State<_TVLiveScreen> {
             Row(children: [
               const Icon(Icons.live_tv, color: AppTheme.accentCyan, size: 18),
               const SizedBox(width: 8),
-              const Text("TV en Vivo", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text("TV en Vivo", style: TextStyle(color: Color(0xFFFFD700), fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1)),
               const Spacer(),
               Text("${_all.length} canales", style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
               const SizedBox(width: 12),
@@ -383,7 +383,7 @@ class _TVLiveState extends State<_TVLiveScreen> {
                         AnimatedContainer(duration: const Duration(milliseconds: 200), width: 3, height: 16,
                           decoration: BoxDecoration(color: catIdx == _catIdx ? AppTheme.accentCyan : Colors.transparent, borderRadius: BorderRadius.circular(2))),
                         const SizedBox(width: 8),
-                        Text(cat, style: TextStyle(color: catIdx == _catIdx ? AppTheme.accentCyan : AppTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.8)),
+                        Text(cat, style: TextStyle(color: catIdx == _catIdx ? const Color(0xFFFFD700) : AppTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.8)),
                       ])),
                     SizedBox(height: 110, child: ListView.builder(
                       controller: (_rowCtrls[catIdx] ??= ScrollController()),
