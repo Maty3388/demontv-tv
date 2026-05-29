@@ -21,6 +21,7 @@ class _VodState extends State<VodScreen> {
   final List<GlobalKey> _keys = [];
 
   bool get isMovies => widget.type == 'movies';
+  bool get isAdult => widget.type == 'adult';
 
   @override void initState() { super.initState(); _load(); }
   @override void dispose() { _searchCtrl.dispose(); super.dispose(); }
@@ -31,6 +32,8 @@ class _VodState extends State<VodScreen> {
       await ApiService.loadToken();
       if (isMovies) {
         _all = await ApiService.getMovies(search: _search.isEmpty ? null : _search);
+      } else if (isAdult) {
+        _all = await ApiService.getChannels(category: 'ADULTOS');
       } else {
         _all = await ApiService.getSeries(search: _search.isEmpty ? null : _search);
       }
@@ -66,7 +69,7 @@ class _VodState extends State<VodScreen> {
       body: SafeArea(child: Column(children: [
         Padding(padding: const EdgeInsets.fromLTRB(16,12,16,0),
           child: Row(children: [
-            Text(isMovies ? 'Películas' : 'Series', style: const TextStyle(color: Color(0xFFFFD700), fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1)),
+            Text(isMovies ? 'Películas' : isAdult ? 'Adultos' : 'Series', style: const TextStyle(color: Color(0xFFFFD700), fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1)),
             const Spacer(),
           ])),
         Padding(padding: const EdgeInsets.fromLTRB(16,12,16,8),
