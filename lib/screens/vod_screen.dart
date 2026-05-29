@@ -32,8 +32,6 @@ class _VodState extends State<VodScreen> {
       await ApiService.loadToken();
       if (isMovies) {
         _all = await ApiService.getMovies(search: _search.isEmpty ? null : _search);
-      } else if (isAdult) {
-        _all = await ApiService.getChannels(category: 'ADULTOS');
       } else {
         _all = await ApiService.getSeries(search: _search.isEmpty ? null : _search);
       }

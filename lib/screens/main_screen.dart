@@ -119,7 +119,7 @@ class _MainState extends State<MainScreen> {
       case 2: return _TVLiveScreen(onBack: () => setState(() => _inContent = false), collapsed: _sidebarCollapsed);
       case 3: return const VodScreen(type: "movies");
       case 4: return const VodScreen(type: "series");
-      case 5: return const VodScreen(type: 'adult');
+      case 5: return _TVLiveScreen(onBack: () => setState(() => _inContent = false), collapsed: _sidebarCollapsed, filterCategory: 'ADULTOS');
       default: return const SizedBox();
     }
   }
@@ -248,7 +248,8 @@ class _SItem {
 class _TVLiveScreen extends StatefulWidget {
   final VoidCallback onBack;
   final bool collapsed;
-  const _TVLiveScreen({required this.onBack, this.collapsed = false});
+  final String? filterCategory;
+  const _TVLiveScreen({required this.onBack, this.collapsed = false, this.filterCategory});
   @override State<_TVLiveScreen> createState() => _TVLiveState();
 }
 
@@ -441,7 +442,7 @@ class _WelcomeChannelsState extends State<_WelcomeChannels> {
   Future<void> _load() async {
     await ApiService.loadToken();
     try {
-      final channels = await ApiService.getChannels();
+      final channels = await ApiService.getChannels(category: widget.filterCategory);
       final grouped = <String, List<Channel>>{};
       for (final ch in channels) grouped.putIfAbsent(ch.category, () => []).add(ch);
       if (mounted) setState(() { _grouped = grouped; _loading = false; });
