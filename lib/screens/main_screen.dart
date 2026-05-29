@@ -280,7 +280,7 @@ class _TVLiveState extends State<_TVLiveScreen> {
   Future<void> _load() async {
     await ApiService.loadToken();
     try {
-      final channels = await ApiService.getChannels(search: _search.isEmpty ? null : _search);
+      final channels = await ApiService.getChannels(search: _search.isEmpty ? null : _search, category: widget.filterCategory);
       final grouped = <String, List<Channel>>{};
       for (final ch in channels) grouped.putIfAbsent(ch.category, () => []).add(ch);
       setState(() { _all = channels; _grouped = grouped; _loading = false; });
