@@ -68,14 +68,24 @@ class ApiService {
     return jsonDecode(r.body);
   }
 
+  static List<Channel>? _cachedChannels;
+  static DateTime? _cacheTime;
+
   static Future<List<Channel>> getChannels({String? search, String? category}) async {
+    // Usar cache si tiene menos de 5 minutos y no hay filtros
+    if (search == null && category == null && _cachedChannels != null && _cacheTime != null &&
+        DateTime.now().difference(_cacheTime!).inMinutes < 5) {
+      return _cachedChannels!;
+    }
     var url = '$baseUrl/channels';
     final p = <String>[];
     if (search != null) p.add('search=${Uri.encodeComponent(search)}');
     if (p.isNotEmpty) url += '?${p.join('&')}';
     final res = await http.get(Uri.parse(url), headers: _headers);
     final data = jsonDecode(res.body);
-    return (data['channels'] as List).map((c) => _channelFromJson(c)).toList();
+    final channels = (data['channels'] as List).map((c) => _channelFromJson(c)).toList();
+    if (search == null && category == null) { _cachedChannels = channels; _cacheTime = DateTime.now(); }
+    return channels;
   }
 
   static Future<List<Content>> getMovies({bool featuredOnly = false, String? search, String? category}) async {
