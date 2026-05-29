@@ -442,7 +442,7 @@ class _WelcomeChannelsState extends State<_WelcomeChannels> {
   Future<void> _load() async {
     await ApiService.loadToken();
     try {
-      final channels = await ApiService.getChannels(category: widget.filterCategory);
+      final channels = await ApiService.getChannels();
       final grouped = <String, List<Channel>>{};
       for (final ch in channels) grouped.putIfAbsent(ch.category, () => []).add(ch);
       if (mounted) setState(() { _grouped = grouped; _loading = false; });
