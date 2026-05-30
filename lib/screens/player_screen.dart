@@ -157,8 +157,8 @@ class _State extends State<PlayerScreen> {
             autofocus: true,
             onKey: (node, event) {
               if (event is RawKeyDownEvent) {
-                if (event.logicalKey == LogicalKeyboardKey.arrowRight) { _nextChannel(); return KeyEventResult.handled; }
-                if (event.logicalKey == LogicalKeyboardKey.arrowLeft) { _prevChannel(); return KeyEventResult.handled; }
+                if (event.logicalKey == LogicalKeyboardKey.arrowRight || event.logicalKey == LogicalKeyboardKey.channelUp) { _nextChannel(); return KeyEventResult.handled; }
+                if (event.logicalKey == LogicalKeyboardKey.arrowLeft || event.logicalKey == LogicalKeyboardKey.channelDown) { _prevChannel(); return KeyEventResult.handled; }
                 if (event.logicalKey == LogicalKeyboardKey.escape || event.logicalKey == LogicalKeyboardKey.goBack) { Navigator.pop(context); return KeyEventResult.handled; }
               }
               return KeyEventResult.ignored;
