@@ -163,7 +163,9 @@ class _State extends State<PlayerScreen> {
               }
               return KeyEventResult.ignored;
             },
-            child: Stack(children: [
+            child: Listener(
+              onPointerDown: (_) => _focusNode.requestFocus(),
+              child: Stack(children: [
             if (_ctrl != null) BetterPlayer(controller: _ctrl!)
             else const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan)),
             if (_hasError) Positioned.fill(child: Container(
@@ -199,6 +201,7 @@ class _State extends State<PlayerScreen> {
                 ]),
               ))),
           ]),
+              ),
           ),
         ),
     ));
