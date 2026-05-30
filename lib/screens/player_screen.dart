@@ -1,31 +1,22 @@
-import '../services/stream_proxy.dart';
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:video_player/video_player.dart';
+import 'package:better_player/better_player.dart';
 import '../models/models.dart';
 import '../theme/app_theme.dart';
 
 class PlayerScreen extends StatefulWidget {
   final Channel channel;
-  final List<Channel> playlist; // canales de la misma categoria
+  final List<Channel> playlist;
   final int initialIndex;
   const PlayerScreen({super.key, required this.channel, this.playlist = const [], this.initialIndex = 0});
-  @override State<PlayerScreen> createState() => _PlayerState();
+  @override State<PlayerScreen> createState() => _State();
 }
 
-class _PlayerState extends State<PlayerScreen> {
-  VideoPlayerController? _ctrl;
-  bool _showControls = false;
-  bool _showChannelInfo = false;
-  Timer? _hideTimer;
-  Timer? _infoTimer;
-  bool _initialized = false;
-  int _loadingToken = 0;
-  Timer? _reconnectTimer;
-  int _reconnectAttempts = 0;
-  late List<Channel> _playlist;
+class _State extends State<PlayerScreen> {
+  BetterPlayerController? _ctrl;
   late int _idx;
+  late List<Channel> _playlist;
+  bool _showChannelInfo = false;
 
   @override
   void initState() {
@@ -37,67 +28,64 @@ class _PlayerState extends State<PlayerScreen> {
     _initPlayer(_playlist[_idx]);
   }
 
-  Future<void> _initPlayer(Channel ch) async {
-    final token = ++_loadingToken;
+  void _initPlayer(Channel ch) {
     _ctrl?.dispose();
-    setState(() => _initialized = false);
-    _reconnectTimer?.cancel();
-    _ctrl?.dispose();
-    setState(() => _initialized = false);
-    final parts = ch.streamUrl.split("|");
-    String url = parts[0].trim();
-    final headers = Map<String, String>.from(ch.headers);
-    headers['User-Agent'] = 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36';
-    try {
-      // Usar proxy solo si hay Referer u otros headers especiales
-      final hasSpecialHeaders = ch.headers.containsKey('Referer') || ch.headers.containsKey('Origin');
-      final playUrl = hasSpecialHeaders ? StreamProxy.proxyUrl(url, headers) : url;
-      final ctrl = VideoPlayerController.networkUrl(Uri.parse(playUrl), httpHeaders: hasSpecialHeaders ? {} : {'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36'}, videoPlayerOptions: VideoPlayerOptions(mixWithOthers: false));
-      await ctrl.initialize();
-      ctrl.addListener(() {
-        if (!mounted) return;
-        final val = ctrl.value;
-        if (val.hasError && _reconnectAttempts < 5) {
-          _reconnectTimer?.cancel();
-          _reconnectTimer = Timer(const Duration(seconds: 3), () {
-            _reconnectAttempts++;
-            _initPlayer(ch);
-          });
-        } else if (!val.hasError) {
-          _reconnectAttempts = 0;
-        }
-      });
-      if (!mounted) return;
-      _ctrl = ctrl;
-      _ctrl!.play();
-      setState(() => _initialized = true);
-    } catch (e) {
-      if (mounted) setState(() => _initialized = false);
+    final rawUrl = ch.streamUrl;
+    final parts = rawUrl.split('|');
+    final url = parts[0].trim();
+    final headers = <String, String>{'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36'};
+    if (parts.length > 1) {
+      for (final kv in parts[1].split('&')) {
+        final idx = kv.indexOf('=');
+        if (idx > 0) headers[kv.substring(0, idx).trim()] = kv.substring(idx + 1).trim();
+      }
     }
-  }
+    headers.addAll(ch.headers);
 
-  void _startHideTimer() {
-    _hideTimer?.cancel();
-    _hideTimer = Timer(const Duration(seconds: 4), () {
-      if (mounted) setState(() => _showControls = false);
-    });
-  }
+    final dataSource = BetterPlayerDataSource(
+      BetterPlayerDataSourceType.network,
+      url,
+      headers: headers,
+      liveStream: ch.isLive,
+      bufferingConfiguration: const BetterPlayerBufferingConfiguration(
+        minBufferMs: 2000,
+        maxBufferMs: 10000,
+        bufferForPlaybackMs: 1000,
+        bufferForPlaybackAfterRebufferMs: 2000,
+      ),
+    );
 
-  @override
-  void dispose() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
-    _hideTimer?.cancel();
-    _infoTimer?.cancel();
-    _reconnectTimer?.cancel();
-    _ctrl?.dispose();
-    SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
-    super.dispose();
+    _ctrl = BetterPlayerController(
+      BetterPlayerConfiguration(
+        autoPlay: true,
+        looping: false,
+        fullScreenByDefault: true,
+        allowedScreenSleep: false,
+        controlsConfiguration: BetterPlayerControlsConfiguration(
+          enableFullscreen: false,
+          enableOverflowMenu: false,
+          enablePip: false,
+          enableSkips: false,
+          enablePlaybackSpeed: false,
+          enableSubtitles: false,
+          enableAudioTracks: false,
+          controlBarColor: Colors.black54,
+          iconsColor: Colors.white,
+          progressBarPlayedColor: AppTheme.accentCyan,
+          progressBarHandleColor: AppTheme.accentCyan,
+        ),
+        eventListener: (e) {
+          if (e.betterPlayerEventType == BetterPlayerEventType.exception) {
+            Future.delayed(const Duration(seconds: 2), () { if (mounted) _initPlayer(_playlist[_idx]); });
+          }
+        },
+      ),
+      betterPlayerDataSource: dataSource,
+    );
+    setState(() {});
   }
-
 
   void _nextChannel() {
-    if (_playlist.isEmpty) return;
     final next = (_idx + 1) % _playlist.length;
     setState(() { _idx = next; _showChannelInfo = true; });
     _initPlayer(_playlist[next]);
@@ -105,7 +93,6 @@ class _PlayerState extends State<PlayerScreen> {
   }
 
   void _prevChannel() {
-    if (_playlist.isEmpty) return;
     final prev = (_idx - 1 + _playlist.length) % _playlist.length;
     setState(() { _idx = prev; _showChannelInfo = true; });
     _initPlayer(_playlist[prev]);
@@ -113,98 +100,53 @@ class _PlayerState extends State<PlayerScreen> {
   }
 
   @override
+  void dispose() {
+    _ctrl?.dispose();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) => PopScope(
     canPop: true,
     child: Scaffold(
-    backgroundColor: Colors.black,
-    body: RawKeyboardListener(
-      focusNode: FocusNode()..requestFocus(),
-      autofocus: true,
-      onKey: (event) {
-        if (event is! RawKeyDownEvent) return;
-        if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-          _nextChannel();
-        } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-          _prevChannel();
-        } else if (event.logicalKey == LogicalKeyboardKey.select ||
-                   event.logicalKey == LogicalKeyboardKey.enter) {
-          setState(() => _showControls = !_showControls);
-          if (_showControls) _startHideTimer();
-        }
-      },
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () { setState(() => _showControls = !_showControls); if (_showControls) _startHideTimer(); },
-        onHorizontalDragEnd: (d) {
-          if (d.primaryVelocity != null) {
-            if (d.primaryVelocity! < -300) _nextChannel();
-            else if (d.primaryVelocity! > 300) _prevChannel();
-          }
+      backgroundColor: Colors.black,
+      body: RawKeyboardListener(
+        focusNode: FocusNode()..requestFocus(),
+        autofocus: true,
+        onKey: (event) {
+          if (event is! RawKeyDownEvent) return;
+          if (event.logicalKey == LogicalKeyboardKey.arrowRight) _nextChannel();
+          else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) _prevChannel();
+          else if (event.logicalKey == LogicalKeyboardKey.escape) Navigator.pop(context);
         },
-        child: Stack(children: [
-          _initialized && _ctrl != null
-            ? SizedBox.expand(child: FittedBox(fit: BoxFit.fill, child: SizedBox(width: 1920, height: 1080, child: VideoPlayer(_ctrl!))))
-            : const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan)),
-          if (_showControls) _buildControls(),
-          if (_showChannelInfo) Positioned(left: 0, right: 0, bottom: 60, child: _buildChannelInfo()),
-        ]),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onHorizontalDragEnd: (d) {
+            if (d.primaryVelocity != null) {
+              if (d.primaryVelocity! < -300) _nextChannel();
+              else if (d.primaryVelocity! > 300) _prevChannel();
+            }
+          },
+          child: Stack(children: [
+            if (_ctrl != null) BetterPlayer(controller: _ctrl!)
+            else const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan)),
+            if (_showChannelInfo) Positioned(left: 0, right: 0, bottom: 60,
+              child: Center(child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                decoration: BoxDecoration(color: Colors.black.withOpacity(0.8), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.accentCyan, width: 1.5)),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  const Icon(Icons.live_tv, color: AppTheme.accentCyan, size: 20),
+                  const SizedBox(width: 10),
+                  Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(_playlist[_idx].name, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text('${_idx + 1} de ${_playlist.length} canales', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                  ]),
+                ]),
+              ))),
+          ]),
+        ),
       ),
-    ),
-  ));
-
-  Widget _buildControls() => Stack(children: [
-    Positioned(top: 0, left: 0, right: 0, child: Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-      decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.black.withOpacity(0.8), Colors.transparent])),
-      child: Row(children: [
-        GestureDetector(onTap: () { if (Navigator.canPop(context)) Navigator.pop(context); },
-          child: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.black45, borderRadius: BorderRadius.circular(8)),
-            child: const Icon(Icons.arrow_back, color: Colors.white, size: 24))),
-        const SizedBox(width: 12),
-        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(_playlist[_idx].name, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
-          Text(_playlist[_idx].category, style: const TextStyle(color: AppTheme.accentCyan, fontSize: 12)),
-        ])),
-        Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: AppTheme.accentRed, borderRadius: BorderRadius.circular(6)),
-          child: const Text("EN VIVO", style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold))),
-      ])),
-    ),
-    // Botón pausa central
-    Positioned.fill(child: Center(child: GestureDetector(
-      onTap: () {
-        if (_ctrl != null) {
-          _ctrl!.value.isPlaying ? _ctrl!.pause() : _ctrl!.play();
-          setState(() {});
-        }
-      },
-      child: Container(padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
-        child: Icon(_ctrl?.value.isPlaying == true ? Icons.pause : Icons.play_arrow, color: Colors.white, size: 48))))),
-    // Barra inferior con progreso y zapping
-    Positioned(bottom: 0, left: 0, right: 0, child: Container(
-      padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
-      decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.bottomCenter, end: Alignment.topCenter, colors: [Colors.black.withOpacity(0.8), Colors.transparent])),
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        if (_ctrl != null) VideoProgressIndicator(_ctrl!, allowScrubbing: true,
-          colors: VideoProgressColors(playedColor: AppTheme.accentCyan, bufferedColor: Colors.white30, backgroundColor: Colors.white12)),
-        const SizedBox(height: 8),
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text('${_idx + 1}/${_playlist.length}', style: const TextStyle(color: Colors.white70, fontSize: 11)),
-          const Text('< > Cambiar canal', style: TextStyle(color: Colors.white70, fontSize: 11)),
-        ]),
-      ]))),
-  ]);
-
-  Widget _buildChannelInfo() => Center(child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      decoration: BoxDecoration(color: Colors.black.withOpacity(0.8), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.accentCyan, width: 1.5)),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        const Icon(Icons.live_tv, color: AppTheme.accentCyan, size: 20),
-        const SizedBox(width: 10),
-        Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(_playlist[_idx].name, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-          Text('${_idx + 1} de ${_playlist.length} canales', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
-        ]),
-      ]),
     ));
 }
