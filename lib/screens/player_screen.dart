@@ -86,7 +86,9 @@ class _State extends State<PlayerScreen> {
         looping: false,
         fullScreenByDefault: true,
         allowedScreenSleep: false,
+        showControlsOnInitialize: false,
         controlsConfiguration: BetterPlayerControlsConfiguration(
+          showControls: false,
           enableFullscreen: false,
           enableOverflowMenu: true,
           enablePip: false,
