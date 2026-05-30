@@ -97,15 +97,17 @@ class _PlayerState extends State<PlayerScreen> {
   void _nextChannel() {
     if (_playlist.isEmpty) return;
     final next = (_idx + 1) % _playlist.length;
-    setState(() => _idx = next);
+    setState(() { _idx = next; _showChannelInfo = true; });
     _initPlayer(_playlist[next]);
+    Future.delayed(const Duration(seconds: 3), () { if (mounted) setState(() => _showChannelInfo = false); });
   }
 
   void _prevChannel() {
     if (_playlist.isEmpty) return;
     final prev = (_idx - 1 + _playlist.length) % _playlist.length;
-    setState(() => _idx = prev);
+    setState(() { _idx = prev; _showChannelInfo = true; });
     _initPlayer(_playlist[prev]);
+    Future.delayed(const Duration(seconds: 3), () { if (mounted) setState(() => _showChannelInfo = false); });
   }
 
   @override
