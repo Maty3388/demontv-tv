@@ -146,6 +146,7 @@ class _State extends State<PlayerScreen> {
       body: RawKeyboardListener(
         focusNode: _focusNode,
         autofocus: true,
+        includeSemantics: false,
         onKey: (event) {
           if (event is! RawKeyDownEvent) return;
           if (event.logicalKey == LogicalKeyboardKey.arrowRight) _nextChannel();
