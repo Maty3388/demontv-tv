@@ -129,6 +129,7 @@ class _PlayerState extends State<PlayerScreen> {
         }
       },
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: () { setState(() => _showControls = !_showControls); if (_showControls) _startHideTimer(); },
         onHorizontalDragEnd: (d) {
           if (d.primaryVelocity != null) {
