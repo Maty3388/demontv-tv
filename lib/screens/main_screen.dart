@@ -119,7 +119,7 @@ class _MainState extends State<MainScreen> {
       case 2: return _TVLiveScreen(onBack: () => setState(() => _inContent = false), collapsed: _sidebarCollapsed);
       case 3: return const VodScreen(type: "movies");
       case 4: return const VodScreen(type: "series");
-      case 5: return _TVLiveScreen(onBack: () => setState(() => _inContent = false), collapsed: _sidebarCollapsed, filterCategory: 'ADULTOS');
+      case 5: ApiService.clearCache(); return _TVLiveScreen(onBack: () => setState(() => _inContent = false), collapsed: _sidebarCollapsed, filterCategory: 'ADULTOS');
       default: return const SizedBox();
     }
   }

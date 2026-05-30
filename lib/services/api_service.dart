@@ -70,6 +70,7 @@ class ApiService {
 
   static List<Channel>? _cachedChannels;
   static DateTime? _cacheTime;
+  static void clearCache() { _cachedChannels = null; _cacheTime = null; }
 
   static Future<List<Channel>> getChannels({String? search, String? category}) async {
     // Usar cache si tiene menos de 5 minutos y no hay filtros
