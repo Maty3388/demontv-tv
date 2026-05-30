@@ -48,10 +48,10 @@ class _State extends State<PlayerScreen> {
       headers: headers,
       liveStream: ch.isLive,
       bufferingConfiguration: const BetterPlayerBufferingConfiguration(
-        minBufferMs: 2000,
-        maxBufferMs: 10000,
-        bufferForPlaybackMs: 1000,
-        bufferForPlaybackAfterRebufferMs: 2000,
+        minBufferMs: 5000,
+        maxBufferMs: 30000,
+        bufferForPlaybackMs: 2500,
+        bufferForPlaybackAfterRebufferMs: 5000,
       ),
     );
 
