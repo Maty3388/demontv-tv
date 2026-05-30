@@ -21,6 +21,7 @@ class _PlayerState extends State<PlayerScreen> {
   Timer? _hideTimer;
   Timer? _infoTimer;
   bool _initialized = false;
+  int _loadingToken = 0;
   Timer? _reconnectTimer;
   int _reconnectAttempts = 0;
   late List<Channel> _playlist;
@@ -37,6 +38,7 @@ class _PlayerState extends State<PlayerScreen> {
   }
 
   Future<void> _initPlayer(Channel ch) async {
+    final token = ++_loadingToken;
     _ctrl?.dispose();
     setState(() => _initialized = false);
     _reconnectTimer?.cancel();
