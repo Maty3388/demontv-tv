@@ -96,7 +96,7 @@ class _MainState extends State<MainScreen> {
           const SizedBox(height: 16),
           TextField(controller: pin, obscureText: true, keyboardType: TextInputType.number,
             maxLength: 4, textAlign: TextAlign.center, autofocus: true,
-            onChanged: (v) { if (v.length == 4) { if (v == _adultPin) { Navigator.pop(ctx); setState(() { _sideIdx = 5; _inContent = true; }); } else { set(() => error = 'PIN incorrecto'); pin.clear(); } } },
+            onChanged: (v) { if (v.length == 4) { if (v == _adultPin) { ApiService.clearCache(); Navigator.pop(ctx); setState(() { _sideIdx = 5; _inContent = true; }); } else { set(() => error = 'PIN incorrecto'); pin.clear(); } } },
             style: const TextStyle(color: Colors.white, fontSize: 24, letterSpacing: 8),
             decoration: InputDecoration(counterText: "", filled: true, fillColor: const Color(0xFF2A2A2E),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -105,7 +105,7 @@ class _MainState extends State<MainScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancelar", style: TextStyle(color: AppTheme.textSecondary))),
           TextButton(onPressed: () {
-            if (pin.text == _adultPin) { Navigator.pop(ctx); setState(() { _sideIdx = 5; _inContent = true; }); }
+            if (pin.text == _adultPin) { ApiService.clearCache(); Navigator.pop(ctx); setState(() { _sideIdx = 5; _inContent = true; }); }
             else set(() => error = "PIN incorrecto");
           }, child: const Text("ENTRAR", style: TextStyle(color: AppTheme.accentCyan, fontWeight: FontWeight.bold))),
         ],
@@ -119,7 +119,7 @@ class _MainState extends State<MainScreen> {
       case 2: return _TVLiveScreen(onBack: () => setState(() => _inContent = false), collapsed: _sidebarCollapsed);
       case 3: return const VodScreen(type: "movies");
       case 4: return const VodScreen(type: "series");
-      case 5: ApiService.clearCache(); return _TVLiveScreen(onBack: () => setState(() => _inContent = false), collapsed: _sidebarCollapsed, filterCategory: 'ADULTOS');
+      case 5: return _TVLiveScreen(onBack: () => setState(() => _inContent = false), collapsed: _sidebarCollapsed, filterCategory: 'ADULTOS');
       default: return const SizedBox();
     }
   }
