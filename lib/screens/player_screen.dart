@@ -29,6 +29,8 @@ class _PlayerState extends State<PlayerScreen> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
     _playlist = widget.playlist.isEmpty ? [widget.channel] : widget.playlist;
     _idx = widget.initialIndex;
     _initPlayer(_playlist[_idx]);
@@ -81,6 +83,8 @@ class _PlayerState extends State<PlayerScreen> {
 
   @override
   void dispose() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
     _hideTimer?.cancel();
     _infoTimer?.cancel();
     _reconnectTimer?.cancel();
