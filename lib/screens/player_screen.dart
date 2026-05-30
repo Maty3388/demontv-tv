@@ -17,6 +17,7 @@ class _State extends State<PlayerScreen> {
   late int _idx;
   late List<Channel> _playlist;
   bool _showChannelInfo = false;
+  bool _hasError = false;
 
   @override
   void initState() {
@@ -63,7 +64,7 @@ class _State extends State<PlayerScreen> {
         allowedScreenSleep: false,
         controlsConfiguration: BetterPlayerControlsConfiguration(
           enableFullscreen: false,
-          enableOverflowMenu: false,
+          enableOverflowMenu: true,
           enablePip: false,
           enableSkips: false,
           enablePlaybackSpeed: false,
@@ -76,7 +77,12 @@ class _State extends State<PlayerScreen> {
         ),
         eventListener: (e) {
           if (e.betterPlayerEventType == BetterPlayerEventType.exception) {
-            Future.delayed(const Duration(seconds: 2), () { if (mounted) _initPlayer(_playlist[_idx]); });
+            if (mounted) setState(() => _hasError = true);
+            Future.delayed(const Duration(seconds: 5), () {
+              if (mounted) { setState(() => _hasError = false); _initPlayer(_playlist[_idx]); }
+            });
+          } else if (e.betterPlayerEventType == BetterPlayerEventType.initialized) {
+            if (mounted) setState(() => _hasError = false);
           }
         },
       ),
@@ -132,6 +138,17 @@ class _State extends State<PlayerScreen> {
           child: Stack(children: [
             if (_ctrl != null) BetterPlayer(controller: _ctrl!)
             else const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan)),
+            if (_hasError) Positioned.fill(child: Container(
+              color: Colors.black87,
+              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                const Icon(Icons.signal_wifi_off, color: Colors.white54, size: 64),
+                const SizedBox(height: 16),
+                const Text('Canal no disponible', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                const Text('Reconectando...', style: TextStyle(color: Colors.white54, fontSize: 14)),
+                const SizedBox(height: 24),
+                const CircularProgressIndicator(color: AppTheme.accentCyan, strokeWidth: 2),
+              ]))),
             if (_showChannelInfo) Positioned(left: 0, right: 0, bottom: 60,
               child: Center(child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
