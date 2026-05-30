@@ -18,6 +18,7 @@ class _State extends State<PlayerScreen> {
   late int _idx;
   late List<Channel> _playlist;
   bool _showChannelInfo = false;
+  final FocusNode _focusNode = FocusNode();
   bool _hasError = false;
   bool _isFavorite = false;
   Set<String> _favorites = {};
@@ -28,6 +29,7 @@ class _State extends State<PlayerScreen> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
     _playlist = widget.playlist.isEmpty ? [widget.channel] : widget.playlist;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _focusNode.requestFocus());
     _idx = widget.initialIndex;
     _initPlayer(_playlist[_idx]);
     _loadFavorites();
@@ -130,6 +132,7 @@ class _State extends State<PlayerScreen> {
   @override
   void dispose() {
     _ctrl?.dispose();
+    _focusNode.dispose();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight, DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
     super.dispose();
@@ -141,7 +144,7 @@ class _State extends State<PlayerScreen> {
     child: Scaffold(
       backgroundColor: Colors.black,
       body: RawKeyboardListener(
-        focusNode: FocusNode()..requestFocus(),
+        focusNode: _focusNode,
         autofocus: true,
         onKey: (event) {
           if (event is! RawKeyDownEvent) return;
