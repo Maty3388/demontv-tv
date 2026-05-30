@@ -165,6 +165,17 @@ class _PlayerState extends State<PlayerScreen> {
           child: const Text("EN VIVO", style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold))),
       ])),
     ),
+    // Botón pausa central
+    Positioned.fill(child: Center(child: GestureDetector(
+      onTap: () {
+        if (_ctrl != null) {
+          _ctrl!.value.isPlaying ? _ctrl!.pause() : _ctrl!.play();
+          setState(() {});
+        }
+      },
+      child: Container(padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+        child: Icon(_ctrl?.value.isPlaying == true ? Icons.pause : Icons.play_arrow, color: Colors.white, size: 48))))),
     // Hint de zapping
     Positioned(bottom: 20, right: 16, child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
