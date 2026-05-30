@@ -176,13 +176,19 @@ class _PlayerState extends State<PlayerScreen> {
       child: Container(padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
         child: Icon(_ctrl?.value.isPlaying == true ? Icons.pause : Icons.play_arrow, color: Colors.white, size: 48))))),
-    // Hint de zapping
-    Positioned(bottom: 20, right: 16, child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(8)),
-      child: Text(
-        '${_idx + 1}/${_playlist.length}  < >  Cambiar canal',
-        style: const TextStyle(color: Colors.white70, fontSize: 11)))),
+    // Barra inferior con progreso y zapping
+    Positioned(bottom: 0, left: 0, right: 0, child: Container(
+      padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
+      decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.bottomCenter, end: Alignment.topCenter, colors: [Colors.black.withOpacity(0.8), Colors.transparent])),
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        if (_ctrl != null) VideoProgressIndicator(_ctrl!, allowScrubbing: true,
+          colors: VideoProgressColors(playedColor: AppTheme.accentCyan, bufferedColor: Colors.white30, backgroundColor: Colors.white12)),
+        const SizedBox(height: 8),
+        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Text('${_idx + 1}/${_playlist.length}', style: const TextStyle(color: Colors.white70, fontSize: 11)),
+          const Text('< > Cambiar canal', style: TextStyle(color: Colors.white70, fontSize: 11)),
+        ]),
+      ]))),
   ]);
 
   Widget _buildChannelInfo() => Center(child: Container(
