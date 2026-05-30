@@ -143,17 +143,7 @@ class _State extends State<PlayerScreen> {
     canPop: true,
     child: Scaffold(
       backgroundColor: Colors.black,
-      body: RawKeyboardListener(
-        focusNode: _focusNode,
-        autofocus: true,
-        includeSemantics: false,
-        onKey: (event) {
-          if (event is! RawKeyDownEvent) return;
-          if (event.logicalKey == LogicalKeyboardKey.arrowRight) _nextChannel();
-          else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) _prevChannel();
-          else if (event.logicalKey == LogicalKeyboardKey.escape) Navigator.pop(context);
-        },
-        child: GestureDetector(
+      body: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onHorizontalDragEnd: (d) {
             if (d.primaryVelocity != null) {
@@ -161,7 +151,18 @@ class _State extends State<PlayerScreen> {
               else if (d.primaryVelocity! > 300) _prevChannel();
             }
           },
-          child: Stack(children: [
+          child: Focus(
+            focusNode: _focusNode,
+            autofocus: true,
+            onKey: (node, event) {
+              if (event is RawKeyDownEvent) {
+                if (event.logicalKey == LogicalKeyboardKey.arrowRight) { _nextChannel(); return KeyEventResult.handled; }
+                if (event.logicalKey == LogicalKeyboardKey.arrowLeft) { _prevChannel(); return KeyEventResult.handled; }
+                if (event.logicalKey == LogicalKeyboardKey.escape || event.logicalKey == LogicalKeyboardKey.goBack) { Navigator.pop(context); return KeyEventResult.handled; }
+              }
+              return KeyEventResult.ignored;
+            },
+            child: Stack(children: [
             if (_ctrl != null) BetterPlayer(controller: _ctrl!)
             else const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan)),
             if (_hasError) Positioned.fill(child: Container(
@@ -197,7 +198,7 @@ class _State extends State<PlayerScreen> {
                 ]),
               ))),
           ]),
+          ),
         ),
-      ),
     ));
 }
