@@ -18,6 +18,8 @@ class _State extends State<PlayerScreen> {
   late List<Channel> _playlist;
   bool _showChannelInfo = false;
   bool _hasError = false;
+  bool _isFavorite = false;
+  Set<String> _favorites = {};
 
   @override
   void initState() {
@@ -27,6 +29,25 @@ class _State extends State<PlayerScreen> {
     _playlist = widget.playlist.isEmpty ? [widget.channel] : widget.playlist;
     _idx = widget.initialIndex;
     _initPlayer(_playlist[_idx]);
+    _loadFavorites();
+  }
+
+  Future<void> _loadFavorites() async {
+    try {
+      final favs = await ApiService.getFavorites();
+      if (mounted) setState(() { _favorites = favs.map((c) => c.id).toSet(); _isFavorite = _favorites.contains(_playlist[_idx].id); });
+    } catch (_) {}
+  }
+
+  void _toggleFavorite() async {
+    final ch = _playlist[_idx];
+    if (_favorites.contains(ch.id)) {
+      await ApiService.removeFavorite(ch.id);
+      setState(() { _favorites.remove(ch.id); _isFavorite = false; });
+    } else {
+      await ApiService.addFavorite(ch.id);
+      setState(() { _favorites.add(ch.id); _isFavorite = true; });
+    }
   }
 
   void _initPlayer(Channel ch) {
@@ -93,14 +114,14 @@ class _State extends State<PlayerScreen> {
 
   void _nextChannel() {
     final next = (_idx + 1) % _playlist.length;
-    setState(() { _idx = next; _showChannelInfo = true; });
+    setState(() { _idx = next; _showChannelInfo = true; _isFavorite = _favorites.contains(_playlist[next].id); });
     _initPlayer(_playlist[next]);
     Future.delayed(const Duration(seconds: 3), () { if (mounted) setState(() => _showChannelInfo = false); });
   }
 
   void _prevChannel() {
     final prev = (_idx - 1 + _playlist.length) % _playlist.length;
-    setState(() { _idx = prev; _showChannelInfo = true; });
+    setState(() { _idx = prev; _showChannelInfo = true; _isFavorite = _favorites.contains(_playlist[prev].id); });
     _initPlayer(_playlist[prev]);
     Future.delayed(const Duration(seconds: 3), () { if (mounted) setState(() => _showChannelInfo = false); });
   }
@@ -158,7 +179,15 @@ class _State extends State<PlayerScreen> {
                   const SizedBox(width: 10),
                   Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text(_playlist[_idx].name, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                    Text('${_idx + 1} de ${_playlist.length} canales', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                    Text('\${_idx + 1} de \${_playlist.length} canales', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                  const SizedBox(height: 4),
+                  GestureDetector(
+                    onTap: _toggleFavorite,
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      Icon(_isFavorite ? Icons.star : Icons.star_border, color: _isFavorite ? const Color(0xFFFFD700) : Colors.white54, size: 16),
+                      const SizedBox(width: 4),
+                      Text(_isFavorite ? 'En favoritos' : 'Agregar a favoritos', style: const TextStyle(color: Colors.white70, fontSize: 11)),
+                    ])),
                   ]),
                 ]),
               ))),

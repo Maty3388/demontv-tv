@@ -72,6 +72,21 @@ class ApiService {
   static DateTime? _cacheTime;
   static void clearCache() { _cachedChannels = null; _cacheTime = null; }
 
+
+  static Future<List<Channel>> getFavorites() async {
+    final res = await http.get(Uri.parse('\$baseUrl/favorites'), headers: _headers);
+    final data = jsonDecode(res.body);
+    return (data['channels'] as List).map((c) => _channelFromJson(c)).toList();
+  }
+
+  static Future<void> addFavorite(String channelId) async {
+    await http.post(Uri.parse('\$baseUrl/favorites/\$channelId'), headers: _headers);
+  }
+
+  static Future<void> removeFavorite(String channelId) async {
+    await http.delete(Uri.parse('\$baseUrl/favorites/\$channelId'), headers: _headers);
+  }
+
   static Future<List<Channel>> getChannels({String? search, String? category}) async {
     // Usar cache si tiene menos de 5 minutos y no hay filtros
     if (search == null && category == null && _cachedChannels != null && _cacheTime != null &&
