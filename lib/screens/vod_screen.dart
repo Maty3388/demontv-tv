@@ -74,11 +74,13 @@ class _VodState extends State<VodScreen> {
     } else if (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter) {
       final c = items[_itemIdx];
       Navigator.push(context, MaterialPageRoute(builder: (_) => ContentPlayerScreen(content: c)));
+    } else if (event.logicalKey == LogicalKeyboardKey.escape || event.logicalKey == LogicalKeyboardKey.goBack) {
+      widget.onBack?.call();
     }
   }
 
   @override
-  Widget build(BuildContext context) => PopScope(canPop: false, onPopInvoked: (_) { widget.onBack?.call() ?? Navigator.maybePop(context); }, child: Scaffold(
+  Widget build(BuildContext context) => Scaffold(
     backgroundColor: AppTheme.background,
     body: Focus(
       focusNode: _focusNode,
