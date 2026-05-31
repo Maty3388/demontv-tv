@@ -19,6 +19,7 @@ class _MainState extends State<MainScreen> {
   // Sidebar: 0=MiPerfil 1=Inicio 2=TVenVivo 3=Peliculas 4=Series 5=Adultos 6=Actualizar 7=CerrarSesion
   int _sideIdx = 1;
   bool _inContent = false;
+  bool _backHandled = false;
   bool _profileExpanded = false;
   bool _sidebarCollapsed = false;
   String _userEmail = "";
@@ -116,10 +117,10 @@ class _MainState extends State<MainScreen> {
   Widget _buildContent() {
     switch (_sideIdx) {
       case 1: return const HomeScreen();
-      case 2: return _TVLiveScreen(onBack: () => setState(() => _inContent = false), collapsed: _sidebarCollapsed);
+      case 2: return _TVLiveScreen(onBack: () { _backHandled = true; setState(() => _inContent = false); Future.delayed(const Duration(milliseconds: 300), () => _backHandled = false); }, collapsed: _sidebarCollapsed);
       case 3: return const VodScreen(type: "movies");
       case 4: return const VodScreen(type: "series");
-      case 5: return _TVLiveScreen(onBack: () => setState(() => _inContent = false), collapsed: _sidebarCollapsed, filterCategory: 'ADULTOS');
+      case 5: return _TVLiveScreen(onBack: () { _backHandled = true; setState(() => _inContent = false); Future.delayed(const Duration(milliseconds: 300), () => _backHandled = false); }, collapsed: _sidebarCollapsed, filterCategory: 'ADULTOS');
       default: return const SizedBox();
     }
   }
@@ -130,7 +131,7 @@ class _MainState extends State<MainScreen> {
     autofocus: true,
     onKey: _onKey,
     child: WillPopScope(
-      onWillPop: () async { if (Navigator.canPop(context)) return true; if (_inContent) { setState(() => _inContent = false); return false; } _showExitDialog(); return false; },
+      onWillPop: () async { if (Navigator.canPop(context)) return true; if (_backHandled) { _backHandled = false; return false; } if (_inContent) { setState(() => _inContent = false); return false; } _showExitDialog(); return false; },
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Row(children: [
