@@ -194,7 +194,7 @@ class _State extends State<PlayerScreen> {
                   const SizedBox(width: 10),
                   Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text(_playlist[_idx].name, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                    Text('\${_idx + 1} de \${_playlist.length} canales', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                    Text("${_idx + 1} de ${_playlist.length} canales", style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
                   const SizedBox(height: 4),
                   GestureDetector(
                     onTap: _toggleFavorite,
