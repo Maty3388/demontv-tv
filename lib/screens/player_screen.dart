@@ -19,6 +19,7 @@ class _State extends State<PlayerScreen> {
   late List<Channel> _playlist;
   bool _showChannelInfo = false;
   final FocusNode _focusNode = FocusNode();
+  Timer? _focusTimer;
   bool _hasError = false;
   bool _isFavorite = false;
   Set<String> _favorites = {};
@@ -29,7 +30,10 @@ class _State extends State<PlayerScreen> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
     _playlist = widget.playlist.isEmpty ? [widget.channel] : widget.playlist;
-    WidgetsBinding.instance.addPostFrameCallback((_) => _focusNode.requestFocus());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+      _focusTimer = Timer.periodic(const Duration(seconds: 1), (_) { if (mounted && !_focusNode.hasFocus) _focusNode.requestFocus(); });
+    });
     _idx = widget.initialIndex;
     _initPlayer(_playlist[_idx]);
     _loadFavorites();
@@ -133,6 +137,7 @@ class _State extends State<PlayerScreen> {
   @override
   void dispose() {
     _ctrl?.dispose();
+    _focusTimer?.cancel();
     _focusNode.dispose();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight, DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
