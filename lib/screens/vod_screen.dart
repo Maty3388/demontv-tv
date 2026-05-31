@@ -17,6 +17,7 @@ class _VodState extends State<VodScreen> {
   String _search = '';
   final _searchCtrl = TextEditingController();
   int _selectedIdx = 0;
+  final _scrollCtrl = ScrollController();
   final int _cols = 5;
   final List<GlobalKey> _keys = [];
 
@@ -53,7 +54,14 @@ class _VodState extends State<VodScreen> {
       setState(() => _selectedIdx = (_selectedIdx + _cols) < len ? _selectedIdx + _cols : _selectedIdx);
     } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
       setState(() => _selectedIdx = (_selectedIdx - _cols) >= 0 ? _selectedIdx - _cols : _selectedIdx);
-    } else if (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter) {
+    }
+    // Auto scroll
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final row = _selectedIdx ~/ _cols;
+      final itemH = 160.0;
+      _scrollCtrl.animateTo(row * itemH, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+    });
+    if (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter) {
       Navigator.push(context, MaterialPageRoute(builder: (_) => ContentPlayerScreen(content: _all[_selectedIdx])));
     }
   }
@@ -88,6 +96,7 @@ class _VodState extends State<VodScreen> {
           : _all.isEmpty
             ? Center(child: Text(isMovies ? 'No hay películas' : 'No hay series', style: const TextStyle(color: AppTheme.textHint)))
             : GridView.builder(
+                controller: _scrollCtrl,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5, crossAxisSpacing: 6, mainAxisSpacing: 6, childAspectRatio: 0.65),
                 itemCount: _all.length,
