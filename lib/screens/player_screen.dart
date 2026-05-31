@@ -19,6 +19,7 @@ class _State extends State<PlayerScreen> {
   late int _idx;
   late List<Channel> _playlist;
   bool _showChannelInfo = false;
+  Timer? _channelInfoTimer;
   final FocusNode _focusNode = FocusNode();
   Timer? _focusTimer;
   bool _hasError = false;
@@ -122,16 +123,18 @@ class _State extends State<PlayerScreen> {
 
   void _nextChannel() {
     final next = (_idx + 1) % _playlist.length;
+    _channelInfoTimer?.cancel();
     setState(() { _idx = next; _showChannelInfo = true; _isFavorite = _favorites.contains(_playlist[next].id); });
     _initPlayer(_playlist[next]);
-    Future.delayed(const Duration(seconds: 3), () { if (mounted) setState(() => _showChannelInfo = false); });
+    _channelInfoTimer = Timer(const Duration(seconds: 4), () { if (mounted) setState(() => _showChannelInfo = false); });
   }
 
   void _prevChannel() {
     final prev = (_idx - 1 + _playlist.length) % _playlist.length;
+    _channelInfoTimer?.cancel();
     setState(() { _idx = prev; _showChannelInfo = true; _isFavorite = _favorites.contains(_playlist[prev].id); });
     _initPlayer(_playlist[prev]);
-    Future.delayed(const Duration(seconds: 3), () { if (mounted) setState(() => _showChannelInfo = false); });
+    _channelInfoTimer = Timer(const Duration(seconds: 4), () { if (mounted) setState(() => _showChannelInfo = false); });
   }
 
   @override
