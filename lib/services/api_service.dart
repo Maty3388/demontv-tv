@@ -68,6 +68,28 @@ class ApiService {
     return jsonDecode(r.body);
   }
 
+
+  static Future<void> _saveChannelCache(List<Channel> channels) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final data = channels.map((c) => {'_id': c.id, 'name': c.name, 'category': c.category, 'logo': c.logoUrl, 'stream_url': c.streamUrl, 'is_live': c.isLive, 'number': c.number}).toList();
+      await prefs.setString('channel_cache', jsonEncode(data));
+      await prefs.setInt('channel_cache_time', DateTime.now().millisecondsSinceEpoch);
+    } catch (_) {}
+  }
+
+  static Future<List<Channel>?> _loadChannelCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheTime = prefs.getInt('channel_cache_time') ?? 0;
+      if (DateTime.now().millisecondsSinceEpoch - cacheTime > 30 * 60 * 1000) return null;
+      final data = prefs.getString('channel_cache');
+      if (data == null) return null;
+      final list = jsonDecode(data) as List;
+      return list.map((j) => _channelFromJson(j)).toList();
+    } catch (_) { return null; }
+  }
+
   static List<Channel>? _cachedChannels;
   static DateTime? _cacheTime;
   static void clearCache() { _cachedChannels = null; _cacheTime = null; }
@@ -89,9 +111,15 @@ class ApiService {
 
   static Future<List<Channel>> getChannels({String? search, String? category}) async {
     // Usar cache si tiene menos de 5 minutos y no hay filtros
-    if (search == null && category == null && _cachedChannels != null && _cacheTime != null &&
-        DateTime.now().difference(_cacheTime!).inMinutes < 5) {
-      return _cachedChannels!;
+    if (search == null && category == null) {
+      if (_cachedChannels != null && _cacheTime != null && DateTime.now().difference(_cacheTime!).inMinutes < 5) {
+        return _cachedChannels!;
+      }
+      final diskCache = await _loadChannelCache();
+      if (diskCache != null && _cachedChannels == null) {
+        _cachedChannels = diskCache;
+        _cacheTime = DateTime.now();
+      }
     }
     var url = '$baseUrl/channels';
     final p = <String>[];
@@ -101,7 +129,7 @@ class ApiService {
     final res = await http.get(Uri.parse(url), headers: _headers);
     final data = jsonDecode(res.body);
     final channels = (data['channels'] as List).map((c) => _channelFromJson(c)).toList();
-    if (search == null && category == null) { _cachedChannels = channels; _cacheTime = DateTime.now(); }
+    if (search == null && category == null) { _cachedChannels = channels; _cacheTime = DateTime.now(); _saveChannelCache(channels); }
     return channels;
   }
 
