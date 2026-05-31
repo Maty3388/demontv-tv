@@ -9,63 +9,40 @@ import 'content_player_screen.dart';
 class VodScreen extends StatefulWidget {
   final String type;
   const VodScreen({super.key, required this.type});
-  @override State<VodScreen> createState() => _State();
+  @override State<VodScreen> createState() => _VodState();
 }
 
-class _State extends State<VodScreen> {
+class _VodState extends State<VodScreen> {
   List<Content> _all = [];
   bool _loading = true;
   String _search = '';
+  final _searchCtrl = TextEditingController();
   int _catIdx = 0;
   int _itemIdx = 0;
   final Map<int, ScrollController> _rowCtrls = {};
   final _listCtrl = ScrollController();
   final _focusNode = FocusNode();
-  final _searchCtrl = TextEditingController();
-  int _catIdx = 0;
-  int _itemIdx = 0;
-  final _scrollCtrl = ScrollController();
 
   bool get isMovies => widget.type == 'movies';
-  bool get isAdult => widget.type == 'adult';
 
   Map<String, List<Content>> get _grouped {
     final map = <String, List<Content>>{};
-    for (final c in _all) map.putIfAbsent(c.category ?? c.year ?? 'Otros', () => []).add(c);
+    for (final c in _all) map.putIfAbsent(c.category ?? 'Otros', () => []).add(c);
     return map;
   }
 
-  @override void initState() { super.initState(); _load(); WidgetsBinding.instance.addPostFrameCallback((_) => _focusNode.requestFocus()); }
-
-  void _handleKey(KeyEvent event) {
-    if (event is! KeyDownEvent || _all.isEmpty) return;
-    final cats = _grouped.keys.toList();
-    final items = _grouped[cats[_catIdx]]!;
-    if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-      setState(() => _itemIdx = (_itemIdx + 1) < items.length ? _itemIdx + 1 : _itemIdx);
-      _scrollRow();
-    } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-      setState(() => _itemIdx = _itemIdx > 0 ? _itemIdx - 1 : 0);
-      _scrollRow();
-    } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-      if (_catIdx < cats.length - 1) setState(() { _catIdx++; _itemIdx = 0; });
-      _scrollList();
-    } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-      if (_catIdx > 0) setState(() { _catIdx--; _itemIdx = 0; });
-      _scrollList();
-    } else if (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter) {
-      final c = _grouped[cats[_catIdx]]![_itemIdx];
-      Navigator.push(context, MaterialPageRoute(builder: (_) => ContentPlayerScreen(content: c)));
-    }
+  @override
+  void initState() {
+    super.initState();
+    _load();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _focusNode.requestFocus());
   }
 
-  void _scrollRow() {
-    final ctrl = _rowCtrls[_catIdx];
-    ctrl?.animateTo(_itemIdx * 98.0, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
-  }
-
-  void _scrollList() {
-    _listCtrl.animateTo(_catIdx * 180.0, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    _listCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -77,42 +54,60 @@ class _State extends State<VodScreen> {
     setState(() => _loading = false);
   }
 
+  void _handleKey(KeyEvent event) {
+    if (event is! KeyDownEvent || _all.isEmpty) return;
+    final cats = _grouped.keys.toList();
+    final items = _grouped[cats[_catIdx]]!;
+    if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+      if (_itemIdx < items.length - 1) setState(() => _itemIdx++);
+      _rowCtrls[_catIdx]?.animateTo(_itemIdx * 98.0, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+      if (_itemIdx > 0) setState(() => _itemIdx--);
+      _rowCtrls[_catIdx]?.animateTo(_itemIdx * 98.0, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+      if (_catIdx < cats.length - 1) setState(() { _catIdx++; _itemIdx = 0; });
+      _listCtrl.animateTo(_catIdx * 180.0, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+      if (_catIdx > 0) setState(() { _catIdx--; _itemIdx = 0; });
+      _listCtrl.animateTo(_catIdx * 180.0, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+    } else if (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter) {
+      final c = items[_itemIdx];
+      Navigator.push(context, MaterialPageRoute(builder: (_) => ContentPlayerScreen(content: c)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: AppTheme.background,
-    body: Focus(focusNode: _focusNode, autofocus: true, onKeyEvent: (_, e) { _handleKey(e); return KeyEventResult.ignored; },
+    body: Focus(
+      focusNode: _focusNode,
+      autofocus: true,
+      onKeyEvent: (_, e) { _handleKey(e); return KeyEventResult.ignored; },
       child: SafeArea(child: Column(children: [
-      Padding(padding: const EdgeInsets.fromLTRB(16,12,16,8),
-        child: Row(children: [
-          Text(isMovies ? 'Películas' : 'Series', style: const TextStyle(color: Color(0xFFFFD700), fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1)),
-          const Spacer(),
-          GestureDetector(
-            onTap: () => setState(() => _search = _search.isEmpty ? ' ' : ''),
-            child: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(10)),
-              child: const Icon(Icons.search, color: AppTheme.textSecondary, size: 22))),
-        ])),
-      if (_search.isNotEmpty || _searchCtrl.text.isNotEmpty)
-        Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: TextField(controller: _searchCtrl, autofocus: true, onChanged: (v) { _search = v; _load(); },
-            style: const TextStyle(color: Colors.white),
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.search, color: AppTheme.textHint),
-              hintText: isMovies ? 'Buscar película...' : 'Buscar serie...',
-              filled: true, fillColor: AppTheme.surface,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-              hintStyle: const TextStyle(color: AppTheme.textHint),
-              suffixIcon: IconButton(onPressed: () { _searchCtrl.clear(); setState(() => _search = ''); _load(); }, icon: const Icon(Icons.close, color: AppTheme.textHint))))),
-      Expanded(child: _loading
-        ? const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan))
-        : _all.isEmpty
-          ? Center(child: Text(isMovies ? 'No hay películas' : 'No hay series', style: const TextStyle(color: AppTheme.textHint)))
-          : ListView(controller: _scrollCtrl, padding: const EdgeInsets.only(bottom: 20),
-              children: _grouped.entries.map((e) => _CategoryRow(
-                category: e.key,
-                items: e.value,
-                onTap: (c) => Navigator.push(context, MaterialPageRoute(builder: (_) => ContentPlayerScreen(content: c))),
-              )).toList())),
-    ])));
+        Padding(padding: const EdgeInsets.fromLTRB(16,12,16,8),
+          child: Row(children: [
+            Text(isMovies ? 'Películas' : 'Series', style: const TextStyle(color: Color(0xFFFFD700), fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1)),
+            const Spacer(),
+          ])),
+        Expanded(child: _loading
+          ? const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan))
+          : _all.isEmpty
+            ? Center(child: Text(isMovies ? 'No hay películas' : 'No hay series', style: const TextStyle(color: AppTheme.textHint)))
+            : ListView(
+                controller: _listCtrl,
+                padding: const EdgeInsets.only(bottom: 20),
+                children: _grouped.entries.toList().asMap().entries.map((entry) {
+                  final catI = entry.key;
+                  final e = entry.value;
+                  return _CategoryRow(
+                    category: e.key,
+                    items: e.value,
+                    selectedIdx: catI == _catIdx ? _itemIdx : -1,
+                    scrollCtrl: _rowCtrls.putIfAbsent(catI, () => ScrollController()),
+                    onTap: (c) => Navigator.push(context, MaterialPageRoute(builder: (_) => ContentPlayerScreen(content: c))),
+                  );
+                }).toList())),
+      ]))));
 }
 
 class _CategoryRow extends StatelessWidget {
@@ -140,7 +135,10 @@ class _CategoryRow extends StatelessWidget {
         onTap: () => onTap(items[i]),
         child: Container(
           width: 90, margin: const EdgeInsets.only(right: 8),
-          decoration: BoxDecoration(color: i == selectedIdx ? AppTheme.accentCyan.withOpacity(0.2) : AppTheme.surface, borderRadius: BorderRadius.circular(8), border: Border.all(color: i == selectedIdx ? AppTheme.accentCyan : Colors.transparent, width: 1.5)),
+          decoration: BoxDecoration(
+            color: i == selectedIdx ? AppTheme.accentCyan.withOpacity(0.2) : AppTheme.surface,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: i == selectedIdx ? AppTheme.accentCyan : Colors.transparent, width: 1.5)),
           child: Column(children: [
             Expanded(child: ClipRRect(borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
               child: items[i].posterUrl.isNotEmpty
@@ -149,6 +147,6 @@ class _CategoryRow extends StatelessWidget {
                 : const Center(child: Icon(Icons.movie, color: AppTheme.textHint)))),
             Padding(padding: const EdgeInsets.all(4),
               child: Text(items[i].title, style: const TextStyle(color: Colors.white, fontSize: 9), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)),
-          ]))))),
+          ])))),
   ]);
 }
