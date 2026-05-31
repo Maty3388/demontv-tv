@@ -78,13 +78,12 @@ class _VodState extends State<VodScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) => PopScope(canPop: false, onPopInvoked: (_) { widget.onBack?.call() ?? Navigator.maybePop(context); }, child: Scaffold(
     backgroundColor: AppTheme.background,
-    body: PopScope(canPop: false, onPopInvoked: (didPop) { if (!didPop) Navigator.pop(context); }, child: Focus(
+    body: Focus(
       focusNode: _focusNode,
       autofocus: true,
-      onKeyEvent: (_, e) { _handleKey(e); return KeyEventResult.ignored; }
-      child: PopScope(canPop: false, onPopInvoked: (_) { widget.onBack?.call(); }),
+      onKeyEvent: (_, e) { _handleKey(e); return KeyEventResult.ignored; },
       child: SafeArea(child: Column(children: [
         Padding(padding: const EdgeInsets.fromLTRB(16,12,16,8),
           child: Row(children: [
