@@ -79,6 +79,17 @@ jobs:
           path: build/app/outputs/flutter-apk/app-release.apk
       - name: Get version
         id: version
+        run: echo "VERSION=$(grep '^version:' pubspec.yaml | cut -d' ' -f2 | cut -d'+' -f1)" >> $GITHUB_OUTPUT
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          files: build/app/outputs/flutter-apk/app-release.apk
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get version
+        id: version
         run: echo "VERSION=$(grep 'version:' pubspec.yaml | head -1 | awk '{print $2}' | cut -d'+' -f1)" >> $GITHUB_OUTPUT
       - name: Create Release
         uses: softprops/action-gh-release@v1
