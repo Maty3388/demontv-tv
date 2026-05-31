@@ -8,7 +8,8 @@ import 'content_player_screen.dart';
 
 class VodScreen extends StatefulWidget {
   final String type;
-  const VodScreen({super.key, required this.type});
+  final VoidCallback? onBack;
+  const VodScreen({super.key, required this.type, this.onBack});
   @override State<VodScreen> createState() => _VodState();
 }
 
@@ -79,10 +80,11 @@ class _VodState extends State<VodScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: AppTheme.background,
-    body: Focus(
+    body: PopScope(canPop: false, onPopInvoked: (didPop) { if (!didPop) Navigator.pop(context); }, child: Focus(
       focusNode: _focusNode,
       autofocus: true,
-      onKeyEvent: (_, e) { _handleKey(e); return KeyEventResult.ignored; },
+      onKeyEvent: (_, e) { _handleKey(e); return KeyEventResult.ignored; }
+      child: PopScope(canPop: false, onPopInvoked: (_) { widget.onBack?.call(); }),
       child: SafeArea(child: Column(children: [
         Padding(padding: const EdgeInsets.fromLTRB(16,12,16,8),
           child: Row(children: [

@@ -118,8 +118,8 @@ class _MainState extends State<MainScreen> {
     switch (_sideIdx) {
       case 1: return const HomeScreen();
       case 2: return _TVLiveScreen(onBack: () { _backHandled = true; setState(() => _inContent = false); Future.delayed(const Duration(milliseconds: 300), () => _backHandled = false); }, collapsed: _sidebarCollapsed);
-      case 3: return const VodScreen(type: "movies");
-      case 4: return const VodScreen(type: "series");
+      case 3: return VodScreen(type: "movies", onBack: () { _backHandled = true; setState(() => _inContent = false); Future.delayed(const Duration(milliseconds: 300), () => _backHandled = false); });
+      case 4: return VodScreen(type: "series", onBack: () { _backHandled = true; setState(() => _inContent = false); Future.delayed(const Duration(milliseconds: 300), () => _backHandled = false); });
       case 5: return _TVLiveScreen(onBack: () { _backHandled = true; setState(() => _inContent = false); Future.delayed(const Duration(milliseconds: 300), () => _backHandled = false); }, collapsed: _sidebarCollapsed, filterCategory: 'ADULTOS');
       default: return const SizedBox();
     }
