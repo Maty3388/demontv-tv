@@ -16,6 +16,11 @@ class _State extends State<VodScreen> {
   List<Content> _all = [];
   bool _loading = true;
   String _search = '';
+  int _catIdx = 0;
+  int _itemIdx = 0;
+  final Map<int, ScrollController> _rowCtrls = {};
+  final _listCtrl = ScrollController();
+  final _focusNode = FocusNode();
   final _searchCtrl = TextEditingController();
   int _catIdx = 0;
   int _itemIdx = 0;
@@ -30,7 +35,38 @@ class _State extends State<VodScreen> {
     return map;
   }
 
-  @override void initState() { super.initState(); _load(); }
+  @override void initState() { super.initState(); _load(); WidgetsBinding.instance.addPostFrameCallback((_) => _focusNode.requestFocus()); }
+
+  void _handleKey(KeyEvent event) {
+    if (event is! KeyDownEvent || _all.isEmpty) return;
+    final cats = _grouped.keys.toList();
+    final items = _grouped[cats[_catIdx]]!;
+    if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+      setState(() => _itemIdx = (_itemIdx + 1) < items.length ? _itemIdx + 1 : _itemIdx);
+      _scrollRow();
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+      setState(() => _itemIdx = _itemIdx > 0 ? _itemIdx - 1 : 0);
+      _scrollRow();
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+      if (_catIdx < cats.length - 1) setState(() { _catIdx++; _itemIdx = 0; });
+      _scrollList();
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+      if (_catIdx > 0) setState(() { _catIdx--; _itemIdx = 0; });
+      _scrollList();
+    } else if (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter) {
+      final c = _grouped[cats[_catIdx]]![_itemIdx];
+      Navigator.push(context, MaterialPageRoute(builder: (_) => ContentPlayerScreen(content: c)));
+    }
+  }
+
+  void _scrollRow() {
+    final ctrl = _rowCtrls[_catIdx];
+    ctrl?.animateTo(_itemIdx * 98.0, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+  }
+
+  void _scrollList() {
+    _listCtrl.animateTo(_catIdx * 180.0, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+  }
 
   Future<void> _load() async {
     setState(() => _loading = true);
@@ -44,7 +80,8 @@ class _State extends State<VodScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: AppTheme.background,
-    body: SafeArea(child: Column(children: [
+    body: Focus(focusNode: _focusNode, autofocus: true, onKeyEvent: (_, e) { _handleKey(e); return KeyEventResult.ignored; },
+      child: SafeArea(child: Column(children: [
       Padding(padding: const EdgeInsets.fromLTRB(16,12,16,8),
         child: Row(children: [
           Text(isMovies ? 'Películas' : 'Series', style: const TextStyle(color: Color(0xFFFFD700), fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1)),
@@ -82,7 +119,9 @@ class _CategoryRow extends StatelessWidget {
   final String category;
   final List<Content> items;
   final Function(Content) onTap;
-  const _CategoryRow({required this.category, required this.items, required this.onTap});
+  final int selectedIdx;
+  final ScrollController scrollCtrl;
+  const _CategoryRow({required this.category, required this.items, required this.onTap, this.selectedIdx = -1, required this.scrollCtrl});
 
   @override
   Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -93,6 +132,7 @@ class _CategoryRow extends StatelessWidget {
         Expanded(child: Container(height: 1, decoration: const BoxDecoration(gradient: LinearGradient(colors: [Color(0xFFFFD700), Colors.transparent])))),
       ])),
     SizedBox(height: 150, child: ListView.builder(
+      controller: scrollCtrl,
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       itemCount: items.length,
@@ -100,7 +140,7 @@ class _CategoryRow extends StatelessWidget {
         onTap: () => onTap(items[i]),
         child: Container(
           width: 90, margin: const EdgeInsets.only(right: 8),
-          decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(8)),
+          decoration: BoxDecoration(color: i == selectedIdx ? AppTheme.accentCyan.withOpacity(0.2) : AppTheme.surface, borderRadius: BorderRadius.circular(8), border: Border.all(color: i == selectedIdx ? AppTheme.accentCyan : Colors.transparent, width: 1.5)),
           child: Column(children: [
             Expanded(child: ClipRRect(borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
               child: items[i].posterUrl.isNotEmpty
