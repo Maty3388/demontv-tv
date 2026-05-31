@@ -12,10 +12,10 @@ enum ContentType { movie, series }
 class Content {
   final String id, title, posterUrl;
   final ContentType type;
-  final String? year, rating, description, streamUrl, backdropUrl;
+  final String? year, rating, description, streamUrl, backdropUrl, category;
   final Map<String, String> headers;
   final List<Episode> episodes;
-  const Content({required this.id, required this.title, required this.posterUrl, required this.type, this.year, this.rating, this.description, this.streamUrl, this.backdropUrl, this.headers = const {}, this.episodes = const []});
+  const Content({required this.id, required this.title, required this.posterUrl, required this.type, this.year, this.rating, this.description, this.streamUrl, this.backdropUrl, this.category, this.headers = const {}, this.episodes = const []});
 }
 
 class Episode {

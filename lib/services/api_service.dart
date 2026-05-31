@@ -146,7 +146,7 @@ class ApiService {
   static Content _movieFromJson(Map<String, dynamic> j) => Content(
     id: (j['_id'] ?? j['id'] ?? '').toString(), title: j['title'] ?? '', posterUrl: j['posterUrl'] ?? j['poster'] ?? '',
     type: ContentType.movie, year: j['year']?.toString(), rating: j['rating']?.toString(),
-    description: j['description'], streamUrl: j['stream_url']?.isEmpty == true ? null : j['stream_url'],
+    description: j['description'], streamUrl: j['stream_url']?.isEmpty == true ? null : j['stream_url'], category: j['category']?.toString(),
   );
   static Content _seriesFromJson(Map<String, dynamic> j) {
     final episodes = <Episode>[];

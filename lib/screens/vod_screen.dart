@@ -26,7 +26,7 @@ class _State extends State<VodScreen> {
 
   Map<String, List<Content>> get _grouped {
     final map = <String, List<Content>>{};
-    for (final c in _all) map.putIfAbsent(c.category ?? 'Sin categoría', () => []).add(c);
+    for (final c in _all) map.putIfAbsent(c.category ?? c.year ?? 'Otros', () => []).add(c);
     return map;
   }
 
