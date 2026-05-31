@@ -130,7 +130,7 @@ class _MainState extends State<MainScreen> {
     autofocus: true,
     onKey: _onKey,
     child: WillPopScope(
-      onWillPop: () async { if (Navigator.canPop(context)) return true; if (_inContent && _sideIdx != 2 && _sideIdx != 5) { setState(() => _inContent = false); } else if (_inContent) { setState(() => _inContent = false); } else { _showExitDialog(); } return false; },
+      onWillPop: () async { if (Navigator.canPop(context)) return true; if (_inContent) { setState(() => _inContent = false); return false; } _showExitDialog(); return false; },
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Row(children: [
