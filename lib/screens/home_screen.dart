@@ -16,6 +16,7 @@ class _HomeState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
   List<Content> _estrenos = [];
   List<Content> _series = [];
   List<Channel> _deportes = [];
+  List<Channel> _tvCanales = [];
   bool _loading = true;
 
   @override
@@ -33,12 +34,14 @@ class _HomeState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
       final movies = await ApiService.getMovies(featuredOnly: true);
       final estrenos = await ApiService.getMovies(category: 'Estrenos 2026');
       final series = await ApiService.getSeries(featuredOnly: true);
-      final deportes = await ApiService.getChannels(category: 'Deportes');
+      final deportes = await ApiService.getChannels(category: 'DEPORTES');
+      final tvCanales = await ApiService.getChannels(category: 'ARGENTINA');
       if (mounted) setState(() {
         _movies = movies;
         _estrenos = estrenos;
         _series = series;
         _deportes = deportes.take(15).toList();
+        _tvCanales = tvCanales.take(15).toList();
         _loading = false;
       });
     } catch (e) {
@@ -55,6 +58,7 @@ class _HomeState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
       color: AppTheme.accentCyan,
       child: CustomScrollView(slivers: [
         SliverToBoxAdapter(child: _buildHeader()),
+        if (_tvCanales.isNotEmpty) ...[_buildTitle('📺 TV en Vivo'), SliverToBoxAdapter(child: _buildChannelRow(_tvCanales))],
         if (_movies.isNotEmpty) ...[_buildTitle('⭐ Recomendados'), SliverToBoxAdapter(child: _buildMovieRow(_movies))],
         if (_estrenos.isNotEmpty) ...[_buildTitle('🎬 Estrenos 2026'), SliverToBoxAdapter(child: _buildMovieRow(_estrenos))],
         if (_series.isNotEmpty) ...[_buildTitle('📺 Series'), SliverToBoxAdapter(child: _buildMovieRow(_series))],
