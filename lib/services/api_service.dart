@@ -128,7 +128,7 @@ class ApiService {
     if (p.isNotEmpty) url += '?${p.join('&')}';
     final res = await http.get(Uri.parse(url), headers: _headers);
     final data = jsonDecode(res.body);
-    final channels = (data['channels'] as List).map((c) => _channelFromJson(c)).toList();
+    var channels = (data['channels'] as List).map((c) => _channelFromJson(c)).toList();
     if (search == null && category == null) { channels = channels.where((c) => c.category != 'ADULTOS').toList(); _cachedChannels = channels; _cacheTime = DateTime.now(); _saveChannelCache(channels); }
     return channels;
   }
