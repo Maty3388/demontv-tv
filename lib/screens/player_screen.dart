@@ -186,8 +186,7 @@ class _State extends State<PlayerScreen> {
                 const SizedBox(height: 24),
                 const CircularProgressIndicator(color: AppTheme.accentCyan, strokeWidth: 2),
               ]))),
-            if (_showChannelInfo) Positioned(left: 0, right: 0, bottom: 60,
-              child: Center(child: Container(
+            if (_showChannelInfo) Positioned(left: 0, right: 0, bottom: 60, child: IgnorePointer(child: Center(child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 decoration: BoxDecoration(color: Colors.black.withOpacity(0.8), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.accentCyan, width: 1.5)),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -206,7 +205,7 @@ class _State extends State<PlayerScreen> {
                     ])),
                   ]),
                 ]),
-              ))),
+              )))),
           ]),
               ),
           ),
