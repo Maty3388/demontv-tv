@@ -117,7 +117,7 @@ class ApiService {
       }
       final diskCache = await _loadChannelCache();
       if (diskCache != null && _cachedChannels == null) {
-        _cachedChannels = diskCache;
+        _cachedChannels = diskCache.where((c) => c.category != 'ADULTOS').toList();
         _cacheTime = DateTime.now();
       }
     }
