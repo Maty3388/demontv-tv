@@ -16,6 +16,7 @@ class PlayerScreen extends StatefulWidget {
 
 class _State extends State<PlayerScreen> {
   BetterPlayerController? _ctrl;
+  BetterPlayerController? _nextCtrl;
   late int _idx;
   late List<Channel> _playlist;
   bool _showChannelInfo = false;
@@ -119,6 +120,20 @@ class _State extends State<PlayerScreen> {
       betterPlayerDataSource: dataSource,
     );
     setState(() {});
+  }
+
+  void _preloadNext() {
+    if (_playlist.length <= 1) return;
+    final nextIdx = (_idx + 1) % _playlist.length;
+    final ch = _playlist[nextIdx];
+    final rawUrl = ch.streamUrl.split('|')[0].trim();
+    final headers = <String, String>{'User-Agent': 'Mozilla/5.0'};
+    headers.addAll(ch.headers);
+    _nextCtrl?.dispose();
+    _nextCtrl = BetterPlayerController(
+      const BetterPlayerConfiguration(autoPlay: false),
+      betterPlayerDataSource: BetterPlayerDataSource(BetterPlayerDataSourceType.network, rawUrl, headers: headers, liveStream: ch.isLive),
+    );
   }
 
   void _nextChannel() {
