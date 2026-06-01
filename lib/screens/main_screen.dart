@@ -67,7 +67,7 @@ class _MainState extends State<MainScreen> {
         content: const Text("¿Deseás salir de DemonTv Plus?", style: TextStyle(color: Colors.white70)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(c, false), child: const Text("Cancelar", style: TextStyle(color: Color(0xFF00CFDD)))),
-          ElevatedButton(onPressed: () => Navigator.pop(c, true),
+          ElevatedButton(autofocus: true, onPressed: () => Navigator.pop(c, true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
             child: const Text("Salir")),
         ]));
