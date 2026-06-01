@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
@@ -14,15 +16,16 @@ class VodScreen extends StatefulWidget {
 }
 
 class _VodState extends State<VodScreen> {
+  List<Content> _featured = [];
   List<Content> _all = [];
   bool _loading = true;
-  String _search = '';
-  final _searchCtrl = TextEditingController();
+  int _carouselIdx = 0;
   int _catIdx = 0;
   int _itemIdx = 0;
   final Map<int, ScrollController> _rowCtrls = {};
   final _listCtrl = ScrollController();
   final _focusNode = FocusNode();
+  Timer? _carouselTimer;
 
   bool get isMovies => widget.type == 'movies';
 
@@ -37,20 +40,29 @@ class _VodState extends State<VodScreen> {
     super.initState();
     _load();
     WidgetsBinding.instance.addPostFrameCallback((_) => _focusNode.requestFocus());
+    _carouselTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (_featured.isNotEmpty && mounted) setState(() => _carouselIdx = (_carouselIdx + 1) % _featured.length);
+    });
   }
 
   @override
   void dispose() {
     _focusNode.dispose();
     _listCtrl.dispose();
+    _carouselTimer?.cancel();
     super.dispose();
   }
 
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      if (isMovies) _all = await ApiService.getMovies(search: _search.isEmpty ? null : _search);
-      else _all = await ApiService.getSeries(search: _search.isEmpty ? null : _search);
+      if (isMovies) {
+        _featured = await ApiService.getMovies(featuredOnly: true);
+        _all = await ApiService.getMovies();
+      } else {
+        _featured = await ApiService.getSeries(featuredOnly: true);
+        _all = await ApiService.getSeries();
+      }
     } catch (_) {}
     setState(() => _loading = false);
   }
@@ -86,31 +98,49 @@ class _VodState extends State<VodScreen> {
       focusNode: _focusNode,
       autofocus: true,
       onKeyEvent: (_, e) { _handleKey(e); return KeyEventResult.ignored; },
-      child: SafeArea(child: Column(children: [
-        Padding(padding: const EdgeInsets.fromLTRB(16,12,16,8),
-          child: Row(children: [
-            Text(isMovies ? 'Películas' : 'Series', style: const TextStyle(color: Color(0xFFFFD700), fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1)),
-            const Spacer(),
-          ])),
-        Expanded(child: _loading
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan))
-          : _all.isEmpty
-            ? Center(child: Text(isMovies ? 'No hay películas' : 'No hay series', style: const TextStyle(color: AppTheme.textHint)))
-            : ListView(
-                controller: _listCtrl,
-                padding: const EdgeInsets.only(bottom: 20),
-                children: _grouped.entries.toList().asMap().entries.map((entry) {
-                  final catI = entry.key;
-                  final e = entry.value;
-                  return _CategoryRow(
-                    category: e.key,
-                    items: e.value,
-                    selectedIdx: catI == _catIdx ? _itemIdx : -1,
-                    scrollCtrl: _rowCtrls.putIfAbsent(catI, () => ScrollController()),
-                    onTap: (c) => Navigator.push(context, MaterialPageRoute(builder: (_) => ContentPlayerScreen(content: c))),
-                  );
-                }).toList())),
-      ]))));
+      child: _loading
+        ? const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan))
+        : ListView(controller: _listCtrl, padding: const EdgeInsets.only(bottom: 20), children: [
+            // Header
+            Padding(padding: const EdgeInsets.fromLTRB(16,16,16,4), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(isMovies ? 'Bienvenido' : 'Series', style: const TextStyle(color: AppTheme.accentCyan, fontSize: 14, fontWeight: FontWeight.bold)),
+              Text(isMovies ? 'Listo para disfrutar 🍿' : '¿Qué serie querés ver?', style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+            ])),
+            // Carousel
+            if (_featured.isNotEmpty) ...[
+              CarouselSlider(
+                options: CarouselOptions(
+                  height: 200, autoPlay: true, enlargeCenterPage: true,
+                  viewportFraction: 0.85, autoPlayInterval: const Duration(seconds: 4),
+                  onPageChanged: (i, _) => setState(() => _carouselIdx = i)),
+                items: _featured.map((c) => GestureDetector(
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ContentPlayerScreen(content: c))),
+                  child: ClipRRect(borderRadius: BorderRadius.circular(12),
+                    child: Stack(fit: StackFit.expand, children: [
+                      CachedNetworkImage(imageUrl: c.posterUrl, fit: BoxFit.cover,
+                        errorWidget: (_, __, ___) => Container(color: AppTheme.surface, child: const Icon(Icons.movie, color: AppTheme.textHint, size: 60))),
+                      Positioned(bottom: 0, left: 0, right: 0, child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.bottomCenter, end: Alignment.topCenter, colors: [Colors.black.withOpacity(0.9), Colors.transparent])),
+                        child: Text(c.title, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold), maxLines: 2, overflow: TextOverflow.ellipsis))),
+                    ])))).toList()),
+              // Indicadores
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: List.generate(_featured.length, (i) => Container(
+                width: i == _carouselIdx ? 16 : 6, height: 6, margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
+                decoration: BoxDecoration(color: i == _carouselIdx ? AppTheme.accentCyan : Colors.white24, borderRadius: BorderRadius.circular(3))))),
+            ],
+            // Categorías
+            ..._grouped.entries.toList().asMap().entries.map((entry) {
+              final catI = entry.key;
+              final e = entry.value;
+              return _CategoryRow(
+                category: e.key, items: e.value,
+                selectedIdx: catI == _catIdx ? _itemIdx : -1,
+                scrollCtrl: _rowCtrls.putIfAbsent(catI, () => ScrollController()),
+                onTap: (c) => Navigator.push(context, MaterialPageRoute(builder: (_) => ContentPlayerScreen(content: c))),
+              );
+            }).toList(),
+          ])));
 }
 
 class _CategoryRow extends StatelessWidget {
@@ -123,21 +153,18 @@ class _CategoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    Padding(padding: const EdgeInsets.fromLTRB(16,16,16,8),
-      child: Row(children: [
-        Text(category, style: const TextStyle(color: Color(0xFFFFD700), fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 1)),
-        const SizedBox(width: 8),
-        Expanded(child: Container(height: 1, decoration: const BoxDecoration(gradient: LinearGradient(colors: [Color(0xFFFFD700), Colors.transparent])))),
-      ])),
+    Padding(padding: const EdgeInsets.fromLTRB(16,16,16,8), child: Row(children: [
+      Text(category, style: const TextStyle(color: Color(0xFFFFD700), fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 1)),
+      const SizedBox(width: 8),
+      Expanded(child: Container(height: 1, decoration: const BoxDecoration(gradient: LinearGradient(colors: [Color(0xFFFFD700), Colors.transparent])))),
+    ])),
     SizedBox(height: 150, child: ListView.builder(
-      controller: scrollCtrl,
-      scrollDirection: Axis.horizontal,
+      controller: scrollCtrl, scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       itemCount: items.length,
       itemBuilder: (ctx, i) => GestureDetector(
         onTap: () => onTap(items[i]),
-        child: Container(
-          width: 90, margin: const EdgeInsets.only(right: 8),
+        child: Container(width: 90, margin: const EdgeInsets.only(right: 8),
           decoration: BoxDecoration(
             color: i == selectedIdx ? AppTheme.accentCyan.withOpacity(0.2) : AppTheme.surface,
             borderRadius: BorderRadius.circular(8),
@@ -150,6 +177,6 @@ class _CategoryRow extends StatelessWidget {
                 : const Center(child: Icon(Icons.movie, color: AppTheme.textHint)))),
             Padding(padding: const EdgeInsets.all(4),
               child: Text(items[i].title, style: const TextStyle(color: Colors.white, fontSize: 9), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)),
-          ]))))),
+          ])))),
   ]);
 }
