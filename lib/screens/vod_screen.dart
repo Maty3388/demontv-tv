@@ -177,6 +177,6 @@ class _CategoryRow extends StatelessWidget {
                 : const Center(child: Icon(Icons.movie, color: AppTheme.textHint)))),
             Padding(padding: const EdgeInsets.all(4),
               child: Text(items[i].title, style: const TextStyle(color: Colors.white, fontSize: 9), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)),
-          ])))),
+          ]))))),
   ]);
 }
