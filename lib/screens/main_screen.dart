@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -21,7 +22,6 @@ class _MainState extends State<MainScreen> {
   bool _inContent = false;
   bool _backHandled = false;
   bool _profileExpanded = false;
-  bool _sidebarCollapsed = false;
   String _userEmail = "";
   String _userExpiry = "";
   static const String _adultPin = "1234";
@@ -126,12 +126,25 @@ class _MainState extends State<MainScreen> {
     if (exit == true && mounted) SystemNavigator.pop();
   }
 
+  void _clearCache() async {
+    ApiService.clearCache();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('channel_cache');
+    await prefs.remove('channel_cache_time');
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Cache borrado y lista actualizada"),
+        backgroundColor: Color(0xFFFF8C00),
+        duration: Duration(seconds: 2)));
+    }
+  }
+
   void _selectItem() {
     switch (_sideIdx) {
       case 0: setState(() => _profileExpanded = !_profileExpanded); break;
       case 5: _showAdultPin(); break;
       
-      case 6: ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lista actualizada"), backgroundColor: AppTheme.accentCyan)); break;
+      case 6: _clearCache(); break;
       case 7: ApiService.clearToken(); Navigator.pushReplacementNamed(context, "/login"); break;
       default: setState(() => _inContent = true);
     }
@@ -169,10 +182,10 @@ class _MainState extends State<MainScreen> {
   Widget _buildContent() {
     switch (_sideIdx) {
       case 1: return const HomeScreen();
-      case 2: return _TVLiveScreen(onBack: () { _backHandled = true; setState(() => _inContent = false); Future.delayed(const Duration(milliseconds: 600), () => _backHandled = false); }, collapsed: _sidebarCollapsed);
+      case 2: return _TVLiveScreen(onBack: () { _backHandled = true; setState(() => _inContent = false); Future.delayed(const Duration(milliseconds: 600), () => _backHandled = false); });
       case 3: return VodScreen(type: "movies", onBack: () { _backHandled = true; setState(() => _inContent = false); Future.delayed(const Duration(milliseconds: 300), () => _backHandled = false); });
       case 4: return VodScreen(type: "series", onBack: () { _backHandled = true; setState(() => _inContent = false); Future.delayed(const Duration(milliseconds: 300), () => _backHandled = false); });
-      case 5: return _TVLiveScreen(onBack: () { _backHandled = true; setState(() => _inContent = false); Future.delayed(const Duration(milliseconds: 600), () => _backHandled = false); }, collapsed: _sidebarCollapsed, filterCategory: 'ADULTOS');
+      case 5: return _TVLiveScreen(onBack: () { _backHandled = true; setState(() => _inContent = false); Future.delayed(const Duration(milliseconds: 600), () => _backHandled = false); }, filterCategory: 'ADULTOS');
       default: return const SizedBox();
     }
   }
@@ -224,12 +237,12 @@ class _MainState extends State<MainScreen> {
       _SItem(4, Icons.video_library_outlined, "Series"),
       _SItem(5, Icons.eighteen_up_rating_outlined, "Adultos", isAdult: true),
       
-      _SItem(6, Icons.refresh_outlined, "Actualizar", isRed: true),
+      _SItem(6, Icons.delete_outline, "Borrar Cache", isAction: true),
       _SItem(7, Icons.logout, "Cerrar Sesion", isRed: true),
     ];
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      width: _sidebarCollapsed ? 60 : 200,
+      width: 160,
       color: const Color(0xFF0D0D0D),
       child: Column(children: [
         const SizedBox(height: 20),
@@ -239,7 +252,7 @@ class _MainState extends State<MainScreen> {
             Container(width: 34, height: 34,
               decoration: BoxDecoration(gradient: const LinearGradient(colors: AppTheme.logoGradient), borderRadius: BorderRadius.circular(9)),
               child: const Center(child: Text("D+", style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)))),
-            if (!_sidebarCollapsed) ...[const SizedBox(width: 8), const Expanded(child: Text("DemonTv Plus", style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis))],
+            const SizedBox(width: 8), const Expanded(child: Text("DemonTv Plus", style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
           ])),
         const Divider(color: Colors.white12),
         Expanded(child: ListView(
@@ -252,14 +265,14 @@ class _MainState extends State<MainScreen> {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
                   margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  padding: EdgeInsets.symmetric(horizontal: _sidebarCollapsed ? 8 : 10, vertical: 9),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
                   decoration: BoxDecoration(
                     color: isFocused ? AppTheme.accentCyan.withOpacity(0.2) : isSelected ? AppTheme.accentCyan.withOpacity(0.1) : Colors.transparent,
                     borderRadius: BorderRadius.circular(10),
                     border: isFocused ? Border.all(color: AppTheme.accentCyan, width: 1.5) : null),
-                  child: Row(mainAxisAlignment: _sidebarCollapsed ? MainAxisAlignment.center : MainAxisAlignment.start, children: [
+                  child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                     Icon(item.icon, color: item.isRed ? AppTheme.accentRed : isFocused || isSelected ? AppTheme.accentCyan : AppTheme.textSecondary, size: 18),
-                    if (!_sidebarCollapsed) ...[const SizedBox(width: 8),
+                    const SizedBox(width: 8),
                       Expanded(child: Text(item.label, style: TextStyle(color: item.isRed ? AppTheme.accentRed : isFocused || isSelected ? AppTheme.accentCyan : AppTheme.textSecondary, fontSize: 12, fontWeight: isFocused || isSelected ? FontWeight.bold : FontWeight.normal), overflow: TextOverflow.ellipsis)),
                       if (item.isProfile) Icon(_profileExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: AppTheme.accentCyan, size: 14),
                       if (item.isAdult) const Icon(Icons.lock, color: Colors.orange, size: 11),
@@ -267,7 +280,7 @@ class _MainState extends State<MainScreen> {
                   ]),
                 ),
               ),
-              if (item.isProfile && _profileExpanded && !_sidebarCollapsed) Container(
+              if (item.isProfile && _profileExpanded) Container(
                 margin: const EdgeInsets.fromLTRB(8, 0, 8, 4),
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(color: const Color(0xFF1A1A1A), borderRadius: BorderRadius.circular(8)),
@@ -279,12 +292,7 @@ class _MainState extends State<MainScreen> {
             ]);
           }).toList(),
         )),
-        // Boton colapsar
-        GestureDetector(
-          onTap: () => setState(() => _sidebarCollapsed = !_sidebarCollapsed),
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            child: Icon(_sidebarCollapsed ? Icons.chevron_right : Icons.chevron_left, color: AppTheme.textHint, size: 18))),
+
       ]),
     );
   }
@@ -294,15 +302,14 @@ class _SItem {
   final int idx;
   final IconData icon;
   final String label;
-  final bool isRed, isProfile, isAdult;
-  const _SItem(this.idx, this.icon, this.label, {this.isRed=false, this.isProfile=false, this.isAdult=false});
+  final bool isRed, isProfile, isAdult, isAction;
+  const _SItem(this.idx, this.icon, this.label, {this.isRed=false, this.isProfile=false, this.isAdult=false, this.isAction=false});
 }
 
 class _TVLiveScreen extends StatefulWidget {
   final VoidCallback onBack;
-  final bool collapsed;
   final String? filterCategory;
-  const _TVLiveScreen({required this.onBack, this.collapsed = false, this.filterCategory});
+  const _TVLiveScreen({required this.onBack, this.filterCategory});
   @override State<_TVLiveScreen> createState() => _TVLiveState();
 }
 
@@ -317,6 +324,7 @@ class _TVLiveState extends State<_TVLiveScreen> {
   bool _showSearch = false;
   final _searchCtrl = TextEditingController();
   final _scrollCtrl = ScrollController();
+  Timer? _searchTimer;
   final Map<int, ScrollController> _rowCtrls = {};
   final Map<int, GlobalKey> _catKeys = {};
 
@@ -327,6 +335,7 @@ class _TVLiveState extends State<_TVLiveScreen> {
   void dispose() {
     _searchCtrl.dispose();
     _scrollCtrl.dispose();
+    _searchTimer?.cancel();
     for (final c in _rowCtrls.values) c.dispose();
     super.dispose();
   }
@@ -429,7 +438,7 @@ class _TVLiveState extends State<_TVLiveScreen> {
             if (_showSearch) ...[const SizedBox(height: 10),
               TextField(
                 controller: _searchCtrl, autofocus: true,
-                onChanged: (v) { _search = v; _load(); },
+                onChanged: (v) { _search = v; _searchTimer?.cancel(); _searchTimer = Timer(const Duration(milliseconds: 400), () { if (mounted) _load(); }); },
                 style: const TextStyle(color: Colors.white, fontSize: 14),
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.search, color: AppTheme.textSecondary, size: 18),

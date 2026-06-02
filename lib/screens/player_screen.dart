@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:better_player/better_player.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class PlayerScreen extends StatefulWidget {
   final Channel channel;
@@ -22,6 +23,8 @@ class _State extends State<PlayerScreen> {
   Timer? _focusTimer;
   final FocusNode _focusNode = FocusNode();
   bool _hasError = false;
+  bool _isLoading = true;
+  bool _isPlaying = true;
   bool _isFavorite = false;
   Set<String> _favorites = {};
   static const _orange = Color(0xFFFF8C00);
@@ -61,6 +64,7 @@ class _State extends State<PlayerScreen> {
 
   void _initPlayer(Channel ch) {
     _ctrl?.dispose();
+    if (mounted) setState(() => _isLoading = true);
     final url = ch.streamUrl.split('|')[0].trim();
     final headers = <String, String>{
       'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36',
@@ -106,13 +110,17 @@ class _State extends State<PlayerScreen> {
         fullScreenByDefault: true, allowedScreenSleep: false,
         controlsConfiguration: const BetterPlayerControlsConfiguration(showControls: false),
         eventListener: (e) {
-          if (e.betterPlayerEventType == BetterPlayerEventType.exception) {
+          if (e.betterPlayerEventType == BetterPlayerEventType.play) {
+            if (mounted) setState(() => _isPlaying = true);
+          } else if (e.betterPlayerEventType == BetterPlayerEventType.pause) {
+            if (mounted) setState(() => _isPlaying = false);
+          } else if (e.betterPlayerEventType == BetterPlayerEventType.exception) {
             if (mounted) setState(() => _hasError = true);
             Future.delayed(const Duration(seconds: 5), () {
               if (mounted) { setState(() => _hasError = false); _initPlayer(_playlist[_idx]); }
             });
           } else if (e.betterPlayerEventType == BetterPlayerEventType.initialized) {
-            if (mounted) setState(() => _hasError = false);
+            if (mounted) setState(() { _hasError = false; _isLoading = false; _isPlaying = true; });
           }
         },
       ),
@@ -180,6 +188,21 @@ class _State extends State<PlayerScreen> {
           child: Stack(children: [
             if (_ctrl != null) BetterPlayer(controller: _ctrl!)
             else const Center(child: CircularProgressIndicator(color: _orange)),
+            if (_isLoading && !_hasError) Positioned.fill(child: Container(
+              color: Colors.black87,
+              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                if (_playlist[_idx].logoUrl.isNotEmpty) SizedBox(width: 80, height: 80,
+                  child: CachedNetworkImage(imageUrl: _playlist[_idx].logoUrl, fit: BoxFit.contain,
+                    errorWidget: (_, __, ___) => const Icon(Icons.tv, color: Colors.white54, size: 48))),
+                const SizedBox(height: 16),
+                Text(_playlist[_idx].name, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 6),
+                Text(_playlist[_idx].category, style: const TextStyle(color: Colors.white54, fontSize: 13)),
+                const SizedBox(height: 24),
+                const CircularProgressIndicator(color: _orange, strokeWidth: 2),
+                const SizedBox(height: 12),
+                const Text('Cargando canal...', style: TextStyle(color: Colors.white54, fontSize: 12)),
+              ]))),
             if (_hasError) Positioned.fill(child: Container(
               color: Colors.black87,
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -229,11 +252,11 @@ class _State extends State<PlayerScreen> {
                       GestureDetector(onTap: _prevChannel, child: const Icon(Icons.skip_previous, color: Colors.white, size: 32)),
                       const SizedBox(width: 24),
                       GestureDetector(
-                        onTap: () { final playing = _ctrl?.isPlaying() ?? false; if (playing) _ctrl?.pause(); else _ctrl?.play(); setState(() {}); },
+                        onTap: () { if (_isPlaying) { _ctrl?.pause(); setState(() => _isPlaying = false); } else { _ctrl?.play(); setState(() => _isPlaying = true); } },
                         child: Container(width: 64, height: 64,
                           decoration: const BoxDecoration(shape: BoxShape.circle,
                             gradient: LinearGradient(colors: [_orange, _orangeLight])),
-                          child: const Icon(Icons.pause, color: Colors.white, size: 36))),
+                          child: Icon(_isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white, size: 36))),
                       const SizedBox(width: 24),
                       GestureDetector(onTap: _nextChannel, child: const Icon(Icons.skip_next, color: Colors.white, size: 32)),
                     ]),
