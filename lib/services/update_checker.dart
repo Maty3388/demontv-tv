@@ -109,70 +109,110 @@ class _UpdateDialogState extends State<_UpdateDialog> {
   @override
   Widget build(BuildContext context) => WillPopScope(
     onWillPop: () async => !widget.forceUpdate && !_downloading,
-    child: AlertDialog(
-      backgroundColor: const Color(0xFF1C1C1E),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      content: Column(mainAxisSize: MainAxisSize.min, children: [
-        const SizedBox(height: 8),
-        Text(
-          _downloading ? 'DESCARGANDO...' : 'NUEVA ACTUALIZACION',
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: 1)),
-        const SizedBox(height: 20),
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Column(children: [
-            const Text('Actual', style: TextStyle(color: Color(0xFF9E9E9E), fontSize: 12)),
-            const Text(UpdateChecker._currentVersion, style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-          ]),
-          const Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Icon(Icons.arrow_forward, color: Colors.white)),
-          Column(children: [
-            const Text('Nueva', style: TextStyle(color: Color(0xFF9E9E9E), fontSize: 12)),
-            Text(widget.newVersion, style: const TextStyle(color: Color(0xFF00CFDD), fontSize: 22, fontWeight: FontWeight.bold)),
-          ]),
-        ]),
-        if (widget.changelog.isNotEmpty && !_downloading) ...[
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: const Color(0xFF2A2A2E), borderRadius: BorderRadius.circular(10)),
-            child: Text(widget.changelog, style: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 11), textAlign: TextAlign.center)),
-        ],
-        if (_downloading) ...[
+    child: Dialog(
+      backgroundColor: Colors.transparent,
+      child: Container(
+        width: 340,
+        padding: const EdgeInsets.all(28),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A1A1A),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: const Color(0xFFFF8C00).withOpacity(0.4), width: 1.5),
+          boxShadow: [BoxShadow(color: const Color(0xFFFF8C00).withOpacity(0.25), blurRadius: 40, spreadRadius: 2)]),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          // Icono
+          Container(width: 68, height: 68,
+            decoration: BoxDecoration(shape: BoxShape.circle,
+              gradient: const LinearGradient(colors: [Color(0xFFFF8C00), Color(0xFFFFB347)]),
+              boxShadow: [BoxShadow(color: const Color(0xFFFF8C00).withOpacity(0.5), blurRadius: 20)]),
+            child: Icon(_downloading ? Icons.downloading : Icons.system_update,
+              color: Colors.white, size: 34)),
+          const SizedBox(height: 16),
+          Text(_downloading ? 'DESCARGANDO...' : 'NUEVA VERSIÓN',
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: 1)),
           const SizedBox(height: 20),
-          Text('${(_progress * 100).toStringAsFixed(0)}%',
-            style: const TextStyle(color: Color(0xFF00CFDD), fontSize: 32, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(
-              value: _progress,
-              backgroundColor: const Color(0xFF2A2A2E),
-              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF00CFDD)),
-              minHeight: 10)),
-          const SizedBox(height: 6),
-          Text(
-            _total > 0 ? '${_formatBytes(_received)} / ${_formatBytes(_total)}' : 'Calculando...',
-            style: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 11)),
-        ],
-        if (_error != null) ...[
-          const SizedBox(height: 8),
-          Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 12)),
-        ],
-        const SizedBox(height: 20),
-        if (!_downloading) Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          if (!widget.forceUpdate) TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('MAS TARDE', style: TextStyle(color: Color(0xFF00CFDD), fontWeight: FontWeight.bold))),
-          ElevatedButton(
-            onPressed: _download,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00CFDD), foregroundColor: Colors.black,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
-            child: const Text('ACTUALIZAR', style: TextStyle(fontWeight: FontWeight.bold))),
-        ]) else TextButton(
-          onPressed: _cancel,
-          child: const Text('CANCELAR', style: TextStyle(color: Color(0xFF9E9E9E)))),
-      ]),
-    ),
-  );
+          // Versiones
+          if (!_downloading) Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12)),
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Column(children: [
+                const Text('Actual', style: TextStyle(color: Colors.white38, fontSize: 11)),
+                const SizedBox(height: 4),
+                Text(UpdateChecker._currentVersion,
+                  style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+              ]),
+              Padding(padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(color: const Color(0xFFFF8C00).withOpacity(0.2), shape: BoxShape.circle),
+                  child: const Icon(Icons.arrow_forward, color: Color(0xFFFF8C00), size: 18))),
+              Column(children: [
+                const Text('Nueva', style: TextStyle(color: Colors.white38, fontSize: 11)),
+                const SizedBox(height: 4),
+                Text(widget.newVersion,
+                  style: const TextStyle(color: Color(0xFFFF8C00), fontSize: 20, fontWeight: FontWeight.bold)),
+              ]),
+            ])),
+          // Changelog
+          if (widget.changelog.isNotEmpty && !_downloading) ...[
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(10)),
+              child: Text(widget.changelog,
+                style: const TextStyle(color: Colors.white60, fontSize: 12), textAlign: TextAlign.center)),
+          ],
+          // Progreso descarga
+          if (_downloading) ...[
+            const SizedBox(height: 20),
+            Text('${(_progress * 100).toStringAsFixed(0)}%',
+              style: const TextStyle(color: Color(0xFFFF8C00), fontSize: 36, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            ClipRRect(borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                value: _progress,
+                backgroundColor: Colors.white12,
+                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFF8C00)),
+                minHeight: 8)),
+            const SizedBox(height: 8),
+            Text(_total > 0 ? '${_formatBytes(_received)} / ${_formatBytes(_total)}' : 'Calculando...',
+              style: const TextStyle(color: Colors.white38, fontSize: 12)),
+          ],
+          if (_error != null) ...[
+            const SizedBox(height: 8),
+            Text(_error!, style: const TextStyle(color: Colors.redAccent, fontSize: 12)),
+          ],
+          const SizedBox(height: 24),
+          if (!_downloading) Row(children: [
+            if (!widget.forceUpdate) Expanded(child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white24)),
+                child: const Center(child: Text('Más tarde',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)))))),
+            if (!widget.forceUpdate) const SizedBox(width: 12),
+            Expanded(child: GestureDetector(
+              onTap: _download,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(colors: [Color(0xFFFF8C00), Color(0xFFFFB347)]),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [BoxShadow(color: const Color(0xFFFF8C00).withOpacity(0.4), blurRadius: 10)]),
+                child: const Center(child: Text('ACTUALIZAR',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)))))),
+          ]) else GestureDetector(
+            onTap: _cancel,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 13),
+              decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white24)),
+              child: const Center(child: Text('Cancelar',
+                style: TextStyle(color: Colors.white60, fontWeight: FontWeight.w600))))),
+        ]),
+      )));
 }

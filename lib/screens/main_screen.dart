@@ -60,17 +60,56 @@ class _MainState extends State<MainScreen> {
   void _showExitDialog() async {
     final exit = await showDialog<bool>(
       context: context,
-      builder: (c) => AlertDialog(
-        backgroundColor: const Color(0xFF1C1C1E),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text("Salir", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        content: const Text("¿Deseás salir de DemonTv Plus?", style: TextStyle(color: Colors.white70)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text("Cancelar", style: TextStyle(color: Color(0xFF00CFDD)))),
-          ElevatedButton(autofocus: true, onPressed: () => Navigator.pop(c, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
-            child: const Text("Salir")),
-        ]));
+      builder: (c) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          width: 320,
+          padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A1A),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFFF8C00).withOpacity(0.4), width: 1.5),
+            boxShadow: [BoxShadow(color: const Color(0xFFFF8C00).withOpacity(0.2), blurRadius: 30, spreadRadius: 2)]),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Container(width: 64, height: 64,
+              decoration: BoxDecoration(shape: BoxShape.circle,
+                gradient: const LinearGradient(colors: [Color(0xFFFF8C00), Color(0xFFFFB347)]),
+                boxShadow: [BoxShadow(color: const Color(0xFFFF8C00).withOpacity(0.4), blurRadius: 16)]),
+              child: const Icon(Icons.exit_to_app, color: Colors.white, size: 32)),
+            const SizedBox(height: 20),
+            const Text("¿Salir de DemonTv Plus?",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            const Text("¿Estás seguro que querés cerrar la app?",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white54, fontSize: 13)),
+            const SizedBox(height: 28),
+            Row(children: [
+              Expanded(child: GestureDetector(
+                onTap: () => Navigator.pop(c, false),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white10,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white24)),
+                  child: const Center(child: Text("Cancelar",
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)))))),
+              const SizedBox(width: 12),
+              Expanded(child: GestureDetector(
+                onTap: () => Navigator.pop(c, true),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [Color(0xFFFF8C00), Color(0xFFFFB347)]),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [BoxShadow(color: const Color(0xFFFF8C00).withOpacity(0.4), blurRadius: 8)]),
+                  child: const Center(child: Text("Salir",
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))))),
+            ]),
+          ]),
+        )));
     if (exit == true && mounted) SystemNavigator.pop();
   }
 
