@@ -443,13 +443,13 @@ class _TVLiveState extends State<_TVLiveScreen> {
           ])),
         // Carrusel destacados
         if (_featured.isNotEmpty && _search.isEmpty) ...[
-          Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+          Padding(padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
             child: Row(children: [
               const Text('🔥 Destacados', style: TextStyle(color: Color(0xFFFF8C00), fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 1)),
               const SizedBox(width: 8),
               Expanded(child: Container(height: 1.5, decoration: const BoxDecoration(gradient: LinearGradient(colors: [Color(0xFFFF8C00), Colors.transparent])))),
             ])),
-          SizedBox(height: 180,
+          SizedBox(height: 120,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -462,7 +462,7 @@ class _TVLiveState extends State<_TVLiveScreen> {
                   onTap: () => Navigator.push(context, MaterialPageRoute(
                     builder: (_) => PlayerScreen(channel: ch, playlist: _featured, initialIndex: i))),
                   child: Container(
-                    width: 150, margin: const EdgeInsets.only(right: 10),
+                    width: 110, margin: const EdgeInsets.only(right: 8),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(14),
                       gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [c1, c2]),
@@ -488,7 +488,7 @@ class _TVLiveState extends State<_TVLiveScreen> {
                           child: const Text('EN VIVO', style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)))),
                     ])));
               })),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
         ],
         // Lista de categorias
         Expanded(child: _loading
