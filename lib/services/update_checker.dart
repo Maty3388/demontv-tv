@@ -73,8 +73,8 @@ class _UpdateDialogState extends State<_UpdateDialog> {
       if (await Permission.requestInstallPackages.isDenied) {
         await Permission.requestInstallPackages.request();
       }
-      final dir = await getTemporaryDirectory();
-      final path = '${dir.path}/demontv_update.apk';
+      final dir = await getExternalStorageDirectory() ?? await getTemporaryDirectory();
+      final path = dir.path + '/demontv_update.apk';
       _cancelToken = CancelToken();
       await Dio().download(
         widget.apkUrl, path,
@@ -88,7 +88,7 @@ class _UpdateDialogState extends State<_UpdateDialog> {
         },
       );
       if (!mounted) return;
-      final fileUri = 'content://com.demontv.demon_tv_plus.fileprovider/cache/demontv_update.apk';
+      final fileUri = 'content://com.demontv.demon_tv_plus.fileprovider/external_files/demontv_update.apk';
       final intent = AndroidIntent(
         action: 'action_view',
         data: fileUri,
