@@ -185,34 +185,33 @@ class _UpdateDialogState extends State<_UpdateDialog> {
           ],
           const SizedBox(height: 24),
           if (!_downloading) Row(children: [
-            if (!widget.forceUpdate) Expanded(child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
+            if (!widget.forceUpdate) Expanded(child: TextButton(
+              onPressed: () => Navigator.pop(context),
+              style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 13),
-                decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white24)),
-                child: const Center(child: Text('Más tarde',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)))))),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(color: Colors.white24)),
+                backgroundColor: Colors.white10),
+              child: const Text('Más tarde', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)))),
             if (!widget.forceUpdate) const SizedBox(width: 12),
-            Expanded(child: GestureDetector(
-              onTap: _download,
-              child: Container(
+            Expanded(child: ElevatedButton(
+              autofocus: true,
+              onPressed: _download,
+              style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 13),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFFFF8C00), Color(0xFFFFB347)]),
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [BoxShadow(color: const Color(0xFFFF8C00).withOpacity(0.4), blurRadius: 10)]),
-                child: const Center(child: Text('ACTUALIZAR',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)))))),
-          ]) else GestureDetector(
-            onTap: _cancel,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 13),
-              decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white24)),
-              child: const Center(child: Text('Cancelar',
-                style: TextStyle(color: Colors.white60, fontWeight: FontWeight.w600))))),
+                backgroundColor: const Color(0xFFFF8C00),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shadowColor: const Color(0xFFFF8C00)),
+              child: const Text('ACTUALIZAR', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)))),
+          ]) else ElevatedButton(
+            onPressed: _cancel,
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+              backgroundColor: Colors.white10,
+              foregroundColor: Colors.white60,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+            child: const Text('Cancelar', style: TextStyle(fontWeight: FontWeight.w600))),
         ]),
       )));
 }
