@@ -146,7 +146,7 @@ class _MainState extends State<MainScreen> {
       
       case 6: _clearCache(); break;
       case 7: Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())); break;
-      case 8: _confirmLogout(); break;
+      case 8: ApiService.clearToken(); Navigator.pushReplacementNamed(context, "/login"); break;
       default: setState(() => _inContent = true);
     }
   }

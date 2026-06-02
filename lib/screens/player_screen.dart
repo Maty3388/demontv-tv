@@ -38,7 +38,7 @@ class _State extends State<PlayerScreen> {
     _idx = widget.initialIndex;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
-      _focusTimer = Timer.periodic(const Duration(seconds: 1), (_) { if (mounted && !_focusNode.hasFocus) _focusNode.requestFocus(); });
+      _focusTimer = Timer.periodic(const Duration(milliseconds: 300), (_) { if (mounted && !_focusNode.hasFocus) _focusNode.requestFocus(); });
     });
     _initPlayer(_playlist[_idx]);
     _loadFavorites();
@@ -166,7 +166,7 @@ class _State extends State<PlayerScreen> {
       backgroundColor: Colors.black,
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: _showControlsTemporary,
+        onTap: () { _focusNode.requestFocus(); _showControlsTemporary(); },
         onHorizontalDragEnd: (d) {
           if (d.primaryVelocity != null) {
             if (d.primaryVelocity! < -300) _nextChannel();
