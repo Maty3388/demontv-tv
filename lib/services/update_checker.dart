@@ -97,7 +97,7 @@ class _UpdateDialogState extends State<_UpdateDialog> {
       await intent.launch();
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      if (mounted) setState(() { _downloading = false; _error = e.toString().contains('cancel') ? null : 'Error al descargar'; });
+      if (mounted) setState(() { _downloading = false; _error = e.toString().contains('cancel') ? null : 'Error: ${e.toString().substring(0, e.toString().length > 100 ? 100 : e.toString().length)}'; });
     }
   }
 
