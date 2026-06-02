@@ -256,6 +256,7 @@ class _TVLiveScreen extends StatefulWidget {
 
 class _TVLiveState extends State<_TVLiveScreen> {
   List<Channel> _all = [];
+  List<Channel> _featured = [];
   Map<String, List<Channel>> _grouped = {};
   bool _loading = true;
   int _catIdx = 0;
@@ -282,6 +283,7 @@ class _TVLiveState extends State<_TVLiveScreen> {
     await ApiService.loadToken();
     try {
       final channels = await ApiService.getChannels(search: _search.isEmpty ? null : _search, category: widget.filterCategory);
+      if (widget.filterCategory == null) { final feat = await ApiService.getChannels(featured: true); if (mounted) setState(() => _featured = feat); }
       final grouped = <String, List<Channel>>{};
       for (final ch in channels) grouped.putIfAbsent(ch.category, () => []).add(ch);
       setState(() { _all = channels; _grouped = grouped; _loading = false; });
@@ -457,8 +459,29 @@ class _WelcomeChannelsState extends State<_WelcomeChannels> {
       ? const Center(child: Text("No hay canales", style: TextStyle(color: AppTheme.textSecondary)))
       : ListView.builder(
           padding: const EdgeInsets.symmetric(vertical: 8),
-          itemCount: _grouped.length,
-          itemBuilder: (ctx, catIdx) {
+          itemCount: _grouped.length + (_featured.isEmpty ? 0 : 1),
+          itemBuilder: (ctx, idx) {
+            if (_featured.isNotEmpty && idx == 0) return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Padding(padding: const EdgeInsets.fromLTRB(16,14,16,8), child: Row(children: [
+                Container(width: 3, height: 14, decoration: BoxDecoration(color: const Color(0xFFFFD700), borderRadius: BorderRadius.circular(2))),
+                const SizedBox(width: 8),
+                const Text('⭐ Destacados', style: TextStyle(color: Color(0xFFFFD700), fontSize: 12, fontWeight: FontWeight.bold)),
+              ])),
+              SizedBox(height: 110, child: ListView.builder(
+                scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 12),
+                itemCount: _featured.length,
+                itemBuilder: (ctx, i) => GestureDetector(
+                  onTap: () => widget.onPlay(_featured[i], _featured, i),
+                  child: Container(width: 105, margin: const EdgeInsets.only(right: 8),
+                    decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF1A0A2E), Color(0xFF0F1A3E)]), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFFFFD700).withOpacity(0.4), width: 1)),
+                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      _featured[i].logoUrl.isNotEmpty ? CachedNetworkImage(imageUrl: _featured[i].logoUrl, width: 52, height: 38, fit: BoxFit.contain, errorWidget: (_, __, ___) => const Icon(Icons.tv, color: Colors.white54, size: 28)) : const Icon(Icons.tv, color: Colors.white54, size: 28),
+                      const SizedBox(height: 4),
+                      Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: Text(_featured[i].name, style: const TextStyle(color: Colors.white, fontSize: 10), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)),
+                      Container(margin: const EdgeInsets.only(top: 3), padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1), decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(3)), child: const Text('EN VIVO', style: TextStyle(color: Colors.white, fontSize: 7, fontWeight: FontWeight.bold))),
+                    ]))))),
+            ]);
+            final catIdx = _featured.isEmpty ? idx : idx - 1;
             final cat = _grouped.keys.elementAt(catIdx);
             final channels = _grouped[cat]!;
             return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

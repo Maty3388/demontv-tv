@@ -61,7 +61,6 @@ class _HomeState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
       color: AppTheme.accentCyan,
       child: CustomScrollView(slivers: [
         SliverToBoxAdapter(child: _buildHeader()),
-        if (_featuredChannels.isNotEmpty) ...[_buildTitle('⭐ Canales Destacados'), SliverToBoxAdapter(child: _buildFeaturedCarousel())],
         if (_tvCanales.isNotEmpty) ...[_buildTitle('📺 TV en Vivo'), SliverToBoxAdapter(child: _buildChannelRow(_tvCanales))],
         if (_movies.isNotEmpty) ...[_buildTitle('⭐ Recomendados'), SliverToBoxAdapter(child: _buildMovieRow(_movies))],
         if (_estrenos.isNotEmpty) ...[_buildTitle('🎬 Estrenos 2026'), SliverToBoxAdapter(child: _buildMovieRow(_estrenos))],
