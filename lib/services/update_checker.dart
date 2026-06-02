@@ -88,7 +88,7 @@ class _UpdateDialogState extends State<_UpdateDialog> {
         },
       );
       if (!mounted) return;
-      final fileUri = 'content://com.demontv.demon_tv_plus.fileprovider/external_files/demontv_update.apk';
+      final fileUri = 'content://com.demontv.demon_tv_plus.fileprovider/files/demontv_update.apk';
       final intent = AndroidIntent(
         action: 'action_view',
         data: fileUri,
