@@ -459,9 +459,9 @@ class _WelcomeChannelsState extends State<_WelcomeChannels> {
       ? const Center(child: Text("No hay canales", style: TextStyle(color: AppTheme.textSecondary)))
       : ListView.builder(
           padding: const EdgeInsets.symmetric(vertical: 8),
-          itemCount: _grouped.length + (_featured.isEmpty ? 0 : 1),
-          itemBuilder: (ctx, idx) {
-            if (_featured.isNotEmpty && idx == 0) return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          itemCount: _grouped.length,
+          itemBuilder: (ctx, catIdx) {
+
               Padding(padding: const EdgeInsets.fromLTRB(16,14,16,8), child: Row(children: [
                 Container(width: 3, height: 14, decoration: BoxDecoration(color: const Color(0xFFFFD700), borderRadius: BorderRadius.circular(2))),
                 const SizedBox(width: 8),
@@ -481,7 +481,7 @@ class _WelcomeChannelsState extends State<_WelcomeChannels> {
                       Container(margin: const EdgeInsets.only(top: 3), padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1), decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(3)), child: const Text('EN VIVO', style: TextStyle(color: Colors.white, fontSize: 7, fontWeight: FontWeight.bold))),
                     ]))))),
             ]);
-            final catIdx = _featured.isEmpty ? idx : idx - 1;
+
             final cat = _grouped.keys.elementAt(catIdx);
             final channels = _grouped[cat]!;
             return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
