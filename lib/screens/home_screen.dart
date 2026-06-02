@@ -17,6 +17,7 @@ class _HomeState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
   List<Content> _series = [];
   List<Channel> _deportes = [];
   List<Channel> _tvCanales = [];
+  List<Channel> _featuredChannels = [];
   bool _loading = true;
 
   @override
@@ -36,12 +37,14 @@ class _HomeState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
       final series = await ApiService.getSeries(featuredOnly: true);
       final deportes = await ApiService.getChannels(category: 'DEPORTES');
       final tvCanales = await ApiService.getChannels(category: 'ARGENTINA');
+      final featuredCh = await ApiService.getChannels(featured: true);
       if (mounted) setState(() {
         _movies = movies;
         _estrenos = estrenos;
         _series = series;
         _deportes = deportes.take(15).toList();
         _tvCanales = tvCanales.take(15).toList();
+        _featuredChannels = featuredCh.take(10).toList();
         _loading = false;
       });
     } catch (e) {
@@ -58,6 +61,7 @@ class _HomeState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
       color: AppTheme.accentCyan,
       child: CustomScrollView(slivers: [
         SliverToBoxAdapter(child: _buildHeader()),
+        if (_featuredChannels.isNotEmpty) ...[_buildTitle('⭐ Canales Destacados'), SliverToBoxAdapter(child: _buildFeaturedCarousel())],
         if (_tvCanales.isNotEmpty) ...[_buildTitle('📺 TV en Vivo'), SliverToBoxAdapter(child: _buildChannelRow(_tvCanales))],
         if (_movies.isNotEmpty) ...[_buildTitle('⭐ Recomendados'), SliverToBoxAdapter(child: _buildMovieRow(_movies))],
         if (_estrenos.isNotEmpty) ...[_buildTitle('🎬 Estrenos 2026'), SliverToBoxAdapter(child: _buildMovieRow(_estrenos))],
@@ -67,6 +71,28 @@ class _HomeState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
       ]),
     );
   }
+
+  Widget _buildFeaturedCarousel() => SizedBox(height: 120,
+    child: PageView.builder(
+      controller: PageController(viewportFraction: 0.35),
+      itemCount: _featuredChannels.length,
+      itemBuilder: (ctx, i) => GestureDetector(
+        onTap: () => Navigator.push(ctx, MaterialPageRoute(builder: (_) => PlayerScreen(channel: _featuredChannels[i], playlist: _featuredChannels, initialIndex: i))),
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: [const Color(0xFF1A0A2E), const Color(0xFF0F1A3E)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFFFD700).withOpacity(0.3), width: 1)),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            CachedNetworkImage(imageUrl: _featuredChannels[i].logoUrl, height: 50, width: 90, fit: BoxFit.contain,
+              errorWidget: (_, __, ___) => const Icon(Icons.tv, color: Colors.white54, size: 30)),
+            const SizedBox(height: 6),
+            Text(_featuredChannels[i].name, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+            Container(margin: const EdgeInsets.only(top: 4), padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(color: const Color(0xFFFF0000), borderRadius: BorderRadius.circular(4)),
+              child: const Text('EN VIVO', style: TextStyle(color: Colors.white, fontSize: 7, fontWeight: FontWeight.bold))),
+          ])))));
 
   Widget _buildHeader() => Padding(
     padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),

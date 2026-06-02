@@ -109,7 +109,7 @@ class ApiService {
     await http.delete(Uri.parse('\$baseUrl/favorites/\$channelId'), headers: _headers);
   }
 
-  static Future<List<Channel>> getChannels({String? search, String? category}) async {
+  static Future<List<Channel>> getChannels({String? search, String? category, bool featured = false}) async {
     // Usar cache si tiene menos de 5 minutos y no hay filtros
     if (search == null && category == null) {
       if (_cachedChannels != null && _cacheTime != null && DateTime.now().difference(_cacheTime!).inMinutes < 5) {
