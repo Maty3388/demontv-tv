@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -9,99 +9,224 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _State extends State<SettingsScreen> {
-  bool _adultContent = false, _mobileMode = false;
-  Map? _profile;
+  bool _autoPlay = true;
+  bool _notifications = true;
+  bool _tvMode = true;
+  bool _adultBlocked = true;
+  String _quality = 'Automática';
+  String _subtitleLang = 'Español';
   String _userEmail = '';
   String _userExpiry = '';
+  static const _orange = Color(0xFFFF8C00);
 
   @override
-  void initState() { super.initState(); _loadProfile(); }
+  void initState() { super.initState(); _loadPrefs(); }
 
-  Future<void> _loadProfile() async {
+  Future<void> _loadPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _userEmail  = prefs.getString('userEmail') ?? '';
       _userExpiry = prefs.getString('userExpiry') ?? '';
+      _autoPlay      = prefs.getBool('autoPlay') ?? true;
+      _notifications = prefs.getBool('notifications') ?? true;
+      _tvMode        = prefs.getBool('tvMode') ?? true;
+      _adultBlocked  = prefs.getBool('adultBlocked') ?? true;
+      _quality       = prefs.getString('quality') ?? 'Automática';
+      _subtitleLang  = prefs.getString('subtitleLang') ?? 'Español';
     });
+  }
+
+  Future<void> _save(String key, dynamic value) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (value is bool) await prefs.setBool(key, value);
+    if (value is String) await prefs.setString(key, value);
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppTheme.background,
-    body: SafeArea(child: SingleChildScrollView(child: Column(children: [
-      const SizedBox(height: 24),
-      Center(child: Container(width: 90, height: 90,
-        decoration: BoxDecoration(gradient: const LinearGradient(colors: AppTheme.logoGradient, begin: Alignment.topLeft, end: Alignment.bottomRight), borderRadius: BorderRadius.circular(24)),
-        child: const Center(child: Text('😎', style: TextStyle(fontSize: 46))))),
-      const SizedBox(height: 28),
-      _SectionLabel('CUENTA'),
-      _Item(icon: Icons.person_outline, label: _userEmail.isEmpty ? 'Sin email' : _userEmail, onTap: () {}),
-      _Item(icon: Icons.calendar_today_outlined, label: _userExpiry.isEmpty ? 'Sin vencimiento' : _userExpiry, onTap: () {}),
-      const _Div(),
-      _SectionLabel('PREFERENCIAS'),
-      _Toggle(icon: Icons.favorite_border, label: 'Contenido para adultos', value: _adultContent, onChanged: (v) => setState(() => _adultContent = v)),
-      const _Div(),
-      _SectionLabel('SISTEMA'),
-      _Item(icon: Icons.pin_outlined, label: 'Resetear PIN', onTap: () {}),
-      _Item(icon: Icons.download_outlined, label: 'Borrar caché', onTap: () => _confirm('¿Borrar caché?', 'Caché eliminado')),
-      _Item(icon: Icons.delete_outline, label: 'Borrar historial', onTap: () => _confirm('¿Borrar historial?', 'Historial eliminado')),
-      _Item(icon: Icons.refresh, label: 'Actualizar app', onTap: () {}),
-      _Toggle(icon: Icons.phone_android, label: 'Modo Móvil', value: _mobileMode, onChanged: (v) => setState(() => _mobileMode = v)),
-      ListTile(
-        leading: const Icon(Icons.logout, color: AppTheme.accentRed),
-        title: const Text('Cerrar sesión', style: TextStyle(color: AppTheme.accentRed, fontWeight: FontWeight.w600)),
-        trailing: const Icon(Icons.chevron_right, color: AppTheme.accentRed),
-        onTap: _logout),
-      const SizedBox(height: 24),
-      const Text('Versión: 11.0.0 (3030000)', style: TextStyle(color: AppTheme.textHint, fontSize: 12)),
-      const SizedBox(height: 32),
-    ]))),
+    backgroundColor: const Color(0xFF121212),
+    body: SafeArea(child: Column(children: [
+      // Header
+      Container(
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+        child: Row(children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(10)),
+              child: const Icon(Icons.arrow_back, color: Colors.white, size: 20))),
+          const SizedBox(width: 12),
+          const Text('Configuración', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+        ])),
+      Expanded(child: SingleChildScrollView(child: Column(children: [
+        // Perfil
+        _buildProfileCard(),
+        const SizedBox(height: 8),
+        // Reproducción
+        _buildSection('Reproducción', [
+          _buildSelector('Calidad de video', Icons.hd, _quality, () => _showQualityPicker()),
+          _buildToggle('Reproducción automática', Icons.play_circle_outline, _autoPlay, (v) { setState(() => _autoPlay = v); _save('autoPlay', v); }),
+          _buildSelector('Idioma de subtítulos', Icons.subtitles_outlined, _subtitleLang, () => _showSubtitlePicker()),
+        ]),
+        const SizedBox(height: 8),
+        // Ajustes
+        _buildSection('Ajustes', [
+          _buildToggle('Modo dispositivo TV', Icons.tv, _tvMode, (v) { setState(() => _tvMode = v); _save('tvMode', v); }),
+          _buildToggle('Notificaciones', Icons.notifications_outlined, _notifications, (v) { setState(() => _notifications = v); _save('notifications', v); }),
+        ]),
+        const SizedBox(height: 8),
+        // Control parental
+        _buildSection('Control Parental', [
+          _buildToggle('Protección contenido adulto', Icons.shield_outlined, _adultBlocked, (v) { setState(() => _adultBlocked = v); _save('adultBlocked', v); },
+            subtitle: _adultBlocked ? 'Contenido adulto BLOQUEADO' : 'Contenido adulto PERMITIDO',
+            activeColor: _adultBlocked ? Colors.green : Colors.red),
+        ]),
+        const SizedBox(height: 8),
+        // Almacenamiento
+        _buildSection('Almacenamiento', [
+          _buildTile('Limpiar caché', Icons.folder_outlined, subtitle: 'Usando 8.7 MB', onTap: () => _confirm('¿Limpiar caché?', 'Caché eliminado')),
+          _buildTile('Limpiar historial', Icons.history, subtitle: 'Eliminar historial de reproducción', onTap: () => _confirm('¿Limpiar historial?', 'Historial eliminado')),
+          _buildTile('Limpiar favoritos', Icons.favorite_border, subtitle: 'Eliminar todos los favoritos guardados', onTap: () => _confirm('¿Limpiar favoritos?', 'Favoritos eliminados')),
+        ]),
+        const SizedBox(height: 8),
+        // Info
+        _buildSection('Información', [
+          _buildTile('Versión de la app', Icons.info_outline, subtitle: 'v2.2.7 (Build 90)'),
+        ]),
+        const SizedBox(height: 16),
+        // Cerrar sesión
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: SizedBox(width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _logout,
+              icon: const Icon(Icons.logout),
+              label: const Text('Cerrar sesión', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFB71C1C),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                side: const BorderSide(color: _orange, width: 1))))),
+        const SizedBox(height: 32),
+      ]))),
+    ])),
   );
 
+  Widget _buildProfileCard() => Container(
+    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: const Color(0xFF1E1E1E),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: _orange.withOpacity(0.3))),
+    child: Row(children: [
+      Container(width: 56, height: 56,
+        decoration: BoxDecoration(shape: BoxShape.circle,
+          gradient: const LinearGradient(colors: [_orange, Color(0xFFFFB347)])),
+        child: const Center(child: Icon(Icons.person, color: Colors.white, size: 30))),
+      const SizedBox(width: 14),
+      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          const Icon(Icons.email_outlined, color: _orange, size: 14),
+          const SizedBox(width: 6),
+          Expanded(child: Text(_userEmail.isEmpty ? 'Sin email' : _userEmail,
+            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+            overflow: TextOverflow.ellipsis)),
+        ]),
+        const SizedBox(height: 6),
+        Row(children: [
+          const Icon(Icons.calendar_today, color: Colors.white54, size: 12),
+          const SizedBox(width: 6),
+          Text('Vence: ${_userExpiry.isEmpty ? "—" : _userExpiry}',
+            style: const TextStyle(color: _orange, fontSize: 12)),
+        ]),
+      ])),
+    ]));
+
+  Widget _buildSection(String title, List<Widget> children) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+        child: Text(title, style: const TextStyle(color: _orange, fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 0.8))),
+      Container(margin: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(color: const Color(0xFF1E1E1E), borderRadius: BorderRadius.circular(14)),
+        child: Column(children: children)),
+    ]);
+
+  Widget _buildToggle(String label, IconData icon, bool value, ValueChanged<bool> onChanged, {String? subtitle, Color? activeColor}) =>
+    Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Row(children: [
+        Container(width: 36, height: 36, decoration: BoxDecoration(color: _orange.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
+          child: Icon(icon, color: _orange, size: 18)),
+        const SizedBox(width: 12),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(label, style: const TextStyle(color: Colors.white, fontSize: 14)),
+          if (subtitle != null) Text(subtitle, style: TextStyle(color: activeColor ?? Colors.white54, fontSize: 11)),
+        ])),
+        Switch(value: value, onChanged: onChanged,
+          activeColor: activeColor ?? _orange,
+          activeTrackColor: (activeColor ?? _orange).withOpacity(0.3),
+          inactiveThumbColor: Colors.white38,
+          inactiveTrackColor: Colors.white12),
+      ]));
+
+  Widget _buildSelector(String label, IconData icon, String value, VoidCallback onTap) =>
+    GestureDetector(onTap: onTap,
+      child: Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(children: [
+          Container(width: 36, height: 36, decoration: BoxDecoration(color: _orange.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
+            child: Icon(icon, color: _orange, size: 18)),
+          const SizedBox(width: 12),
+          Expanded(child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 14))),
+          Text(value, style: const TextStyle(color: Colors.white54, fontSize: 13)),
+          const SizedBox(width: 6),
+          const Icon(Icons.chevron_right, color: Colors.white38, size: 18),
+        ])));
+
+  Widget _buildTile(String label, IconData icon, {String? subtitle, VoidCallback? onTap}) =>
+    GestureDetector(onTap: onTap,
+      child: Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(children: [
+          Container(width: 36, height: 36, decoration: BoxDecoration(color: _orange.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
+            child: Icon(icon, color: _orange, size: 18)),
+          const SizedBox(width: 12),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(label, style: const TextStyle(color: Colors.white, fontSize: 14)),
+            if (subtitle != null) Text(subtitle, style: const TextStyle(color: Colors.white54, fontSize: 11)),
+          ])),
+          if (onTap != null) const Icon(Icons.chevron_right, color: Colors.white38, size: 18),
+        ])));
+
+  void _showQualityPicker() => showDialog(context: context, builder: (ctx) => SimpleDialog(
+    backgroundColor: const Color(0xFF1E1E1E),
+    title: const Text('Calidad de video', style: TextStyle(color: Colors.white)),
+    children: ['Automática', '1080p', '720p', '480p', '360p'].map((q) => SimpleDialogOption(
+      onPressed: () { setState(() => _quality = q); _save('quality', q); Navigator.pop(ctx); },
+      child: Text(q, style: TextStyle(color: q == _quality ? _orange : Colors.white)))).toList()));
+
+  void _showSubtitlePicker() => showDialog(context: context, builder: (ctx) => SimpleDialog(
+    backgroundColor: const Color(0xFF1E1E1E),
+    title: const Text('Idioma de subtítulos', style: TextStyle(color: Colors.white)),
+    children: ['Español', 'Inglés', 'Portugués', 'Sin subtítulos'].map((l) => SimpleDialogOption(
+      onPressed: () { setState(() => _subtitleLang = l); _save('subtitleLang', l); Navigator.pop(ctx); },
+      child: Text(l, style: TextStyle(color: l == _subtitleLang ? _orange : Colors.white)))).toList()));
+
   void _confirm(String title, String success) => showDialog(context: context, builder: (ctx) => AlertDialog(
-    backgroundColor: AppTheme.surface,
+    backgroundColor: const Color(0xFF1E1E1E),
     title: Text(title, style: const TextStyle(color: Colors.white)),
     actions: [
-      TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar', style: TextStyle(color: AppTheme.textSecondary))),
-      TextButton(onPressed: () { Navigator.pop(ctx); ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(success), backgroundColor: AppTheme.accentCyan)); }, child: const Text('Confirmar', style: TextStyle(color: AppTheme.accentRed))),
+      TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar', style: TextStyle(color: Colors.white54))),
+      TextButton(onPressed: () { Navigator.pop(ctx); ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(success), backgroundColor: _orange)); },
+        child: const Text('Confirmar', style: TextStyle(color: _orange))),
     ]));
 
   void _logout() => showDialog(context: context, builder: (ctx) => AlertDialog(
-    backgroundColor: AppTheme.surface,
+    backgroundColor: const Color(0xFF1E1E1E),
     title: const Text('¿Cerrar sesión?', style: TextStyle(color: Colors.white)),
-    content: const Text('Se cerrará tu sesión actual.', style: TextStyle(color: AppTheme.textSecondary)),
+    content: const Text('Se cerrará tu sesión actual.', style: TextStyle(color: Colors.white54)),
     actions: [
-      TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar', style: TextStyle(color: AppTheme.textSecondary))),
-      TextButton(onPressed: () { ApiService.clearToken(); Navigator.pop(ctx); Navigator.pushNamedAndRemoveUntil(context, '/login', (r) => false); }, child: const Text('Cerrar sesión', style: TextStyle(color: AppTheme.accentRed))),
+      TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar', style: TextStyle(color: Colors.white54))),
+      TextButton(onPressed: () { ApiService.clearToken(); Navigator.pop(ctx); Navigator.pushNamedAndRemoveUntil(context, '/login', (r) => false); },
+        child: const Text('Cerrar sesión', style: TextStyle(color: Colors.red))),
     ]));
-}
-
-class _SectionLabel extends StatelessWidget {
-  final String text;
-  const _SectionLabel(this.text);
-  @override Widget build(BuildContext context) => Padding(padding: const EdgeInsets.fromLTRB(16,16,16,6),
-    child: Align(alignment: Alignment.centerLeft, child: Text(text, style: const TextStyle(color: AppTheme.textHint, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.2))));
-}
-
-class _Item extends StatelessWidget {
-  final IconData icon; final String label; final VoidCallback onTap;
-  const _Item({required this.icon, required this.label, required this.onTap});
-  @override Widget build(BuildContext context) => ListTile(
-    leading: Icon(icon, color: AppTheme.textSecondary, size: 22),
-    title: Text(label, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 15)),
-    trailing: const Icon(Icons.chevron_right, color: AppTheme.textHint), onTap: onTap);
-}
-
-class _Toggle extends StatelessWidget {
-  final IconData icon; final String label; final bool value; final ValueChanged<bool> onChanged;
-  const _Toggle({required this.icon, required this.label, required this.value, required this.onChanged});
-  @override Widget build(BuildContext context) => ListTile(
-    leading: Icon(icon, color: AppTheme.textSecondary, size: 22),
-    title: Text(label, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 15)),
-    trailing: Switch(value: value, onChanged: onChanged, activeColor: AppTheme.accentCyan, inactiveThumbColor: const Color(0xFF5C5C5C), inactiveTrackColor: AppTheme.surface));
-}
-
-class _Div extends StatelessWidget {
-  const _Div();
-  @override Widget build(BuildContext context) => const Divider(color: AppTheme.border, height: 1, indent: 16, endIndent: 16);
 }
