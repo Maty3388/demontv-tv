@@ -58,6 +58,47 @@ class _MainState extends State<MainScreen> {
   }
 
 
+  void _showLogoutDialog() => showDialog(context: context, builder: (c) => RawKeyboardListener(
+    focusNode: FocusNode()..requestFocus(),
+    autofocus: true,
+    onKey: (event) {
+      if (event is RawKeyDownEvent) {
+        if (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter) {
+          ApiService.clearToken(); Navigator.pop(c); Navigator.pushReplacementNamed(context, "/login");
+        }
+        if (event.logicalKey == LogicalKeyboardKey.escape || event.logicalKey == LogicalKeyboardKey.goBack) Navigator.pop(c);
+      }
+    },
+    child: Dialog(
+      backgroundColor: Colors.transparent,
+      child: Container(
+        width: 300, padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A1A1A), borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.red.withOpacity(0.4), width: 1.5)),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Container(width: 56, height: 56,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.red.withOpacity(0.15), border: Border.all(color: Colors.red.withOpacity(0.4))),
+            child: const Icon(Icons.logout, color: Colors.red, size: 28)),
+          const SizedBox(height: 16),
+          const Text("Cerrar sesion?", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 6),
+          const Text("Se cerrara tu sesion actual.", style: TextStyle(color: Colors.white54, fontSize: 12), textAlign: TextAlign.center),
+          const SizedBox(height: 20),
+          Row(children: [
+            Expanded(child: TextButton(
+              onPressed: () => Navigator.pop(c),
+              style: TextButton.styleFrom(backgroundColor: Colors.white10, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: const BorderSide(color: Colors.white24))),
+              child: const Text("Cancelar", style: TextStyle(color: Colors.white)))),
+            const SizedBox(width: 10),
+            Expanded(child: ElevatedButton(
+              autofocus: true,
+              onPressed: () { ApiService.clearToken(); Navigator.pop(c); Navigator.pushReplacementNamed(context, "/login"); },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+              child: const Text("Cerrar", style: TextStyle(fontWeight: FontWeight.bold)))),
+          ]),
+        ])))));
+
   void _showExitDialog() async {
     final exit = await showDialog<bool>(
       context: context,
@@ -147,7 +188,7 @@ class _MainState extends State<MainScreen> {
       
       case 6: _clearCache(); break;
       case 7: Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())); break;
-      case 8: ApiService.clearToken(); Navigator.pushReplacementNamed(context, "/login"); break;
+      case 8: _showLogoutDialog(); break;
       default: setState(() => _inContent = true);
     }
   }
