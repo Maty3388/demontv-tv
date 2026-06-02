@@ -62,15 +62,44 @@ class _State extends State<PlayerScreen> {
   void _initPlayer(Channel ch) {
     _ctrl?.dispose();
     final url = ch.streamUrl.split('|')[0].trim();
-    final headers = <String, String>{'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36'};
+    final headers = <String, String>{
+      'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36',
+      'Accept': '*/*',
+      'Accept-Encoding': 'gzip, deflate',
+      'Connection': 'keep-alive',
+    };
     headers.addAll(ch.headers);
-    final dataSource = BetterPlayerDataSource(
-      BetterPlayerDataSourceType.network, url,
-      headers: headers, liveStream: ch.isLive,
-      bufferingConfiguration: const BetterPlayerBufferingConfiguration(
-        minBufferMs: 5000, maxBufferMs: 30000,
-        bufferForPlaybackMs: 2500, bufferForPlaybackAfterRebufferMs: 5000),
-    );
+
+    // Detectar formato por URL
+    final urlLower = url.toLowerCase();
+    BetterPlayerDataSource dataSource;
+    if (urlLower.contains('.mpd')) {
+      dataSource = BetterPlayerDataSource(
+        BetterPlayerDataSourceType.network, url,
+        headers: headers, liveStream: ch.isLive,
+        videoFormat: BetterPlayerVideoFormat.dash,
+        bufferingConfiguration: const BetterPlayerBufferingConfiguration(
+          minBufferMs: 2000, maxBufferMs: 10000,
+          bufferForPlaybackMs: 1000, bufferForPlaybackAfterRebufferMs: 2000),
+      );
+    } else if (urlLower.contains('.m3u8') || urlLower.contains('hls')) {
+      dataSource = BetterPlayerDataSource(
+        BetterPlayerDataSourceType.network, url,
+        headers: headers, liveStream: ch.isLive,
+        videoFormat: BetterPlayerVideoFormat.hls,
+        bufferingConfiguration: const BetterPlayerBufferingConfiguration(
+          minBufferMs: 2000, maxBufferMs: 10000,
+          bufferForPlaybackMs: 1000, bufferForPlaybackAfterRebufferMs: 2000),
+      );
+    } else {
+      dataSource = BetterPlayerDataSource(
+        BetterPlayerDataSourceType.network, url,
+        headers: headers, liveStream: ch.isLive,
+        bufferingConfiguration: const BetterPlayerBufferingConfiguration(
+          minBufferMs: 2000, maxBufferMs: 10000,
+          bufferForPlaybackMs: 1000, bufferForPlaybackAfterRebufferMs: 2000),
+      );
+    }
     _ctrl = BetterPlayerController(
       BetterPlayerConfiguration(
         autoPlay: true, looping: false,
