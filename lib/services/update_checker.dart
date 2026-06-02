@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
@@ -107,7 +108,20 @@ class _UpdateDialogState extends State<_UpdateDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => WillPopScope(
+  Widget build(BuildContext context) => RawKeyboardListener(
+    focusNode: FocusNode()..requestFocus(),
+    autofocus: true,
+    onKey: (event) {
+      if (event is RawKeyDownEvent) {
+        if (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter) {
+          if (!_downloading) _download();
+        }
+        if (event.logicalKey == LogicalKeyboardKey.escape || event.logicalKey == LogicalKeyboardKey.goBack) {
+          if (!widget.forceUpdate && !_downloading) Navigator.pop(context);
+        }
+      }
+    },
+    child: WillPopScope(
     onWillPop: () async => !widget.forceUpdate && !_downloading,
     child: Dialog(
       backgroundColor: Colors.transparent,
