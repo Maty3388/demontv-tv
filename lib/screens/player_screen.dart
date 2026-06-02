@@ -200,7 +200,7 @@ class _State extends State<PlayerScreen> {
                       GestureDetector(onTap: _prevChannel, child: const Icon(Icons.skip_previous, color: Colors.white, size: 32)),
                       const SizedBox(width: 24),
                       GestureDetector(
-                        onTap: () { _ctrl?.isPlaying().then((p) { if (p == true) _ctrl?.pause(); else _ctrl?.play(); setState(() {}); }); },
+                        onTap: () { final playing = _ctrl?.isPlaying() ?? false; if (playing) _ctrl?.pause(); else _ctrl?.play(); setState(() {}); },
                         child: Container(width: 64, height: 64,
                           decoration: const BoxDecoration(shape: BoxShape.circle,
                             gradient: LinearGradient(colors: [_orange, _orangeLight])),

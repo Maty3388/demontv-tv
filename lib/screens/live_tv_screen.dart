@@ -72,6 +72,36 @@ class _State extends State<LiveTvScreen> {
     return map;
   }
 
+
+  Color _channelColor(String name) {
+    final colors = [
+      [0xFFFF8C00, 0xFFFFB347], // naranja
+      [0xFFE53935, 0xFFEF9A9A], // rojo
+      [0xFF8E24AA, 0xFFCE93D8], // violeta
+      [0xFF1E88E5, 0xFF90CAF9], // azul
+      [0xFF00897B, 0xFF80CBC4], // verde
+      [0xFFD81B60, 0xFFF48FB1], // rosa
+      [0xFF6D4C41, 0xFFBCAAA4], // marron
+      [0xFF3949AB, 0xFF9FA8DA], // indigo
+    ];
+    final idx = name.codeUnits.fold(0, (a, b) => a + b) % colors.length;
+    return Color(colors[idx][0]);
+  }
+
+  Color _channelColorLight(String name) {
+    final colors = [
+      [0xFFFF8C00, 0xFFFFB347],
+      [0xFFE53935, 0xFFEF9A9A],
+      [0xFF8E24AA, 0xFFCE93D8],
+      [0xFF1E88E5, 0xFF90CAF9],
+      [0xFF00897B, 0xFF80CBC4],
+      [0xFFD81B60, 0xFFF48FB1],
+      [0xFF6D4C41, 0xFFBCAAA4],
+      [0xFF3949AB, 0xFF9FA8DA],
+    ];
+    final idx = name.codeUnits.fold(0, (a, b) => a + b) % colors.length;
+    return Color(colors[idx][1]);
+  }
   void _handleChannelKey(int catI, int chI, KeyEvent event) {
     if (event is! KeyDownEvent) return;
     final cats = _grouped.values.toList();

@@ -311,6 +311,24 @@ class _TVLiveState extends State<_TVLiveScreen> {
     }
   }
 
+
+  Color _channelColor(String name) {
+    final colors = [
+      0xFFFF8C00, 0xFFE53935, 0xFF8E24AA, 0xFF1E88E5,
+      0xFF00897B, 0xFFD81B60, 0xFF6D4C41, 0xFF3949AB,
+    ];
+    final idx = name.codeUnits.fold(0, (a, b) => a + b) % colors.length;
+    return Color(colors[idx]);
+  }
+
+  Color _channelColorLight(String name) {
+    final colors = [
+      0xFFFFB347, 0xFFEF9A9A, 0xFFCE93D8, 0xFF90CAF9,
+      0xFF80CBC4, 0xFFF48FB1, 0xFFBCAAA4, 0xFF9FA8DA,
+    ];
+    final idx = name.codeUnits.fold(0, (a, b) => a + b) % colors.length;
+    return Color(colors[idx]);
+  }
   void _scrollCat() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final key = _catKeys[_catIdx];
