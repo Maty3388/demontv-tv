@@ -441,6 +441,55 @@ class _TVLiveState extends State<_TVLiveScreen> {
                   suffixIcon: _search.isNotEmpty ? IconButton(icon: const Icon(Icons.close, color: AppTheme.textHint, size: 16), onPressed: () { _searchCtrl.clear(); _search = ""; _load(); }) : null)),
             ],
           ])),
+        // Carrusel destacados
+        if (_featured.isNotEmpty && _search.isEmpty) ...[
+          Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+            child: Row(children: [
+              const Text('🔥 Destacados', style: TextStyle(color: Color(0xFFFF8C00), fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 1)),
+              const SizedBox(width: 8),
+              Expanded(child: Container(height: 1.5, decoration: const BoxDecoration(gradient: LinearGradient(colors: [Color(0xFFFF8C00), Colors.transparent])))),
+            ])),
+          SizedBox(height: 180,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              itemCount: _featured.length,
+              itemBuilder: (ctx, i) {
+                final ch = _featured[i];
+                final c1 = _channelColor(ch.name);
+                final c2 = _channelColorLight(ch.name);
+                return GestureDetector(
+                  onTap: () => Navigator.push(context, MaterialPageRoute(
+                    builder: (_) => PlayerScreen(channel: ch, playlist: _featured, initialIndex: i))),
+                  child: Container(
+                    width: 150, margin: const EdgeInsets.only(right: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [c1, c2]),
+                      boxShadow: [BoxShadow(color: c1.withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 3))]),
+                    child: Stack(children: [
+                      if (ch.logoUrl.isNotEmpty) Positioned.fill(
+                        child: Padding(padding: const EdgeInsets.all(16),
+                          child: CachedNetworkImage(imageUrl: ch.logoUrl, fit: BoxFit.contain,
+                            errorWidget: (_, __, ___) => const Icon(Icons.tv, color: Colors.white54, size: 40)))),
+                      Positioned(left: 0, right: 0, bottom: 0,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                          decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(14)),
+                            gradient: LinearGradient(begin: Alignment.bottomCenter, end: Alignment.topCenter,
+                              colors: [Colors.black.withOpacity(0.85), Colors.transparent])),
+                          child: Text(ch.name, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                            maxLines: 1, overflow: TextOverflow.ellipsis))),
+                      Positioned(top: 8, right: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                          decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(4)),
+                          child: const Text('EN VIVO', style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)))),
+                    ])));
+              })),
+          const SizedBox(height: 4),
+        ],
         // Lista de categorias
         Expanded(child: _loading
           ? const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan))
