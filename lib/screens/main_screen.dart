@@ -122,7 +122,7 @@ class _MainState extends State<MainScreen> {
                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))))),
             ]),
           ]),
-        )));
+        ))));
     if (exit == true && mounted) SystemNavigator.pop();
   }
 
