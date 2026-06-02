@@ -42,6 +42,19 @@ class _State extends State<LiveTvScreen> {
     super.dispose();
   }
 
+
+  Color _channelColor(String name) {
+    final colors = [0xFFFF8C00, 0xFFE53935, 0xFF8E24AA, 0xFF1E88E5, 0xFF00897B, 0xFFD81B60, 0xFF6D4C41, 0xFF3949AB];
+    final idx = name.codeUnits.fold(0, (a, b) => a + b) % colors.length;
+    return Color(colors[idx]);
+  }
+
+  Color _channelColorLight(String name) {
+    final colors = [0xFFFFB347, 0xFFEF9A9A, 0xFFCE93D8, 0xFF90CAF9, 0xFF80CBC4, 0xFFF48FB1, 0xFFBCAAA4, 0xFF9FA8DA];
+    final idx = name.codeUnits.fold(0, (a, b) => a + b) % colors.length;
+    return Color(colors[idx]);
+  }
+
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
@@ -204,11 +217,12 @@ class _State extends State<LiveTvScreen> {
                             width: isFocused ? 140 : 120,
                             margin: const EdgeInsets.symmetric(horizontal: 4),
                             decoration: BoxDecoration(
-                              color: isFocused ? AppTheme.accentCyan.withOpacity(0.15) : AppTheme.surface,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight,
+                                colors: isFocused ? [_channelColor(ch.name), _channelColorLight(ch.name)] : [_channelColor(ch.name).withOpacity(0.7), _channelColorLight(ch.name).withOpacity(0.5)]),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: isFocused ? AppTheme.accentCyan : AppTheme.border, width: isFocused ? 2 : 0.5),
-                              boxShadow: isFocused ? [BoxShadow(color: AppTheme.accentCyan.withOpacity(0.3), blurRadius: 12)] : null),
-                            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                              border: Border.all(color: isFocused ? Colors.white : Colors.transparent, width: isFocused ? 2 : 0),
+                              boxShadow: isFocused ? [BoxShadow(color: _channelColor(ch.name).withOpacity(0.5), blurRadius: 16)] : null),
                               SizedBox(width: 70, height: 70, child: ClipRRect(borderRadius: BorderRadius.circular(10),
                                 child: ch.logoUrl.isNotEmpty
                                   ? CachedNetworkImage(imageUrl: ch.logoUrl, fit: BoxFit.contain,
