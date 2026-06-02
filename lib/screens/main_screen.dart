@@ -238,8 +238,9 @@ class _MainState extends State<MainScreen> {
     focusNode: FocusNode()..requestFocus(),
     autofocus: true,
     onKey: _onKey,
-    child: WillPopScope(
-      onWillPop: () async { if (_backHandled) { _backHandled = false; return false; } if (_inContent) { setState(() => _inContent = false); return false; } if (Navigator.canPop(context)) return true; _showExitDialog(); return false; },
+    child: PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) { if (didPop) return; if (_backHandled) { _backHandled = false; return; } if (_inContent) { setState(() => _inContent = false); return; } _showExitDialog(); },
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Row(children: [
