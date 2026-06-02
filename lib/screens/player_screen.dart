@@ -120,7 +120,7 @@ class _State extends State<PlayerScreen> {
               if (mounted) { setState(() => _hasError = false); _initPlayer(_playlist[_idx]); }
             });
           } else if (e.betterPlayerEventType == BetterPlayerEventType.initialized) {
-            if (mounted) setState(() { _hasError = false; _isLoading = false; _isPlaying = true; });
+            if (mounted) { setState(() { _hasError = false; _isLoading = false; _isPlaying = true; }); _showControlsTemporary(); }
           }
         },
       ),
@@ -137,16 +137,16 @@ class _State extends State<PlayerScreen> {
 
   void _nextChannel() {
     final next = (_idx + 1) % _playlist.length;
-    setState(() { _idx = next; _isFavorite = _favorites.contains(_playlist[next].id); });
+    setState(() { _idx = next; _isFavorite = _favorites.contains(_playlist[next].id); _showControls = true; });
+    _hideTimer?.cancel();
     _initPlayer(_playlist[next]);
-    _showControlsTemporary();
   }
 
   void _prevChannel() {
     final prev = (_idx - 1 + _playlist.length) % _playlist.length;
-    setState(() { _idx = prev; _isFavorite = _favorites.contains(_playlist[prev].id); });
+    setState(() { _idx = prev; _isFavorite = _favorites.contains(_playlist[prev].id); _showControls = true; });
+    _hideTimer?.cancel();
     _initPlayer(_playlist[prev]);
-    _showControlsTemporary();
   }
 
   @override
