@@ -1,6 +1,6 @@
 name: demon_tv_plus
 description: DemonTv Plus - App de Streaming
-version: 2.4.5+108
+version: 2.4.7+109
 publish_to: 'none'
 
 environment:
