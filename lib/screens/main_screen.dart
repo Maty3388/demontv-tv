@@ -230,71 +230,71 @@ class _MainState extends State<MainScreen> {
 
   Widget _buildSidebar() {
     final items = [
-      _SItem(0, Icons.person_outline, "Mi Perfil", isProfile: true),
+      _SItem(0, Icons.person_outline, "Mi Perfil"),
       _SItem(1, Icons.home_outlined, "Inicio"),
       _SItem(2, Icons.live_tv_outlined, "TV en Vivo"),
       _SItem(3, Icons.movie_outlined, "Peliculas"),
       _SItem(4, Icons.video_library_outlined, "Series"),
       _SItem(5, Icons.eighteen_up_rating_outlined, "Adultos", isAdult: true),
-      
       _SItem(6, Icons.delete_outline, "Borrar Cache", isAction: true),
-      _SItem(7, Icons.logout, "Cerrar Sesion", isRed: true),
+      _SItem(7, Icons.settings_outlined, "Ajustes"),
+      _SItem(8, Icons.logout, "Cerrar Sesion", isRed: true),
     ];
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
+    return Container(
       width: 160,
       color: const Color(0xFF0D0D0D),
       child: Column(children: [
-        const SizedBox(height: 20),
-        // Logo
+        const SizedBox(height: 16),
         Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(children: [
-            Container(width: 34, height: 34,
-              decoration: BoxDecoration(gradient: const LinearGradient(colors: AppTheme.logoGradient), borderRadius: BorderRadius.circular(9)),
-              child: const Center(child: Text("D+", style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)))),
-            const SizedBox(width: 8), const Expanded(child: Text("DemonTv Plus", style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+            Container(width: 32, height: 32,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [Color(0xFFFF8C00), Color(0xFFFFB347)]),
+                borderRadius: BorderRadius.circular(9),
+                boxShadow: [BoxShadow(color: const Color(0xFFFF8C00).withOpacity(0.4), blurRadius: 10)]),
+              child: const Center(child: Text("D+", style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)))),
+            const SizedBox(width: 8),
+            const Expanded(child: Text("DemonTv Plus", style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
           ])),
-        const Divider(color: Colors.white12),
-        Expanded(child: ListView(
-          children: items.map((item) {
-            final isFocused = _sideIdx == item.idx && !_inContent;
-            final isSelected = _sideIdx == item.idx && _inContent;
-            return Column(children: [
-              GestureDetector(
-                onTap: () { setState(() { _sideIdx = item.idx; _inContent = false; }); _selectItem(); },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-                  decoration: BoxDecoration(
-                    color: isFocused ? AppTheme.accentCyan.withOpacity(0.2) : isSelected ? AppTheme.accentCyan.withOpacity(0.1) : Colors.transparent,
-                    borderRadius: BorderRadius.circular(10),
-                    border: isFocused ? Border.all(color: AppTheme.accentCyan, width: 1.5) : null),
-                  child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-                    Icon(item.icon, color: item.isRed ? AppTheme.accentRed : isFocused || isSelected ? AppTheme.accentCyan : AppTheme.textSecondary, size: 18),
-                    const SizedBox(width: 8),
-                      Expanded(child: Text(item.label, style: TextStyle(color: item.isRed ? AppTheme.accentRed : isFocused || isSelected ? AppTheme.accentCyan : AppTheme.textSecondary, fontSize: 12, fontWeight: isFocused || isSelected ? FontWeight.bold : FontWeight.normal), overflow: TextOverflow.ellipsis)),
-                      if (item.isProfile) Icon(_profileExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: AppTheme.accentCyan, size: 14),
-                      if (item.isAdult) const Icon(Icons.lock, color: Colors.orange, size: 11),
-                    ],
-                  ]),
-                ),
-              ),
-              if (item.isProfile && _profileExpanded) Container(
-                margin: const EdgeInsets.fromLTRB(8, 0, 8, 4),
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: const Color(0xFF1A1A1A), borderRadius: BorderRadius.circular(8)),
-                child: Column(children: [
-                  Row(children: [const Icon(Icons.email_outlined, color: AppTheme.accentCyan, size: 11), const SizedBox(width: 4), Expanded(child: Text(_userEmail, style: const TextStyle(color: Colors.white, fontSize: 10), overflow: TextOverflow.ellipsis))]),
-                  const SizedBox(height: 4),
-                  Row(children: [const Icon(Icons.calendar_today, color: AppTheme.textSecondary, size: 10), const SizedBox(width: 4), Text("Vence: $_userExpiry", style: const TextStyle(color: AppTheme.accentCyan, fontSize: 10))]),
+        Container(height: 1, margin: const EdgeInsets.symmetric(horizontal: 12), color: Colors.white10),
+        const SizedBox(height: 4),
+        Expanded(child: ListView(children: items.map((item) {
+          final isFocused = _sideIdx == item.idx && !_inContent;
+          final isSelected = _sideIdx == item.idx && _inContent;
+          return GestureDetector(
+            onTap: () { setState(() { _sideIdx = item.idx; _inContent = false; }); _selectItem(); },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+              decoration: BoxDecoration(
+                color: isFocused ? const Color(0xFFFF8C00).withOpacity(0.15) : isSelected ? const Color(0xFFFF8C00).withOpacity(0.08) : Colors.transparent,
+                borderRadius: BorderRadius.circular(10),
+                border: isFocused ? Border.all(color: const Color(0xFFFF8C00).withOpacity(0.5)) : null),
+              child: Row(children: [
+                AnimatedContainer(duration: const Duration(milliseconds: 150),
+                  width: 3, height: isFocused ? 18 : 0,
+                  decoration: BoxDecoration(color: const Color(0xFFFF8C00), borderRadius: BorderRadius.circular(2)),
+                  margin: const EdgeInsets.only(right: 8)),
+                Icon(item.icon,
+                  color: item.isRed ? AppTheme.accentRed : item.isAction ? const Color(0xFFFF8C00) : isFocused || isSelected ? const Color(0xFFFF8C00) : AppTheme.textSecondary,
+                  size: 17),
+                const SizedBox(width: 8),
+                Expanded(child: Row(children: [
+                  Expanded(child: Text(item.label,
+                    style: TextStyle(
+                      color: item.isRed ? AppTheme.accentRed : isFocused || isSelected ? const Color(0xFFFF8C00) : AppTheme.textSecondary,
+                      fontSize: 11,
+                      fontWeight: isFocused || isSelected ? FontWeight.bold : FontWeight.normal),
+                    overflow: TextOverflow.ellipsis)),
+                  if (item.isAdult) const Icon(Icons.lock, color: Colors.orange, size: 10),
                 ])),
-            ]);
-          }).toList(),
-        )),
-
-      ]),
-    );
+              ])));
+        }).toList())),
+        Container(height: 1, margin: const EdgeInsets.symmetric(horizontal: 12), color: Colors.white10),
+        Padding(padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Text("v2.4.6", style: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 10))),
+      ]));
   }
 }
 
