@@ -107,7 +107,7 @@ class _State extends State<PlayerScreen> {
     _ctrl = BetterPlayerController(
       BetterPlayerConfiguration(
         autoPlay: true, looping: false,
-        fullScreenByDefault: true, allowedScreenSleep: false,
+        fullScreenByDefault: false, allowedScreenSleep: false,
         controlsConfiguration: const BetterPlayerControlsConfiguration(showControls: false),
         eventListener: (e) {
           if (e.betterPlayerEventType == BetterPlayerEventType.play) {
