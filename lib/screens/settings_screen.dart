@@ -91,7 +91,7 @@ class _State extends State<SettingsScreen> {
         const SizedBox(height: 8),
         // Info
         _buildSection('Información', [
-          _buildTile('Versión de la app', Icons.info_outline, subtitle: 'v2.2.7 (Build 90)'),
+          _buildTile('Versión de la app', Icons.info_outline, subtitle: 'v2.4.5 (Build 108)'),
         ]),
         const SizedBox(height: 16),
         // Cerrar sesión
