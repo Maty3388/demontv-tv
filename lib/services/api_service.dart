@@ -96,17 +96,17 @@ class ApiService {
 
 
   static Future<List<Channel>> getFavorites() async {
-    final res = await http.get(Uri.parse('\$baseUrl/favorites'), headers: _headers);
+    final res = await http.get(Uri.parse('$baseUrl/favorites'), headers: _headers);
     final data = jsonDecode(res.body);
     return (data['channels'] as List).map((c) => _channelFromJson(c)).toList();
   }
 
   static Future<void> addFavorite(String channelId) async {
-    await http.post(Uri.parse('\$baseUrl/favorites/\$channelId'), headers: _headers);
+    await http.post(Uri.parse('$baseUrl/favorites/$channelId'), headers: _headers);
   }
 
   static Future<void> removeFavorite(String channelId) async {
-    await http.delete(Uri.parse('\$baseUrl/favorites/\$channelId'), headers: _headers);
+    await http.delete(Uri.parse('$baseUrl/favorites/$channelId'), headers: _headers);
   }
 
   static Future<List<Channel>> getChannels({String? search, String? category, bool featured = false}) async {

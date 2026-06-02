@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -10,15 +11,18 @@ class SettingsScreen extends StatefulWidget {
 class _State extends State<SettingsScreen> {
   bool _adultContent = false, _mobileMode = false;
   Map? _profile;
+  String _userEmail = '';
+  String _userExpiry = '';
 
   @override
   void initState() { super.initState(); _loadProfile(); }
 
   Future<void> _loadProfile() async {
-    try {
-      final r = await ApiService.getChannels();
-      // Solo para verificar conexión
-    } catch (_) {}
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _userEmail  = prefs.getString('userEmail') ?? '';
+      _userExpiry = prefs.getString('userExpiry') ?? '';
+    });
   }
 
   @override
@@ -31,8 +35,8 @@ class _State extends State<SettingsScreen> {
         child: const Center(child: Text('😎', style: TextStyle(fontSize: 46))))),
       const SizedBox(height: 28),
       _SectionLabel('CUENTA'),
-      _Item(icon: Icons.person_outline, label: 'darioluna@tv.es', onTap: () {}),
-      _Item(icon: Icons.calendar_today_outlined, label: '10/06/2026', onTap: () {}),
+      _Item(icon: Icons.person_outline, label: _userEmail.isEmpty ? 'Sin email' : _userEmail, onTap: () {}),
+      _Item(icon: Icons.calendar_today_outlined, label: _userExpiry.isEmpty ? 'Sin vencimiento' : _userExpiry, onTap: () {}),
       const _Div(),
       _SectionLabel('PREFERENCIAS'),
       _Toggle(icon: Icons.favorite_border, label: 'Contenido para adultos', value: _adultContent, onChanged: (v) => setState(() => _adultContent = v)),

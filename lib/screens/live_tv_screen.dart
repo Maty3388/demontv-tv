@@ -24,7 +24,6 @@ class _State extends State<LiveTvScreen> {
   final List<List<FocusNode>> _chFocusNodes = [];
 
   @override
-  @override
   void initState() {
     super.initState();
     _loadWithToken();
