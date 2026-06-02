@@ -227,5 +227,5 @@ class _UpdateDialogState extends State<_UpdateDialog> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
             child: const Text('Cancelar', style: TextStyle(fontWeight: FontWeight.w600))),
         ]),
-      )));
+      ))));
 }
