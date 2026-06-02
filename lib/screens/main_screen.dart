@@ -60,7 +60,20 @@ class _MainState extends State<MainScreen> {
   void _showExitDialog() async {
     final exit = await showDialog<bool>(
       context: context,
-      builder: (c) => Dialog(
+      builder: (c) => RawKeyboardListener(
+        focusNode: FocusNode()..requestFocus(),
+        autofocus: true,
+        onKey: (event) {
+          if (event is RawKeyDownEvent) {
+            if (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter) {
+              Navigator.pop(c, true);
+            }
+            if (event.logicalKey == LogicalKeyboardKey.escape || event.logicalKey == LogicalKeyboardKey.goBack) {
+              Navigator.pop(c, false);
+            }
+          }
+        },
+        child: Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
           width: 320,
