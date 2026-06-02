@@ -73,8 +73,8 @@ class _UpdateDialogState extends State<_UpdateDialog> {
       if (await Permission.requestInstallPackages.isDenied) {
         await Permission.requestInstallPackages.request();
       }
-      final dir = await getExternalStorageDirectory() ?? await getTemporaryDirectory();
-      final path = dir.path + '/demontv_update.apk';
+      final dir = await getTemporaryDirectory();
+      final path = '${dir.path}/demontv_update.apk';
       _cancelToken = CancelToken();
       await Dio().download(
         widget.apkUrl, path,
