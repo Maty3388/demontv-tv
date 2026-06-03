@@ -44,7 +44,7 @@ class _MainState extends State<MainScreen> {
       if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
         if (_sideIdx > 0) setState(() => _sideIdx--);
       } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-        if (_sideIdx < 8) setState(() => _sideIdx++);
+        if (_sideIdx < 7) setState(() => _sideIdx++);
       } else if (event.logicalKey == LogicalKeyboardKey.arrowRight ||
                  event.logicalKey == LogicalKeyboardKey.select ||
                  event.logicalKey == LogicalKeyboardKey.enter) {
@@ -285,7 +285,7 @@ class _MainState extends State<MainScreen> {
       _SItem(5, Icons.eighteen_up_rating_outlined, "Adultos", isAdult: true),
       _SItem(6, Icons.delete_outline, "Borrar Cache", isAction: true),
       _SItem(7, Icons.settings_outlined, "Ajustes"),
-      _SItem(8, Icons.logout, "Cerrar Sesion", isRed: true),
+
     ];
     return Container(
       width: 160,

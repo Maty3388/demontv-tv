@@ -42,8 +42,46 @@ class _State extends State<SettingsScreen> {
     if (value is String) await prefs.setString(key, value);
   }
 
+  Future<void> _clearCache() async {
+    ApiService.clearCache();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('channel_cache');
+    await prefs.remove('channel_cache_time');
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Caché eliminado'), backgroundColor: Color(0xFFFF8C00)));
+  }
+
+  Future<void> _clearFavorites() async {
+    showDialog(context: context, builder: (ctx) => AlertDialog(
+      backgroundColor: const Color(0xFF1E1E1E),
+      title: const Text('Limpiar favoritos', style: TextStyle(color: Colors.white)),
+      content: const Text('Se eliminarán todos los favoritos.', style: TextStyle(color: Colors.white54)),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar', style: TextStyle(color: Colors.white54))),
+        TextButton(onPressed: () async {
+          Navigator.pop(ctx);
+          try {
+            final favs = await ApiService.getFavorites();
+            for (final f in favs) await ApiService.removeFavorite(f.id);
+            if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Favoritos eliminados'), backgroundColor: Color(0xFFFF8C00)));
+          } catch (_) {}
+        }, child: const Text('Eliminar', style: TextStyle(color: Colors.red))),
+      ]));
+  }
+
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) => RawKeyboardListener(
+    focusNode: FocusNode()..requestFocus(),
+    autofocus: true,
+    onKey: (event) {
+      if (event is RawKeyDownEvent) {
+        if (event.logicalKey == LogicalKeyboardKey.escape || event.logicalKey == LogicalKeyboardKey.goBack) {
+          Navigator.pop(context);
+        }
+      }
+    },
+    child: Scaffold(
     backgroundColor: const Color(0xFF121212),
     body: SafeArea(child: Column(children: [
       // Header
@@ -84,9 +122,9 @@ class _State extends State<SettingsScreen> {
         const SizedBox(height: 8),
         // Almacenamiento
         _buildSection('Almacenamiento', [
-          _buildTile('Limpiar caché', Icons.folder_outlined, subtitle: 'Usando 8.7 MB', onTap: () => _confirm('¿Limpiar caché?', 'Caché eliminado')),
+          _buildTile('Limpiar caché', Icons.folder_outlined, subtitle: 'Usando 8.7 MB', onTap: () => _clearCache()),
           _buildTile('Limpiar historial', Icons.history, subtitle: 'Eliminar historial de reproducción', onTap: () => _confirm('¿Limpiar historial?', 'Historial eliminado')),
-          _buildTile('Limpiar favoritos', Icons.favorite_border, subtitle: 'Eliminar todos los favoritos guardados', onTap: () => _confirm('¿Limpiar favoritos?', 'Favoritos eliminados')),
+          _buildTile('Limpiar favoritos', Icons.favorite_border, subtitle: 'Eliminar todos los favoritos guardados', onTap: () => _clearFavorites()),
         ]),
         const SizedBox(height: 8),
         // Info
@@ -110,7 +148,7 @@ class _State extends State<SettingsScreen> {
         const SizedBox(height: 32),
       ]))),
     ])),
-  );
+  ));
 
   Widget _buildProfileCard() => Container(
     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -197,6 +235,8 @@ class _State extends State<SettingsScreen> {
           if (onTap != null) const Icon(Icons.chevron_right, color: Colors.white38, size: 18),
         ])));
 
+  Widget _wrapRkl(Widget child) => child;
+
   void _showQualityPicker() => showDialog(context: context, builder: (ctx) => SimpleDialog(
     backgroundColor: const Color(0xFF1E1E1E),
     title: const Text('Calidad de video', style: TextStyle(color: Colors.white)),
@@ -219,6 +259,8 @@ class _State extends State<SettingsScreen> {
       TextButton(onPressed: () { Navigator.pop(ctx); ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(success), backgroundColor: _orange)); },
         child: const Text('Confirmar', style: TextStyle(color: _orange))),
     ]));
+
+  void _closeSettings() => Navigator.pop(context);
 
   void _logout() => showDialog(context: context, builder: (ctx) => AlertDialog(
     backgroundColor: const Color(0xFF1E1E1E),
