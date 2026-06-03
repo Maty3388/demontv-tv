@@ -44,7 +44,7 @@ class _MainState extends State<MainScreen> {
       if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
         if (_sideIdx > 0) setState(() => _sideIdx--);
       } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-        if (_sideIdx < 7) setState(() => _sideIdx++);
+        if (_sideIdx < 8) setState(() => _sideIdx++);
       } else if (event.logicalKey == LogicalKeyboardKey.arrowRight ||
                  event.logicalKey == LogicalKeyboardKey.select ||
                  event.logicalKey == LogicalKeyboardKey.enter) {
@@ -340,7 +340,7 @@ class _MainState extends State<MainScreen> {
         }).toList())),
         Container(height: 1, margin: const EdgeInsets.symmetric(horizontal: 12), color: Colors.white10),
         Padding(padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Text("v2.4.6", style: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 10))),
+          child: Text("v2.6.1", style: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 10))),
       ]));
   }
 }
