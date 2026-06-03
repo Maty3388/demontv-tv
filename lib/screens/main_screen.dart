@@ -242,6 +242,7 @@ class _MainState extends State<MainScreen> {
       onWillPop: () async {
         if (_backHandled) { _backHandled = false; return false; }
         if (_inContent) { setState(() => _inContent = false); return false; }
+        _showExitDialog();
         return false;
       },
       child: Scaffold(
