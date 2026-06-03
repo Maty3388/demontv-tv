@@ -239,8 +239,8 @@ class _MainState extends State<MainScreen> {
     autofocus: true,
     onKey: _onKey,
     child: PopScope(
-      canPop: _inContent,
-      onPopInvoked: (didPop) { if (didPop) return; if (_backHandled) { _backHandled = false; return; } _showExitDialog(); },
+      canPop: false,
+      onPopInvoked: (didPop) { if (didPop) return; if (_backHandled) { _backHandled = false; return; } if (_inContent) { setState(() => _inContent = false); return; } _showExitDialog(); },
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Row(children: [
