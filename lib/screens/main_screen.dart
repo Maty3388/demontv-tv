@@ -225,7 +225,7 @@ class _MainState extends State<MainScreen> {
   Widget _buildContent() {
     switch (_sideIdx) {
       case 1: return const HomeScreen();
-      case 2: return _TVLiveScreen(onBack: () { _backHandled = true; setState(() => _inContent = false); Future.delayed(const Duration(milliseconds: 600), () => _backHandled = false); });
+      case 2: return _TVLiveScreen(onBack: () { setState(() => _inContent = false); });
       case 3: return VodScreen(type: "movies", onBack: () { _backHandled = true; setState(() => _inContent = false); Future.delayed(const Duration(milliseconds: 300), () => _backHandled = false); });
       case 4: return VodScreen(type: "series", onBack: () { _backHandled = true; setState(() => _inContent = false); Future.delayed(const Duration(milliseconds: 300), () => _backHandled = false); });
       case 5: return _TVLiveScreen(onBack: () { _backHandled = true; setState(() => _inContent = false); Future.delayed(const Duration(milliseconds: 600), () => _backHandled = false); }, filterCategory: 'ADULTOS');
@@ -239,8 +239,8 @@ class _MainState extends State<MainScreen> {
     autofocus: true,
     onKey: _onKey,
     child: PopScope(
-      canPop: false,
-      onPopInvoked: (didPop) { if (didPop) return; if (_backHandled) { _backHandled = false; return; } if (_inContent) { setState(() => _inContent = false); return; } _showExitDialog(); },
+      canPop: _inContent,
+      onPopInvoked: (didPop) { if (didPop) return; if (_backHandled) { _backHandled = false; return; } _showExitDialog(); },
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Row(children: [
