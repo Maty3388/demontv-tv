@@ -238,12 +238,19 @@ class _MainState extends State<MainScreen> {
     focusNode: FocusNode()..requestFocus(),
     autofocus: true,
     onKey: _onKey,
+      child: PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        if (_backHandled) { _backHandled = false; return; }
+        if (_inContent) { setState(() => _inContent = false); return; }
+      },
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Row(children: [
         _buildSidebar(),
         Expanded(child: _inContent ? _buildContent() : const HomeScreen()),
-      ])),
+      ]))),
   );
 
   Widget _buildWelcome() => Container(
