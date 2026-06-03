@@ -225,7 +225,7 @@ class _MainState extends State<MainScreen> {
   Widget _buildContent() {
     switch (_sideIdx) {
       case 1: return const HomeScreen();
-      case 2: return _TVLiveScreen(onBack: () { setState(() => _inContent = false); });
+      case 2: return _TVLiveScreen(onBack: () { _backHandled = true; setState(() => _inContent = false); Future.delayed(const Duration(milliseconds: 500), () => _backHandled = false); });
       case 3: return VodScreen(type: "movies", onBack: () { _backHandled = true; setState(() => _inContent = false); Future.delayed(const Duration(milliseconds: 300), () => _backHandled = false); });
       case 4: return VodScreen(type: "series", onBack: () { _backHandled = true; setState(() => _inContent = false); Future.delayed(const Duration(milliseconds: 300), () => _backHandled = false); });
       case 5: return _TVLiveScreen(onBack: () { _backHandled = true; setState(() => _inContent = false); Future.delayed(const Duration(milliseconds: 600), () => _backHandled = false); }, filterCategory: 'ADULTOS');
