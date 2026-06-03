@@ -238,17 +238,11 @@ class _MainState extends State<MainScreen> {
     focusNode: FocusNode()..requestFocus(),
     autofocus: true,
     onKey: _onKey,
-      child: PopScope(
-      canPop: false,
-      onPopInvoked: (didPop) {
-        if (didPop) return;
-        if (_backHandled) { _backHandled = false; return; }
-        if (_inContent) { setState(() => _inContent = false); return; }
-        // En sidebar - no hacer nada, no salir de la app
-      },
-        if (didPop) return;
-        if (_backHandled) { _backHandled = false; return; }
-        if (_inContent) { setState(() => _inContent = false); return; }
+    child: WillPopScope(
+      onWillPop: () async {
+        if (_backHandled) { _backHandled = false; return false; }
+        if (_inContent) { setState(() => _inContent = false); return false; }
+        return false;
       },
       child: Scaffold(
         backgroundColor: Colors.black,
