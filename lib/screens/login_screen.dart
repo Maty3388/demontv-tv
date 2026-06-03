@@ -91,7 +91,7 @@ class _LoginState extends State<LoginScreen> {
             const SizedBox(height: 6),
             const Text('DemonTv Plus', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
-            const Text('v1.2.0', style: TextStyle(color: Colors.white30, fontSize: 13)),
+            const Text('v2.5.9', style: TextStyle(color: Colors.white30, fontSize: 13)),
           ]),
         )),
         Container(width: 1, color: Colors.white12),
@@ -131,13 +131,13 @@ class _LoginState extends State<LoginScreen> {
                   final focused = _btnFocus.hasFocus || _focusIdx == 2;
                   return Container(height: 56,
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(colors: [Color(0xFF00E5FF), Color(0xFFAA00FF)], begin: Alignment.centerLeft, end: Alignment.centerRight),
+                      gradient: const LinearGradient(colors: [Color(0xFFFF8C00), Color(0xFFFFB347)], begin: Alignment.centerLeft, end: Alignment.centerRight),
                       borderRadius: BorderRadius.circular(28),
                       border: focused ? Border.all(color: Colors.white, width: 3) : null,
                       boxShadow: focused ? [const BoxShadow(color: Colors.white24, blurRadius: 20)] : null),
                     child: Center(child: _loading
-                      ? const CircularProgressIndicator(color: Colors.black, strokeWidth: 2.5)
-                      : const Text('Iniciar Sesion', style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold))));
+                      ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5)
+                      : const Text('Iniciar Sesion', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold))));
                 }),
               ),
             ),
@@ -156,7 +156,7 @@ class _LoginState extends State<LoginScreen> {
       child: Container(
         decoration: BoxDecoration(
           color: const Color(0xFF1E1E1E), borderRadius: BorderRadius.circular(12),
-          border: focused ? Border.all(color: AppTheme.accentCyan, width: 2) : Border.all(color: Colors.transparent, width: 2)),
+          border: focused ? Border.all(color: const Color(0xFFFF8C00), width: 2) : Border.all(color: Colors.transparent, width: 2)),
         child: Row(children: [
           Padding(padding: const EdgeInsets.symmetric(horizontal: 14), child: Icon(icon, color: Colors.white54, size: 22)),
           Expanded(child: TextField(

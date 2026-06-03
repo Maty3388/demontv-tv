@@ -244,6 +244,11 @@ class _MainState extends State<MainScreen> {
         if (didPop) return;
         if (_backHandled) { _backHandled = false; return; }
         if (_inContent) { setState(() => _inContent = false); return; }
+        // En sidebar - no hacer nada, no salir de la app
+      },
+        if (didPop) return;
+        if (_backHandled) { _backHandled = false; return; }
+        if (_inContent) { setState(() => _inContent = false); return; }
       },
       child: Scaffold(
         backgroundColor: Colors.black,

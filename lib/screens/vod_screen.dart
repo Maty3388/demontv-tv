@@ -97,13 +97,13 @@ class _VodState extends State<VodScreen> {
     body: Focus(
       focusNode: _focusNode,
       autofocus: true,
-      onKeyEvent: (_, e) { _handleKey(e); return KeyEventResult.ignored; },
+      onKeyEvent: (_, e) { _handleKey(e); return KeyEventResult.handled; },
       child: _loading
-        ? const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan))
+        ? const Center(child: CircularProgressIndicator(color: Color(0xFFFF8C00)))
         : ListView(controller: _listCtrl, padding: const EdgeInsets.only(bottom: 20), children: [
             // Header
             Padding(padding: const EdgeInsets.fromLTRB(16,16,16,4), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(isMovies ? 'Bienvenido' : 'Series', style: const TextStyle(color: AppTheme.accentCyan, fontSize: 14, fontWeight: FontWeight.bold)),
+              Text(isMovies ? 'Bienvenido' : 'Series', style: const TextStyle(color: Color(0xFFFF8C00), fontSize: 14, fontWeight: FontWeight.bold)),
               Text(isMovies ? 'Listo para disfrutar 🍿' : '¿Qué serie querés ver?', style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
             ])),
             // Carousel
@@ -166,9 +166,9 @@ class _CategoryRow extends StatelessWidget {
         onTap: () => onTap(items[i]),
         child: Container(width: 90, margin: const EdgeInsets.only(right: 8),
           decoration: BoxDecoration(
-            color: i == selectedIdx ? AppTheme.accentCyan.withOpacity(0.2) : AppTheme.surface,
+            color: i == selectedIdx ? const Color(0xFFFF8C00).withOpacity(0.2) : AppTheme.surface,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: i == selectedIdx ? AppTheme.accentCyan : Colors.transparent, width: 1.5)),
+            border: Border.all(color: i == selectedIdx ? const Color(0xFFFF8C00) : Colors.transparent, width: 1.5)),
           child: Column(children: [
             Expanded(child: ClipRRect(borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
               child: items[i].posterUrl.isNotEmpty
