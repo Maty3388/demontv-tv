@@ -52,7 +52,7 @@ class _MainState extends State<MainScreen> {
       }
     } else {
       if (event.logicalKey == LogicalKeyboardKey.escape || event.logicalKey == LogicalKeyboardKey.goBack) {
-        setState(() => _inContent = false);
+        if (_inContent) setState(() => _inContent = false);
       }
     }
   }
@@ -238,16 +238,12 @@ class _MainState extends State<MainScreen> {
     focusNode: FocusNode()..requestFocus(),
     autofocus: true,
     onKey: _onKey,
-    child: PopScope(
-      canPop: false,
-      onPopInvoked: (didPop) { if (didPop) return; if (_backHandled) { _backHandled = false; return; } if (_inContent) { setState(() => _inContent = false); return; } _showExitDialog(); },
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Row(children: [
         _buildSidebar(),
         Expanded(child: _inContent ? _buildContent() : const HomeScreen()),
-      ]),
-      )),
+      ])),
   );
 
   Widget _buildWelcome() => Container(
