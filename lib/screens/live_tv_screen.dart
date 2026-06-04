@@ -22,6 +22,7 @@ class _State extends State<LiveTvScreen> {
   int _chIdx = 0;
   final List<FocusNode> _catFocusNodes = [];
   final List<List<FocusNode>> _chFocusNodes = [];
+  final ScrollController _scrollCtrl = ScrollController();
 
   @override
   void initState() {
@@ -38,6 +39,8 @@ class _State extends State<LiveTvScreen> {
   void dispose() {
     _searchFocus.dispose();
     for (final f in _catFocusNodes) f.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    _scrollCtrl.dispose();
     for (final row in _chFocusNodes) for (final f in row) f.dispose();
     super.dispose();
   }
@@ -115,6 +118,18 @@ class _State extends State<LiveTvScreen> {
     final idx = name.codeUnits.fold(0, (a, b) => a + b) % colors.length;
     return Color(colors[idx][1]);
   }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _chFocusNodes.isNotEmpty && _catIdx < _chFocusNodes.length) {
+          final row = _chFocusNodes[_catIdx];
+          if (_chIdx < row.length) FocusScope.of(context).requestFocus(row[_chIdx]);
+        }
+      });
+    }
+  }
+
   void _handleChannelKey(int catI, int chI, KeyEvent event) {
     if (event is! KeyDownEvent) return;
     final cats = _grouped.values.toList();
@@ -145,11 +160,19 @@ class _State extends State<LiveTvScreen> {
         if (_chFocusNodes[prevCat].isNotEmpty) {
           FocusScope.of(context).requestFocus(_chFocusNodes[prevCat][0]);
           setState(() { _catIdx = prevCat; _chIdx = 0; });
+          _scrollCtrl.animateTo(prevCat * 160.0, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
         }
       }
     } else if (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter) {
       final channel = cats[catI][chI];
-      Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: channel)));
+      Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: channel))).then((_) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _chFocusNodes.isNotEmpty && _catIdx < _chFocusNodes.length) {
+            final row = _chFocusNodes[_catIdx];
+            if (_chIdx < row.length) FocusScope.of(context).requestFocus(row[_chIdx]);
+          }
+        });
+      });
     }
   }
 
