@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
+import '../services/update_checker.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -91,7 +92,7 @@ class _LoginState extends State<LoginScreen> {
             const SizedBox(height: 6),
             const Text('DemonTv Plus', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
-            const Text('v2.5.9', style: TextStyle(color: Colors.white30, fontSize: 13)),
+            const Text('v${UpdateChecker.currentVersion}', style: TextStyle(color: Colors.white30, fontSize: 13)),
           ]),
         )),
         Container(width: 1, color: Colors.white12),

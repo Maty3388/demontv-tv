@@ -42,8 +42,8 @@ class _State extends State<SplashScreen> with SingleTickerProviderStateMixin {
       Center(child: FadeTransition(opacity: _fade, child: Column(mainAxisSize: MainAxisSize.min, children: [
         Row(mainAxisSize: MainAxisSize.min, children: [
           ShaderMask(
-            shaderCallback: (b) => const LinearGradient(colors: [Color(0xFFFFD700), Color(0xFFFFA500)]).createShader(b),
-            child: const Text('D+', style: TextStyle(color: Colors.white, fontSize: 52, fontWeight: FontWeight.w900, shadows: [Shadow(color: Color(0xFFFFD700), blurRadius: 10)]))),
+            shaderCallback: (b) => const LinearGradient(colors: [Color(0xFFFF8C00), Color(0xFFFFB347)]).createShader(b),
+            child: const Text('D+', style: TextStyle(color: Colors.white, fontSize: 52, fontWeight: FontWeight.w900, shadows: [Shadow(color: Color(0xFFFF8C00), blurRadius: 10)]))),
           const SizedBox(width: 12),
           const Text('DemonTv Plus', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w700)),
         ]),
@@ -60,11 +60,11 @@ class _WavePainter extends CustomPainter {
     final rect = Offset.zero & size;
     canvas.drawRect(rect, Paint()..shader = const LinearGradient(
       begin: Alignment.bottomLeft, end: Alignment.topRight,
-      colors: [Color(0xFF0A0A0A), Color(0xFF1A1500), Color(0xFF0A0A0A), Color(0xFF1A1200), Color(0xFF0A0A0A)],
+      colors: [Color(0xFF0A0A0A), Color(0xFF1A0800), Color(0xFF0A0A0A), Color(0xFF1A0500), Color(0xFF0A0A0A)],
       stops: [0.0, 0.25, 0.5, 0.75, 1.0],
     ).createShader(rect));
     for (int w = 0; w < 6; w++) {
-      _drawWave(canvas, size, 0.15 + w * 0.15, const Color(0xFFFFD700), 1.0);
+      _drawWave(canvas, size, 0.15 + w * 0.15, const Color(0xFFFF8C00), 1.0);
     }
   }
   void _drawWave(Canvas canvas, Size size, double yFraction, Color color, double stroke) {

@@ -10,6 +10,7 @@ import 'dart:convert';
 
 class UpdateChecker {
   static const _currentVersion = '2.4.5';
+  static String get currentVersion => _currentVersion;
   static const _apiUrl = 'http://149.104.92.205:25461/app/version';
 
   static Future<void> check(BuildContext context) async {
