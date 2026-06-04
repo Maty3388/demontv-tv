@@ -201,7 +201,7 @@ class _MainState extends State<MainScreen> {
         backgroundColor: const Color(0xFF1C1C1E),
         title: const Text("Contenido Adultos", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Icon(Icons.lock, color: AppTheme.accentCyan, size: 48),
+          const Icon(Icons.lock, color: const Color(0xFFFF8C00), size: 48),
           const SizedBox(height: 16),
           TextField(controller: pin, obscureText: true, keyboardType: TextInputType.number,
             maxLength: 4, textAlign: TextAlign.center, autofocus: true,
@@ -216,7 +216,7 @@ class _MainState extends State<MainScreen> {
           TextButton(onPressed: () {
             if (pin.text == _adultPin) { ApiService.clearCache(); Navigator.pop(ctx); setState(() { _sideIdx = 5; _inContent = true; }); }
             else set(() => error = "PIN incorrecto");
-          }, child: const Text("ENTRAR", style: TextStyle(color: AppTheme.accentCyan, fontWeight: FontWeight.bold))),
+          }, child: const Text("ENTRAR", style: TextStyle(color: const Color(0xFFFF8C00), fontWeight: FontWeight.bold))),
         ],
       ),
     ));
@@ -470,7 +470,7 @@ class _TVLiveState extends State<_TVLiveScreen> {
             gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF1A0A2E), Color(0xFF0A0A0A)])),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              const Icon(Icons.live_tv, color: AppTheme.accentCyan, size: 18),
+              const Icon(Icons.live_tv, color: const Color(0xFFFF8C00), size: 18),
               const SizedBox(width: 8),
               const Text("TV en Vivo", style: TextStyle(color: Color(0xFFFFD700), fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1)),
               const Spacer(),
@@ -479,8 +479,8 @@ class _TVLiveState extends State<_TVLiveScreen> {
               GestureDetector(
                 onTap: () => setState(() => _showSearch = !_showSearch),
                 child: Container(padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(color: _showSearch ? AppTheme.accentCyan.withOpacity(0.2) : Colors.transparent, borderRadius: BorderRadius.circular(8), border: _showSearch ? Border.all(color: AppTheme.accentCyan) : null),
-                  child: Icon(Icons.search, color: _showSearch ? AppTheme.accentCyan : AppTheme.textSecondary, size: 18))),
+                  decoration: BoxDecoration(color: _showSearch ? const Color(0xFFFF8C00).withOpacity(0.2) : Colors.transparent, borderRadius: BorderRadius.circular(8), border: _showSearch ? Border.all(color: const Color(0xFFFF8C00)) : null),
+                  child: Icon(Icons.search, color: _showSearch ? const Color(0xFFFF8C00) : AppTheme.textSecondary, size: 18))),
             ]),
             if (_showSearch) ...[const SizedBox(height: 10),
               TextField(
@@ -548,7 +548,7 @@ class _TVLiveState extends State<_TVLiveScreen> {
         ],
         // Lista de categorias
         Expanded(child: _loading
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan))
+          ? const Center(child: CircularProgressIndicator(color: const Color(0xFFFF8C00)))
           : _all.isEmpty
             ? const Center(child: Text("Sin canales", style: TextStyle(color: AppTheme.textSecondary, fontSize: 16)))
             : ListView.builder(
@@ -562,7 +562,7 @@ class _TVLiveState extends State<_TVLiveScreen> {
                     Padding(padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
                       child: Row(children: [
                         AnimatedContainer(duration: const Duration(milliseconds: 200), width: 3, height: 16,
-                          decoration: BoxDecoration(color: catIdx == _catIdx ? AppTheme.accentCyan : Colors.transparent, borderRadius: BorderRadius.circular(2))),
+                          decoration: BoxDecoration(color: catIdx == _catIdx ? const Color(0xFFFF8C00) : Colors.transparent, borderRadius: BorderRadius.circular(2))),
                         const SizedBox(width: 8),
                         Text(cat, style: TextStyle(color: catIdx == _catIdx ? const Color(0xFFFFD700) : const Color(0xFFFFD700), fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.8)),
                         const SizedBox(width: 8),
@@ -629,7 +629,7 @@ class _WelcomeChannelsState extends State<_WelcomeChannels> {
 
   @override
   Widget build(BuildContext context) => _loading
-    ? const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan))
+    ? const Center(child: CircularProgressIndicator(color: const Color(0xFFFF8C00)))
     : _grouped.isEmpty
       ? const Center(child: Text("No hay canales", style: TextStyle(color: AppTheme.textSecondary)))
       : ListView.builder(
@@ -642,7 +642,7 @@ class _WelcomeChannelsState extends State<_WelcomeChannels> {
             return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Padding(padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
                 child: Row(children: [
-                  Container(width: 3, height: 14, decoration: BoxDecoration(color: AppTheme.accentCyan, borderRadius: BorderRadius.circular(2))),
+                  Container(width: 3, height: 14, decoration: BoxDecoration(color: const Color(0xFFFF8C00), borderRadius: BorderRadius.circular(2))),
                   const SizedBox(width: 8),
                   Text(cat, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.8)),
                 ])),
@@ -703,10 +703,10 @@ class _ChannelCardState extends State<_ChannelCard> {
       width: widget.selected ? 120 : 105,
       margin: const EdgeInsets.only(right: 8),
       decoration: BoxDecoration(
-        color: widget.selected ? AppTheme.accentCyan.withOpacity(0.15) : _bgColor,
+        color: widget.selected ? const Color(0xFFFF8C00).withOpacity(0.15) : _bgColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: widget.selected ? AppTheme.accentCyan : AppTheme.border, width: widget.selected ? 2 : 0.5),
-        boxShadow: widget.selected ? [BoxShadow(color: AppTheme.accentCyan.withOpacity(0.3), blurRadius: 10)] : null),
+        border: Border.all(color: widget.selected ? const Color(0xFFFF8C00) : AppTheme.border, width: widget.selected ? 2 : 0.5),
+        boxShadow: widget.selected ? [BoxShadow(color: const Color(0xFFFF8C00).withOpacity(0.3), blurRadius: 10)] : null),
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         widget.channel.logoUrl.isNotEmpty
           ? CachedNetworkImage(imageUrl: widget.channel.logoUrl, width: 52, height: 38, fit: BoxFit.contain, errorWidget: (_, __, ___) => const Icon(Icons.tv, color: AppTheme.textHint, size: 28), fadeInDuration: Duration.zero)

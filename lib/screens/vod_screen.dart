@@ -127,7 +127,7 @@ class _VodState extends State<VodScreen> {
               // Indicadores
               Row(mainAxisAlignment: MainAxisAlignment.center, children: List.generate(_featured.length, (i) => Container(
                 width: i == _carouselIdx ? 16 : 6, height: 6, margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
-                decoration: BoxDecoration(color: i == _carouselIdx ? AppTheme.accentCyan : Colors.white24, borderRadius: BorderRadius.circular(3))))),
+                decoration: BoxDecoration(color: i == _carouselIdx ? const Color(0xFFFF8C00) : Colors.white24, borderRadius: BorderRadius.circular(3))))),
             ],
             // Categorías
             ..._grouped.entries.toList().asMap().entries.map((entry) {

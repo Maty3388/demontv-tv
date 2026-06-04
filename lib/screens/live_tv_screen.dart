@@ -165,9 +165,9 @@ class _State extends State<LiveTvScreen> {
           GestureDetector(
             onTap: () { setState(() => _showSearch = !_showSearch); if (_showSearch) FocusScope.of(context).requestFocus(_searchFocus); },
             child: Container(padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: _showSearch ? AppTheme.accentCyan.withOpacity(0.2) : AppTheme.surface, borderRadius: BorderRadius.circular(10),
-                border: _showSearch ? Border.all(color: AppTheme.accentCyan) : null),
-              child: Icon(Icons.search, color: _showSearch ? AppTheme.accentCyan : AppTheme.textSecondary, size: 22))),
+              decoration: BoxDecoration(color: _showSearch ? const Color(0xFFFF8C00).withOpacity(0.2) : AppTheme.surface, borderRadius: BorderRadius.circular(10),
+                border: _showSearch ? Border.all(color: const Color(0xFFFF8C00)) : null),
+              child: Icon(Icons.search, color: _showSearch ? const Color(0xFFFF8C00) : AppTheme.textSecondary, size: 22))),
         ])),
       // Barra de busqueda
       if (_showSearch) Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -185,7 +185,7 @@ class _State extends State<LiveTvScreen> {
       const SizedBox(height: 8),
       // Lista de canales
       Expanded(child: _loading
-        ? const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan))
+        ? const Center(child: CircularProgressIndicator(color: const Color(0xFFFF8C00)))
         : _channels.isEmpty
           ? const Center(child: Text('Sin canales', style: TextStyle(color: AppTheme.textSecondary)))
           : ListView(padding: const EdgeInsets.only(bottom: 20),
@@ -195,7 +195,7 @@ class _State extends State<LiveTvScreen> {
                 final channels = entry.value.value;
                 return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Padding(padding: const EdgeInsets.fromLTRB(16,16,16,10),
-                    child: Text(cat, style: const TextStyle(color: AppTheme.accentCyan, fontSize: 14, fontWeight: FontWeight.w800, letterSpacing: 1.1))),
+                    child: Text(cat, style: const TextStyle(color: const Color(0xFFFF8C00), fontSize: 14, fontWeight: FontWeight.w800, letterSpacing: 1.1))),
                   SizedBox(height: 130, child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 12),
