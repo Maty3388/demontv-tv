@@ -91,7 +91,6 @@ class _State extends State<PlayerScreen> {
         BetterPlayerDataSourceType.network, url,
         headers: headers, liveStream: ch.isLive,
         videoFormat: BetterPlayerVideoFormat.hls,
-        useAsmsList: true,
         bufferingConfiguration: const BetterPlayerBufferingConfiguration(
           minBufferMs: 3000, maxBufferMs: 15000,
           bufferForPlaybackMs: 1500, bufferForPlaybackAfterRebufferMs: 3000),
