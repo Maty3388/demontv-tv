@@ -91,9 +91,10 @@ class _State extends State<PlayerScreen> {
         BetterPlayerDataSourceType.network, url,
         headers: headers, liveStream: ch.isLive,
         videoFormat: BetterPlayerVideoFormat.hls,
+        useAsmsList: true,
         bufferingConfiguration: const BetterPlayerBufferingConfiguration(
-          minBufferMs: 2000, maxBufferMs: 10000,
-          bufferForPlaybackMs: 1000, bufferForPlaybackAfterRebufferMs: 2000),
+          minBufferMs: 3000, maxBufferMs: 15000,
+          bufferForPlaybackMs: 1500, bufferForPlaybackAfterRebufferMs: 3000),
       );
     } else {
       dataSource = BetterPlayerDataSource(
@@ -109,6 +110,7 @@ class _State extends State<PlayerScreen> {
         autoPlay: true, looping: false,
         fullScreenByDefault: true, allowedScreenSleep: false,
         controlsConfiguration: const BetterPlayerControlsConfiguration(showControls: false),
+        autoDetectFullscreenAspectRatio: true,
         eventListener: (e) {
           if (e.betterPlayerEventType == BetterPlayerEventType.play) {
             if (mounted) setState(() => _isPlaying = true);

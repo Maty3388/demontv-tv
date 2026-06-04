@@ -340,7 +340,7 @@ class _MainState extends State<MainScreen> {
         }).toList())),
         Container(height: 1, margin: const EdgeInsets.symmetric(horizontal: 12), color: Colors.white10),
         Padding(padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Text("v2.6.1", style: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 10))),
+          child: Text("v${UpdateChecker.currentVersion}", style: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 10))),
       ]));
   }
 }
