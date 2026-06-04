@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
+import 'no_internet_screen.dart';
+import 'dart:io';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -23,11 +25,18 @@ class _State extends State<SplashScreen> with SingleTickerProviderStateMixin {
       ApiService.getMovies(featuredOnly: true).catchError((_) {});
     });
     Future.delayed(const Duration(seconds: 2), () async {
-      if (mounted) {
-        final hasToken = await ApiService.loadToken();
-        Navigator.pushReplacementNamed(context, hasToken ? '/main' : '/login');
-
+      if (!mounted) return;
+      try {
+        final result = await InternetAddress.lookup('google.com').timeout(const Duration(seconds: 5));
+        if (result.isEmpty || result[0].rawAddress.isEmpty) throw Exception('No internet');
+      } catch (_) {
+        if (mounted) Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => NoInternetScreen(onRetry: () {
+          Navigator.pushReplacementNamed(context, '/');
+        })));
+        return;
       }
+      final hasToken = await ApiService.loadToken();
+      if (mounted) Navigator.pushReplacementNamed(context, hasToken ? '/main' : '/login');
     });
   }
 

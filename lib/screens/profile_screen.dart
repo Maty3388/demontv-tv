@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
+import '../services/api_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -13,6 +14,9 @@ class _State extends State<ProfileScreen> {
   int _focused = 0;
   static const _orange = Color(0xFFFF8C00);
   static const _orangeLight = Color(0xFFFFB347);
+  String _email = '';
+  String _expiry = '';
+  int _daysLeft = 0;
 
   final _profiles = const [
     {'emoji': '😜', 'name': 'Perfil 1', 'color': Color(0xFFFF8C00)},
@@ -23,9 +27,24 @@ class _State extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
+    _loadUserInfo();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(_focusNodes[0]);
     });
+  }
+
+  Future<void> _loadUserInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('userEmail') ?? '';
+    final expiry = prefs.getString('userExpiry') ?? '';
+    int days = 0;
+    if (expiry.isNotEmpty) {
+      try {
+        final exp = DateTime.parse(expiry);
+        days = exp.difference(DateTime.now()).inDays;
+      } catch (_) {}
+    }
+    if (mounted) setState(() { _email = email; _expiry = expiry.length >= 10 ? expiry.substring(0, 10) : expiry; _daysLeft = days; });
   }
 
   @override
@@ -39,6 +58,19 @@ class _State extends State<ProfileScreen> {
     await prefs.setInt('selectedProfile', idx);
     await prefs.setString('profileName', _profiles[idx]['name'] as String);
     if (mounted) Navigator.pushReplacementNamed(context, '/main');
+  }
+
+  Color get _statusColor {
+    if (_daysLeft < 0) return Colors.red;
+    if (_daysLeft <= 5) return Colors.orange;
+    return Colors.green;
+  }
+
+  String get _statusText {
+    if (_daysLeft < 0) return 'Vencido';
+    if (_daysLeft == 0) return 'Vence hoy';
+    if (_daysLeft <= 5) return 'Vence en \$_daysLeft días';
+    return 'Activo';
   }
 
   @override
@@ -61,7 +93,29 @@ class _State extends State<ProfileScreen> {
         const Text('¿Quién está viendo?', style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         const Text('Seleccioná tu perfil para continuar', style: TextStyle(color: Colors.white54, fontSize: 14)),
-        const SizedBox(height: 48),
+        const SizedBox(height: 24),
+        // Info usuario
+        if (_email.isNotEmpty) Container(
+          margin: const EdgeInsets.symmetric(horizontal: 40),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: _statusColor.withOpacity(0.3))),
+          child: Row(children: [
+            Icon(Icons.account_circle_outlined, color: _statusColor, size: 20),
+            const SizedBox(width: 10),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(_email, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis),
+              const SizedBox(height: 2),
+              Text('Vence: \$_expiry', style: TextStyle(color: Colors.white54, fontSize: 10)),
+            ])),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(color: _statusColor.withOpacity(0.15), borderRadius: BorderRadius.circular(8)),
+              child: Text(_statusText, style: TextStyle(color: _statusColor, fontSize: 10, fontWeight: FontWeight.bold))),
+          ])),
+        const SizedBox(height: 32),
         // Perfiles
         Row(mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(_profiles.length, (i) {
