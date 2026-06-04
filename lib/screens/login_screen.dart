@@ -92,7 +92,7 @@ class _LoginState extends State<LoginScreen> {
             const SizedBox(height: 6),
             const Text('DemonTv Plus', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
-            const Text('v${UpdateChecker.currentVersion}', style: TextStyle(color: Colors.white30, fontSize: 13)),
+            Text('v\${UpdateChecker.currentVersion}', style: const TextStyle(color: Colors.white30, fontSize: 13)),
           ]),
         )),
         Container(width: 1, color: Colors.white12),
