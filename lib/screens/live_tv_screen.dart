@@ -85,6 +85,19 @@ class _State extends State<LiveTvScreen> {
   Map<String, List<Channel>> get _grouped {
     final map = <String, List<Channel>>{};
     for (final ch in _channels) map.putIfAbsent(ch.category, () => []).add(ch);
+    // Ordenar categorias
+    const catOrder = [
+      'EVENTOS', 'ARGENTINA', 'ARGENTINA INTERIOR', 'DEPORTES', 'NOTICIAS',
+      'MÚSICA', 'RELIGIÓN', 'INFANTILES', 'CINE', 'CANALES 24/7', 'PLUTOTV',
+      'PARAGUAY', 'BRASIL', 'CHILE', 'URUGUAY', 'MEXICO', 'COLOMBIA',
+      'INTERNACIONAL', 'DESTACADOS', 'DOCUMENTALES', 'ADULTOS',
+    ];
+    final sorted = <String, List<dynamic>>{};
+    for (final cat in catOrder) { if (map.containsKey(cat)) sorted[cat] = map[cat]!; }
+    for (final cat in map.keys) { if (!sorted.containsKey(cat)) sorted[cat] = map[cat]!; }
+    map
+      ..clear()
+      ..addAll(sorted);
     return map;
   }
 
