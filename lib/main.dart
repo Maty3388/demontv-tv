@@ -29,11 +29,20 @@ class DemonTvPlusApp extends StatelessWidget {
     debugShowCheckedModeBanner: false,
     theme: AppTheme.darkTheme,
     initialRoute: '/',
-    routes: {
-      '/':        (_) => const SplashScreen(),
-      '/login':   (_) => const LoginScreen(),
-      '/profile': (_) => const ProfileScreen(),
-      '/main':    (_) => const MainScreen(),
+    onGenerateRoute: (settings) {
+      Widget page;
+      switch (settings.name) {
+        case '/login':   page = const LoginScreen(); break;
+        case '/profile': page = const ProfileScreen(); break;
+        case '/main':    page = const MainScreen(); break;
+        default:         page = const SplashScreen();
+      }
+      return PageRouteBuilder(
+        settings: settings,
+        pageBuilder: (_, __, ___) => page,
+        transitionsBuilder: (_, anim, __, child) => FadeTransition(opacity: anim, child: child),
+        transitionDuration: const Duration(milliseconds: 400),
+      );
     },
   );
 }
