@@ -63,8 +63,10 @@ class _State extends State<PlayerScreen> {
   }
 
   void _initPlayer(Channel ch) {
-    _ctrl?.dispose();
-    if (mounted) setState(() => _isLoading = true);
+    final oldCtrl = _ctrl;
+    _ctrl = null;
+    if (mounted) setState(() { _isLoading = true; _showControls = false; });
+    Future.delayed(const Duration(milliseconds: 100), () { oldCtrl?.dispose(); });
     final url = ch.streamUrl.split('|')[0].trim();
     final headers = <String, String>{
       'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36',
