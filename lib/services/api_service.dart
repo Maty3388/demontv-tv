@@ -73,17 +73,17 @@ class ApiService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final data = channels.map((c) => {'_id': c.id, 'name': c.name, 'category': c.category, 'logo': c.logoUrl, 'stream_url': c.streamUrl, 'is_live': c.isLive, 'number': c.number}).toList();
-      await prefs.setString('channel_cache', jsonEncode(data));
-      await prefs.setInt('channel_cache_time', DateTime.now().millisecondsSinceEpoch);
+      await prefs.setString('channel_cache_v2', jsonEncode(data));
+      await prefs.setInt('channel_cache_time_v2', DateTime.now().millisecondsSinceEpoch);
     } catch (_) {}
   }
 
   static Future<List<Channel>?> _loadChannelCache() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final cacheTime = prefs.getInt('channel_cache_time') ?? 0;
+      final cacheTime = prefs.getInt('channel_cache_time_v2') ?? 0;
       if (DateTime.now().millisecondsSinceEpoch - cacheTime > 30 * 60 * 1000) return null;
-      final data = prefs.getString('channel_cache');
+      final data = prefs.getString('channel_cache_v2');
       if (data == null) return null;
       final list = jsonDecode(data) as List;
       return list.map((j) => _channelFromJson(j)).toList();
