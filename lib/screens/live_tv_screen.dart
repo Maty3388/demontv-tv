@@ -62,6 +62,20 @@ class _State extends State<LiveTvScreen> {
     setState(() => _loading = true);
     try {
       final channels = await ApiService.getChannels(search: _search.isEmpty ? null : _search);
+      const catOrder = [
+        'EVENTOS', 'ARGENTINA', 'ARGENTINA INTERIOR', 'DEPORTES', 'NOTICIAS',
+        'MÚSICA', 'RELIGIÓN', 'INFANTILES', 'CINE', 'CANALES 24/7', 'PLUTOTV',
+        'PARAGUAY', 'BRASIL', 'CHILE', 'URUGUAY', 'MEXICO', 'COLOMBIA',
+        'INTERNACIONAL', 'DESTACADOS', 'DOCUMENTALES', 'ADULTOS',
+      ];
+      channels.sort((a, b) {
+        final ai = catOrder.indexWhere((c) => c.toLowerCase() == a.category.toLowerCase());
+        final bi = catOrder.indexWhere((c) => c.toLowerCase() == b.category.toLowerCase());
+        final av = ai == -1 ? 999 : ai;
+        final bv = bi == -1 ? 999 : bi;
+        if (av != bv) return av.compareTo(bv);
+        return (a.number ?? 999).compareTo(b.number ?? 999);
+      });
       setState(() {
         _channels = channels;
         _catFocusNodes.clear();
@@ -85,29 +99,7 @@ class _State extends State<LiveTvScreen> {
   Map<String, List<Channel>> get _grouped {
     final map = <String, List<Channel>>{};
     for (final ch in _channels) map.putIfAbsent(ch.category, () => []).add(ch);
-    // Ordenar categorias
-    const catOrder = [
-      'EVENTOS', 'ARGENTINA', 'ARGENTINA INTERIOR', 'DEPORTES', 'NOTICIAS',
-      'MÚSICA', 'RELIGIÓN', 'INFANTILES', 'CINE', 'CANALES 24/7', 'PLUTOTV',
-      'PARAGUAY', 'BRASIL', 'CHILE', 'URUGUAY', 'MEXICO', 'COLOMBIA',
-      'INTERNACIONAL', 'DESTACADOS', 'DOCUMENTALES', 'ADULTOS',
-    ];
-    final sorted = <String, List<Channel>>{};
-    for (final cat in catOrder) {
-      // Buscar match exacto o case-insensitive
-      if (map.containsKey(cat)) {
-        sorted[cat] = map[cat]!;
-      } else {
-        final key = map.keys.where((k) => k.toLowerCase() == cat.toLowerCase()).firstOrNull;
-        if (key != null) sorted[cat] = map[key]!;
-      }
-    }
-    for (final cat in map.keys) {
-      if (!sorted.containsKey(cat) && !sorted.keys.any((k) => k.toLowerCase() == cat.toLowerCase())) {
-        sorted[cat] = map[cat]!;
-      }
-    }
-    return sorted;
+    return map;
   }
 
 
