@@ -82,7 +82,7 @@ class ApiService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final cacheTime = prefs.getInt('channel_cache_time') ?? 0;
-      if (DateTime.now().millisecondsSinceEpoch - cacheTime > 120 * 60 * 1000) return null;
+      if (DateTime.now().millisecondsSinceEpoch - cacheTime > 30 * 60 * 1000) return null;
       final data = prefs.getString('channel_cache');
       if (data == null) return null;
       final list = jsonDecode(data) as List;
@@ -112,7 +112,7 @@ class ApiService {
   static Future<List<Channel>> getChannels({String? search, String? category, bool featured = false}) async {
     // Usar cache si tiene menos de 5 minutos y no hay filtros
     if (search == null && category == null) {
-      if (_cachedChannels != null && _cacheTime != null && DateTime.now().difference(_cacheTime!).inMinutes < 15) {
+      if (_cachedChannels != null && _cacheTime != null && DateTime.now().difference(_cacheTime!).inMinutes < 5) {
         return _cachedChannels!;
       }
       final diskCache = await _loadChannelCache();
