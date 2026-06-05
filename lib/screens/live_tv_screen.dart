@@ -92,13 +92,10 @@ class _State extends State<LiveTvScreen> {
       'PARAGUAY', 'BRASIL', 'CHILE', 'URUGUAY', 'MEXICO', 'COLOMBIA',
       'INTERNACIONAL', 'DESTACADOS', 'DOCUMENTALES', 'ADULTOS',
     ];
-    final sorted = <String, List<dynamic>>{};
+    final sorted = <String, List<Channel>>{};
     for (final cat in catOrder) { if (map.containsKey(cat)) sorted[cat] = map[cat]!; }
     for (final cat in map.keys) { if (!sorted.containsKey(cat)) sorted[cat] = map[cat]!; }
-    map
-      ..clear()
-      ..addAll(sorted);
-    return map;
+    return sorted;
   }
 
 
