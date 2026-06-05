@@ -93,8 +93,20 @@ class _State extends State<LiveTvScreen> {
       'INTERNACIONAL', 'DESTACADOS', 'DOCUMENTALES', 'ADULTOS',
     ];
     final sorted = <String, List<Channel>>{};
-    for (final cat in catOrder) { if (map.containsKey(cat)) sorted[cat] = map[cat]!; }
-    for (final cat in map.keys) { if (!sorted.containsKey(cat)) sorted[cat] = map[cat]!; }
+    for (final cat in catOrder) {
+      // Buscar match exacto o case-insensitive
+      if (map.containsKey(cat)) {
+        sorted[cat] = map[cat]!;
+      } else {
+        final key = map.keys.where((k) => k.toLowerCase() == cat.toLowerCase()).firstOrNull;
+        if (key != null) sorted[cat] = map[key]!;
+      }
+    }
+    for (final cat in map.keys) {
+      if (!sorted.containsKey(cat) && !sorted.keys.any((k) => k.toLowerCase() == cat.toLowerCase())) {
+        sorted[cat] = map[cat]!;
+      }
+    }
     return sorted;
   }
 
