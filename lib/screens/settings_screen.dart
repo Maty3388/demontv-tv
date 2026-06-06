@@ -48,6 +48,8 @@ class _State extends State<SettingsScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('channel_cache');
     await prefs.remove('channel_cache_time');
+    await prefs.remove('channel_cache_v2');
+    await prefs.remove('channel_cache_time_v2');
     if (mounted) ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Caché eliminado'), backgroundColor: Color(0xFFFF8C00)));
   }
