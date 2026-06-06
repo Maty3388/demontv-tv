@@ -26,7 +26,6 @@ jobs:
         run: |
           flutter create --org com.demontv --project-name demon_tv_plus tmp_app
           cp -r tmp_app/android .
-          sed -i 's/android:label="demontv_plus"/android:label="DemonTV Plus" android:banner="@drawable\/tv_banner"/' android/app/src/main/AndroidManifest.xml
           sed -i 's/signingConfig = signingConfigs.debug/signingConfig = signingConfigs.release/' android/app/build.gradle
           sed -i '/buildTypes {/i\    signingConfigs { release { def p=new Properties(); p.load(new FileInputStream(rootProject.file("key.properties"))); storeFile file(p["storeFile"]); storePassword p["storePassword"]; keyAlias p["keyAlias"]; keyPassword p["keyPassword"] } }' android/app/build.gradle
           rm -rf tmp_app
@@ -40,7 +39,7 @@ jobs:
           python3 -c "c=open('android/app/src/main/AndroidManifest.xml').read();p='<provider android:name=\"androidx.core.content.FileProvider\" android:authorities=\"com.demontv.demon_tv_plus.fileprovider\" android:exported=\"false\" android:grantUriPermissions=\"true\"><meta-data android:name=\"android.support.FILE_PROVIDER_PATHS\" android:resource=\"@xml/file_paths\"/></provider>';open('android/app/src/main/AndroidManifest.xml','w').write(c.replace('</application>',p+'</application>')) if 'FileProvider' not in c else None"
           mkdir -p android/app/src/main/res/xml && echo '<paths><external-files-path name="external_files" path="."/><files-path name="files" path="."/><external-path name="external" path="."/></paths>' > android/app/src/main/res/xml/file_paths.xml
           python3 -c "c=open('android/app/src/main/AndroidManifest.xml').read();open('android/app/src/main/AndroidManifest.xml','w').write(c.replace('<action android:name=\"android.intent.action.MAIN\"/>','<action android:name=\"android.intent.action.MAIN\"/><category android:name=\"android.intent.category.LEANBACK_LAUNCHER\"/>')) if 'LEANBACK' not in c else None"
-          python3 -c "c=open('android/app/src/main/AndroidManifest.xml').read();open('android/app/src/main/AndroidManifest.xml','w').write(c.replace('<application','<application android:banner=\"@drawable/banner\"')) if 'banner' not in c else None"
+          python3 -c "c=open('android/app/src/main/AndroidManifest.xml').read();open('android/app/src/main/AndroidManifest.xml','w').write(c.replace('<application','<application android:banner=\"@drawable/tv_banner\"')) if 'tv_banner' not in c else None"
       - name: Copy app icon
         run: |
           # Eliminar icono vectorial y usar PNG
@@ -50,9 +49,6 @@ jobs:
           rm -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
           # TV Banner
           mkdir -p android/app/src/main/res/drawable
-          mkdir -p android/app/src/main/res/drawable-xhdpi
-          cp android_icons/banner.png android/app/src/main/res/drawable/banner.png
-          cp android_icons/banner_xhdpi.png android/app/src/main/res/drawable-xhdpi/banner.png
           cp android_icons/mipmap-mdpi/ic_launcher.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png
           cp android_icons/mipmap-mdpi/ic_launcher.png android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png
           cp android_icons/mipmap-hdpi/ic_launcher.png android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png
