@@ -22,6 +22,7 @@ class _MainState extends State<MainScreen> {
   int _sideIdx = 1;
   bool _inContent = false;
   bool _backHandled = false;
+  bool _exitDialogOpen = false;
   bool _profileExpanded = false;
   String _userEmail = "";
   String _userExpiry = "";
