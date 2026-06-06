@@ -26,6 +26,7 @@ jobs:
         run: |
           flutter create --org com.demontv --project-name demon_tv_plus tmp_app
           cp -r tmp_app/android .
+          sed -i 's/android:label="demontv_plus"/android:label="DemonTV Plus" android:banner="@drawable\/tv_banner"/' android/app/src/main/AndroidManifest.xml
           sed -i 's/signingConfig = signingConfigs.debug/signingConfig = signingConfigs.release/' android/app/build.gradle
           sed -i '/buildTypes {/i\    signingConfigs { release { def p=new Properties(); p.load(new FileInputStream(rootProject.file("key.properties"))); storeFile file(p["storeFile"]); storePassword p["storePassword"]; keyAlias p["keyAlias"]; keyPassword p["keyPassword"] } }' android/app/build.gradle
           rm -rf tmp_app
@@ -44,6 +45,8 @@ jobs:
         run: |
           # Eliminar icono vectorial y usar PNG
           rm -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+          mkdir -p android/app/src/main/res/drawable
+          cp android_icons/tv_banner.png android/app/src/main/res/drawable/tv_banner.png
           rm -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
           # TV Banner
           mkdir -p android/app/src/main/res/drawable
