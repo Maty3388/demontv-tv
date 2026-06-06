@@ -69,7 +69,7 @@ class ApiService {
   }
 
 
-  static Future<void> _saveChannelCache(List<Channel> channels) async {
+  static Future<void> _saveChannelCache(List<Channel> channels) async { return; // cache deshabilitado
     try {
       final prefs = await SharedPreferences.getInstance();
       final data = channels.map((c) => {'_id': c.id, 'name': c.name, 'category': c.category, 'logo': c.logoUrl, 'stream_url': c.streamUrl, 'is_live': c.isLive, 'number': c.number}).toList();
@@ -115,11 +115,7 @@ class ApiService {
       if (_cachedChannels != null && _cacheTime != null && DateTime.now().difference(_cacheTime!).inMinutes < 5) {
         return _cachedChannels!;
       }
-      final diskCache = await _loadChannelCache();
-      if (diskCache != null && _cachedChannels == null) {
-        _cachedChannels = diskCache.where((c) => c.category != 'ADULTOS').toList();
-        _cacheTime = DateTime.now();
-      }
+      // disco cache deshabilitado
     }
     var url = '$baseUrl/channels';
     final p = <String>[];
