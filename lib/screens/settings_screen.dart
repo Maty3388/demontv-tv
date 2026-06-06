@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -10,30 +9,30 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _State extends State<SettingsScreen> {
-  bool _autoPlay = true;
-  bool _notifications = true;
-  bool _tvMode = true;
-  bool _adultBlocked = true;
-  String _quality = 'Automática';
-  String _subtitleLang = 'Español';
-  String _userEmail = '';
-  String _userExpiry = '';
+  bool _autoPlay = true, _notifications = true, _tvMode = true, _adultBlocked = true;
+  String _quality = 'Automática', _subtitleLang = 'Español';
+  String _userEmail = '', _userExpiry = '';
+  int _focusedIndex = 0;
   static const _orange = Color(0xFFFF8C00);
+  final _focusNodes = List.generate(12, (_) => FocusNode());
 
   @override
-  void initState() { super.initState(); _loadPrefs(); }
+  void initState() { super.initState(); _loadPrefs(); WidgetsBinding.instance.addPostFrameCallback((_) { FocusScope.of(context).requestFocus(_focusNodes[0]); }); }
+
+  @override
+  void dispose() { for (final f in _focusNodes) f.dispose(); super.dispose(); }
 
   Future<void> _loadPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _userEmail  = prefs.getString('userEmail') ?? '';
+      _userEmail = prefs.getString('userEmail') ?? '';
       _userExpiry = prefs.getString('userExpiry') ?? '';
-      _autoPlay      = prefs.getBool('autoPlay') ?? true;
+      _autoPlay = prefs.getBool('autoPlay') ?? true;
       _notifications = prefs.getBool('notifications') ?? true;
-      _tvMode        = prefs.getBool('tvMode') ?? true;
-      _adultBlocked  = prefs.getBool('adultBlocked') ?? true;
-      _quality       = prefs.getString('quality') ?? 'Automática';
-      _subtitleLang  = prefs.getString('subtitleLang') ?? 'Español';
+      _tvMode = prefs.getBool('tvMode') ?? true;
+      _adultBlocked = prefs.getBool('adultBlocked') ?? true;
+      _quality = prefs.getString('quality') ?? 'Automática';
+      _subtitleLang = prefs.getString('subtitleLang') ?? 'Español';
     });
   }
 
@@ -46,232 +45,189 @@ class _State extends State<SettingsScreen> {
   Future<void> _clearCache() async {
     ApiService.clearCache();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('channel_cache');
-    await prefs.remove('channel_cache_time');
-    await prefs.remove('channel_cache_v2');
-    await prefs.remove('channel_cache_time_v2');
-    if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Caché eliminado'), backgroundColor: Color(0xFFFF8C00)));
+    await prefs.remove('channel_cache'); await prefs.remove('channel_cache_time');
+    await prefs.remove('channel_cache_v2'); await prefs.remove('channel_cache_time_v2');
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Caché eliminado'), backgroundColor: _orange));
   }
 
-  Future<void> _clearFavorites() async {
-    showDialog(context: context, builder: (ctx) => AlertDialog(
+  void _showConfirm(String title, String msg, IconData icon, VoidCallback onOk) {
+    final f1 = FocusNode(), f2 = FocusNode();
+    showDialog(context: context, builder: (_) => AlertDialog(
       backgroundColor: const Color(0xFF1E1E1E),
-      title: const Text('Limpiar favoritos', style: TextStyle(color: Colors.white)),
-      content: const Text('Se eliminarán todos los favoritos.', style: TextStyle(color: Colors.white54)),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar', style: TextStyle(color: Colors.white54))),
-        TextButton(onPressed: () async {
-          Navigator.pop(ctx);
-          try {
-            final favs = await ApiService.getFavorites();
-            for (final f in favs) await ApiService.removeFavorite(f.id);
-            if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Favoritos eliminados'), backgroundColor: Color(0xFFFF8C00)));
-          } catch (_) {}
-        }, child: const Text('Eliminar', style: TextStyle(color: Colors.red))),
-      ]));
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: _orange, width: 2)),
+      title: Row(children: [Icon(icon, color: _orange, size: 26), const SizedBox(width: 10), Expanded(child: Text(title, style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold)))]),
+      content: Text(msg, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+      actionsAlignment: MainAxisAlignment.spaceEvenly,
+      actions: [_Btn('Cancelar', f1, false, Navigator.of(context).pop), _Btn('Confirmar', f2, true, () { Navigator.pop(context); onOk(); })]
+    )).then((_) { if (mounted) FocusScope.of(context).requestFocus(_focusNodes[_focusedIndex]); });
+    WidgetsBinding.instance.addPostFrameCallback((_) => FocusScope.of(context).requestFocus(f2));
+  }
+
+  void _logout() => _showConfirm('¿Cerrar sesión?', 'Se cerrará tu sesión actual.', Icons.logout, () {
+    ApiService.clearToken(); Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
+  });
+
+  KeyEventResult _handleKey(KeyEvent e, int idx) {
+    if (e is! KeyDownEvent) return KeyEventResult.ignored;
+    if (e.logicalKey == LogicalKeyboardKey.arrowDown && idx < _focusNodes.length - 1) {
+      setState(() => _focusedIndex = idx + 1); FocusScope.of(context).requestFocus(_focusNodes[idx + 1]); return KeyEventResult.handled;
+    }
+    if (e.logicalKey == LogicalKeyboardKey.arrowUp) {
+      if (idx > 0) { setState(() => _focusedIndex = idx - 1); FocusScope.of(context).requestFocus(_focusNodes[idx - 1]); return KeyEventResult.handled; }
+      Navigator.pop(context); return KeyEventResult.handled;
+    }
+    if (e.logicalKey == LogicalKeyboardKey.goBack || e.logicalKey == LogicalKeyboardKey.escape) { Navigator.pop(context); return KeyEventResult.handled; }
+    return KeyEventResult.ignored;
   }
 
   @override
-  Widget build(BuildContext context) => RawKeyboardListener(
-    focusNode: FocusNode()..requestFocus(),
-    autofocus: true,
-    onKey: (event) {
-      if (event is RawKeyDownEvent) {
-        if (event.logicalKey == LogicalKeyboardKey.escape || event.logicalKey == LogicalKeyboardKey.goBack) {
-          Navigator.pop(context);
-        }
-      }
-    },
-    child: Scaffold(
-    backgroundColor: const Color(0xFF121212),
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: const Color(0xFF0D0D0D),
     body: SafeArea(child: Column(children: [
-      // Header
-      Container(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+      Container(padding: const EdgeInsets.fromLTRB(16,20,16,16),
+        decoration: const BoxDecoration(gradient: LinearGradient(colors: [Color(0xFF1A0800), Color(0xFF0D0D0D)], end: Alignment.bottomCenter)),
         child: Row(children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(10)),
-              child: const Icon(Icons.arrow_back, color: Colors.white, size: 20))),
+          GestureDetector(onTap: () => Navigator.pop(context), child: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.arrow_back, color: Colors.white, size: 20))),
           const SizedBox(width: 12),
+          const Icon(Icons.settings, color: _orange, size: 22),
+          const SizedBox(width: 8),
           const Text('Configuración', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
         ])),
       Expanded(child: SingleChildScrollView(child: Column(children: [
-        // Perfil
-        _buildProfileCard(),
-        const SizedBox(height: 8),
-        // Reproducción
-        _buildSection('Reproducción', [
-          _buildSelector('Calidad de video', Icons.hd, _quality, () => _showQualityPicker()),
-          _buildToggle('Reproducción automática', Icons.play_circle_outline, _autoPlay, (v) { setState(() => _autoPlay = v); _save('autoPlay', v); }),
-          _buildSelector('Idioma de subtítulos', Icons.subtitles_outlined, _subtitleLang, () => _showSubtitlePicker()),
+        _card(_userEmail.isEmpty ? 'Sin email' : _userEmail, _userExpiry),
+        _sec('Reproducción', [
+          _item(0, 'Calidad de video', Icons.hd, sub: _quality, onTap: _showQualityPicker),
+          _item(1, 'Auto-reproducción', Icons.play_circle_outline, trail: _sw(_autoPlay, (v) { setState(() => _autoPlay = v); _save('autoPlay', v); })),
+          _item(2, 'Idioma subtítulos', Icons.subtitles_outlined, sub: _subtitleLang, onTap: _showSubtitlePicker),
         ]),
-        const SizedBox(height: 8),
-        // Ajustes
-        _buildSection('Ajustes', [
-          _buildToggle('Modo dispositivo TV', Icons.tv, _tvMode, (v) { setState(() => _tvMode = v); _save('tvMode', v); }),
-          _buildToggle('Notificaciones', Icons.notifications_outlined, _notifications, (v) { setState(() => _notifications = v); _save('notifications', v); }),
+        _sec('Ajustes', [
+          _item(3, 'Modo TV', Icons.tv, trail: _sw(_tvMode, (v) { setState(() => _tvMode = v); _save('tvMode', v); })),
+          _item(4, 'Notificaciones', Icons.notifications_outlined, trail: _sw(_notifications, (v) { setState(() => _notifications = v); _save('notifications', v); })),
         ]),
-        const SizedBox(height: 8),
-        // Control parental
-        _buildSection('Control Parental', [
-          _buildToggle('Protección contenido adulto', Icons.shield_outlined, _adultBlocked, (v) { setState(() => _adultBlocked = v); _save('adultBlocked', v); },
-            subtitle: _adultBlocked ? 'Contenido adulto BLOQUEADO' : 'Contenido adulto PERMITIDO',
-            activeColor: _adultBlocked ? Colors.green : Colors.red),
+        _sec('Control Parental', [
+          _item(5, 'Protección adultos', Icons.shield_outlined,
+            sub: _adultBlocked ? '🔒 BLOQUEADO' : '🔓 PERMITIDO',
+            subColor: _adultBlocked ? Colors.green : Colors.red,
+            trail: _sw(_adultBlocked, (v) { setState(() => _adultBlocked = v); _save('adultBlocked', v); }, color: _adultBlocked ? Colors.green : Colors.red)),
         ]),
-        const SizedBox(height: 8),
-        // Almacenamiento
-        _buildSection('Almacenamiento', [
-          _buildTile('Limpiar caché', Icons.folder_outlined, subtitle: 'Usando 8.7 MB', onTap: () => _clearCache()),
-          _buildTile('Limpiar historial', Icons.history, subtitle: 'Eliminar historial de reproducción', onTap: () => _confirm('¿Limpiar historial?', 'Historial eliminado')),
-          _buildTile('Limpiar favoritos', Icons.favorite_border, subtitle: 'Eliminar todos los favoritos guardados', onTap: () => _clearFavorites()),
+        _sec('Almacenamiento', [
+          _item(6, 'Limpiar caché', Icons.folder_outlined, sub: 'Liberar espacio', onTap: _clearCache),
+          _item(7, 'Limpiar favoritos', Icons.favorite_border, sub: 'Eliminar todos', onTap: () => _showConfirm('¿Limpiar favoritos?', 'Se eliminarán todos los favoritos.', Icons.favorite_border, () async {
+            try { final f = await ApiService.getFavorites(); for (final x in f) await ApiService.removeFavorite(x.id); } catch (_) {}
+          })),
         ]),
-        const SizedBox(height: 8),
-        // Info
-        _buildSection('Información', [
-          _buildTile('Versión de la app', Icons.info_outline, subtitle: 'v2.4.5 (Build 108)'),
+        _sec('Información', [
+          _item(9, 'Versión', Icons.info_outline, sub: 'DemonTV Plus'),
         ]),
         const SizedBox(height: 16),
-        // Cerrar sesión
-        Padding(padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: SizedBox(width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: _logout,
-              icon: const Icon(Icons.logout),
-              label: const Text('Cerrar sesión', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFB71C1C),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                side: const BorderSide(color: _orange, width: 1))))),
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Focus(
+          focusNode: _focusNodes[10],
+          onFocusChange: (v) { if (v) setState(() => _focusedIndex = 10); },
+          onKeyEvent: (_, e) { if (e is KeyDownEvent && (e.logicalKey == LogicalKeyboardKey.select || e.logicalKey == LogicalKeyboardKey.enter)) { _logout(); return KeyEventResult.handled; } return _handleKey(e, 10); },
+          child: Builder(builder: (ctx) {
+            final focused = _focusedIndex == 10;
+            return AnimatedContainer(duration: const Duration(milliseconds: 150),
+              decoration: BoxDecoration(color: focused ? Colors.red.withOpacity(0.4) : const Color(0xFFB71C1C), borderRadius: BorderRadius.circular(12), border: Border.all(color: focused ? Colors.red : Colors.transparent, width: 3), boxShadow: focused ? [const BoxShadow(color: Colors.red, blurRadius: 14, spreadRadius: 2)] : null),
+              child: Material(color: Colors.transparent, child: InkWell(onTap: _logout, borderRadius: BorderRadius.circular(12),
+                child: const Padding(padding: EdgeInsets.symmetric(vertical: 14), child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.logout, color: Colors.white), SizedBox(width: 8), Text('Cerrar sesión', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold))])))));
+          }))),
         const SizedBox(height: 32),
       ]))),
-    ])),
-  ));
+    ])));
 
-  Widget _buildProfileCard() => Container(
-    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: const Color(0xFF1E1E1E),
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: _orange.withOpacity(0.3))),
+  Widget _card(String email, String expiry) => Container(
+    margin: const EdgeInsets.fromLTRB(16,8,16,0), padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(color: const Color(0xFF1E1E1E), borderRadius: BorderRadius.circular(16), border: Border.all(color: _orange.withOpacity(0.3))),
     child: Row(children: [
-      Container(width: 56, height: 56,
-        decoration: BoxDecoration(shape: BoxShape.circle,
-          gradient: const LinearGradient(colors: [_orange, Color(0xFFFFB347)])),
-        child: const Center(child: Icon(Icons.person, color: Colors.white, size: 30))),
-      const SizedBox(width: 14),
+      Container(width: 52, height: 52, decoration: const BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [_orange, Color(0xFFFFB347)])), child: const Icon(Icons.person, color: Colors.white, size: 28)),
+      const SizedBox(width: 12),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          const Icon(Icons.email_outlined, color: _orange, size: 14),
-          const SizedBox(width: 6),
-          Expanded(child: Text(_userEmail.isEmpty ? 'Sin email' : _userEmail,
-            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
-            overflow: TextOverflow.ellipsis)),
-        ]),
-        const SizedBox(height: 6),
-        Row(children: [
-          const Icon(Icons.calendar_today, color: Colors.white54, size: 12),
-          const SizedBox(width: 6),
-          Text('Vence: ${_userExpiry.isEmpty ? "—" : _userExpiry}',
-            style: const TextStyle(color: _orange, fontSize: 12)),
-        ]),
+        Text(email, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis),
+        const SizedBox(height: 4),
+        Text('Vence: ${expiry.isEmpty ? "—" : expiry}', style: const TextStyle(color: _orange, fontSize: 11)),
       ])),
     ]));
 
-  Widget _buildSection(String title, List<Widget> children) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
-        child: Text(title, style: const TextStyle(color: _orange, fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 0.8))),
-      Container(margin: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(color: const Color(0xFF1E1E1E), borderRadius: BorderRadius.circular(14)),
-        child: Column(children: children)),
-    ]);
+  Widget _sec(String title, List<Widget> children) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+    Padding(padding: const EdgeInsets.fromLTRB(16,12,16,6), child: Text(title, style: const TextStyle(color: _orange, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 0.8))),
+    Container(margin: const EdgeInsets.symmetric(horizontal: 16), decoration: BoxDecoration(color: const Color(0xFF1E1E1E), borderRadius: BorderRadius.circular(14)), child: Column(children: children)),
+  ]);
 
-  Widget _buildToggle(String label, IconData icon, bool value, ValueChanged<bool> onChanged, {String? subtitle, Color? activeColor}) =>
-    Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Row(children: [
-        Container(width: 36, height: 36, decoration: BoxDecoration(color: _orange.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
-          child: Icon(icon, color: _orange, size: 18)),
-        const SizedBox(width: 12),
-        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(label, style: const TextStyle(color: Colors.white, fontSize: 14)),
-          if (subtitle != null) Text(subtitle, style: TextStyle(color: activeColor ?? Colors.white54, fontSize: 11)),
-        ])),
-        Switch(value: value, onChanged: onChanged,
-          activeColor: activeColor ?? _orange,
-          activeTrackColor: (activeColor ?? _orange).withOpacity(0.3),
-          inactiveThumbColor: Colors.white38,
-          inactiveTrackColor: Colors.white12),
-      ]));
-
-  Widget _buildSelector(String label, IconData icon, String value, VoidCallback onTap) =>
-    GestureDetector(onTap: onTap,
-      child: Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+  Widget _item(int idx, String label, IconData icon, {String? sub, Color? subColor, Widget? trail, VoidCallback? onTap}) {
+    final focused = _focusedIndex == idx;
+    return Focus(
+      focusNode: _focusNodes[idx],
+      onFocusChange: (v) { if (v) setState(() => _focusedIndex = idx); },
+      onKeyEvent: (_, e) {
+        if (e is KeyDownEvent && (e.logicalKey == LogicalKeyboardKey.select || e.logicalKey == LogicalKeyboardKey.enter)) { onTap?.call(); return KeyEventResult.handled; }
+        return _handleKey(e, idx);
+      },
+      child: GestureDetector(onTap: onTap, child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        decoration: BoxDecoration(color: focused ? _orange.withOpacity(0.12) : Colors.transparent, borderRadius: BorderRadius.circular(10), border: Border.all(color: focused ? _orange : Colors.transparent, width: 2), boxShadow: focused ? [BoxShadow(color: _orange.withOpacity(0.25), blurRadius: 8)] : null),
         child: Row(children: [
-          Container(width: 36, height: 36, decoration: BoxDecoration(color: _orange.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
-            child: Icon(icon, color: _orange, size: 18)),
-          const SizedBox(width: 12),
-          Expanded(child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 14))),
-          Text(value, style: const TextStyle(color: Colors.white54, fontSize: 13)),
-          const SizedBox(width: 6),
-          const Icon(Icons.chevron_right, color: Colors.white38, size: 18),
-        ])));
-
-  Widget _buildTile(String label, IconData icon, {String? subtitle, VoidCallback? onTap}) =>
-    GestureDetector(onTap: onTap,
-      child: Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(children: [
-          Container(width: 36, height: 36, decoration: BoxDecoration(color: _orange.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
-            child: Icon(icon, color: _orange, size: 18)),
+          Container(width: 34, height: 34, decoration: BoxDecoration(color: focused ? _orange.withOpacity(0.3) : _orange.withOpacity(0.12), borderRadius: BorderRadius.circular(9)), child: Icon(icon, color: _orange, size: 17)),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(label, style: const TextStyle(color: Colors.white, fontSize: 14)),
-            if (subtitle != null) Text(subtitle, style: const TextStyle(color: Colors.white54, fontSize: 11)),
+            Text(label, style: TextStyle(color: focused ? Colors.white : Colors.white70, fontSize: 13, fontWeight: focused ? FontWeight.bold : FontWeight.normal)),
+            if (sub != null) Text(sub, style: TextStyle(color: subColor ?? (focused ? _orange : Colors.white38), fontSize: 10)),
           ])),
-          if (onTap != null) const Icon(Icons.chevron_right, color: Colors.white38, size: 18),
-        ])));
+          if (trail != null) trail else if (onTap != null) Icon(Icons.chevron_right, color: focused ? _orange : Colors.white24, size: 18),
+        ]))));
+  }
 
-  Widget _wrapRkl(Widget child) => child;
+  Widget _sw(bool val, ValueChanged<bool> cb, {Color? color}) => Switch(value: val, onChanged: cb, activeColor: color ?? _orange, activeTrackColor: (color ?? _orange).withOpacity(0.3), inactiveThumbColor: Colors.white30, inactiveTrackColor: Colors.white10);
 
-  void _showQualityPicker() => showDialog(context: context, builder: (ctx) => SimpleDialog(
-    backgroundColor: const Color(0xFF1E1E1E),
-    title: const Text('Calidad de video', style: TextStyle(color: Colors.white)),
-    children: ['Automática', '1080p', '720p', '480p', '360p'].map((q) => SimpleDialogOption(
-      onPressed: () { setState(() => _quality = q); _save('quality', q); Navigator.pop(ctx); },
-      child: Text(q, style: TextStyle(color: q == _quality ? _orange : Colors.white)))).toList()));
+  void _showQualityPicker() => _showOpts('Calidad', Icons.hd, ['Automática','1080p','720p','480p','360p'], _quality, (v) { setState(() => _quality = v); _save('quality', v); });
+  void _showSubtitlePicker() => _showOpts('Subtítulos', Icons.subtitles_outlined, ['Español','Inglés','Portugués','Sin subtítulos'], _subtitleLang, (v) { setState(() => _subtitleLang = v); _save('subtitleLang', v); });
 
-  void _showSubtitlePicker() => showDialog(context: context, builder: (ctx) => SimpleDialog(
-    backgroundColor: const Color(0xFF1E1E1E),
-    title: const Text('Idioma de subtítulos', style: TextStyle(color: Colors.white)),
-    children: ['Español', 'Inglés', 'Portugués', 'Sin subtítulos'].map((l) => SimpleDialogOption(
-      onPressed: () { setState(() => _subtitleLang = l); _save('subtitleLang', l); Navigator.pop(ctx); },
-      child: Text(l, style: TextStyle(color: l == _subtitleLang ? _orange : Colors.white)))).toList()));
+  void _showOpts(String title, IconData icon, List<String> opts, String cur, ValueChanged<String> onSel) {
+    final fns = List.generate(opts.length, (_) => FocusNode());
+    showDialog(context: context, builder: (_) => StatefulBuilder(builder: (ctx, ss) => AlertDialog(
+      backgroundColor: const Color(0xFF1E1E1E),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: _orange, width: 2)),
+      title: Row(children: [Icon(icon, color: _orange), const SizedBox(width: 8), Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))]),
+      content: Column(mainAxisSize: MainAxisSize.min, children: List.generate(opts.length, (i) {
+        final sel = opts[i] == cur;
+        return Focus(focusNode: fns[i],
+          onKeyEvent: (_, e) {
+            if (e is KeyDownEvent && (e.logicalKey == LogicalKeyboardKey.select || e.logicalKey == LogicalKeyboardKey.enter)) { onSel(opts[i]); Navigator.pop(ctx); return KeyEventResult.handled; }
+            if (e is KeyDownEvent && e.logicalKey == LogicalKeyboardKey.arrowDown && i < opts.length-1) { FocusScope.of(ctx).requestFocus(fns[i+1]); return KeyEventResult.handled; }
+            if (e is KeyDownEvent && e.logicalKey == LogicalKeyboardKey.arrowUp && i > 0) { FocusScope.of(ctx).requestFocus(fns[i-1]); return KeyEventResult.handled; }
+            return KeyEventResult.ignored;
+          },
+          child: Builder(builder: (bctx) {
+            final foc = Focus.of(bctx).hasFocus;
+            return GestureDetector(onTap: () { onSel(opts[i]); Navigator.pop(ctx); },
+              child: AnimatedContainer(duration: const Duration(milliseconds: 100),
+                margin: const EdgeInsets.only(bottom: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                decoration: BoxDecoration(color: foc ? _orange.withOpacity(0.2) : sel ? _orange.withOpacity(0.1) : Colors.transparent, borderRadius: BorderRadius.circular(10), border: Border.all(color: foc ? _orange : sel ? _orange.withOpacity(0.4) : Colors.transparent, width: 2)),
+                child: Row(children: [
+                  Icon(sel ? Icons.radio_button_checked : Icons.radio_button_unchecked, color: sel ? _orange : Colors.white38, size: 16),
+                  const SizedBox(width: 10),
+                  Text(opts[i], style: TextStyle(color: foc || sel ? _orange : Colors.white, fontSize: 13, fontWeight: sel ? FontWeight.bold : FontWeight.normal)),
+                ])));
+          }));
+      })))));
+    WidgetsBinding.instance.addPostFrameCallback((_) { final i = opts.indexOf(cur); if (i >= 0) FocusScope.of(context).requestFocus(fns[i]); });
+  }
+}
 
-  void _confirm(String title, String success) => showDialog(context: context, builder: (ctx) => AlertDialog(
-    backgroundColor: const Color(0xFF1E1E1E),
-    title: Text(title, style: const TextStyle(color: Colors.white)),
-    actions: [
-      TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar', style: TextStyle(color: Colors.white54))),
-      TextButton(onPressed: () { Navigator.pop(ctx); ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(success), backgroundColor: _orange)); },
-        child: const Text('Confirmar', style: TextStyle(color: _orange))),
-    ]));
-
-  void _closeSettings() => Navigator.pop(context);
-
-  void _logout() => showDialog(context: context, builder: (ctx) => AlertDialog(
-    backgroundColor: const Color(0xFF1E1E1E),
-    title: const Text('¿Cerrar sesión?', style: TextStyle(color: Colors.white)),
-    content: const Text('Se cerrará tu sesión actual.', style: TextStyle(color: Colors.white54)),
-    actions: [
-      TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar', style: TextStyle(color: Colors.white54))),
-      TextButton(onPressed: () { ApiService.clearToken(); Navigator.pop(ctx); Navigator.pushNamedAndRemoveUntil(context, '/login', (r) => false); },
-        child: const Text('Cerrar sesión', style: TextStyle(color: Colors.red))),
-    ]));
+class _Btn extends StatefulWidget {
+  final String label; final FocusNode fn; final bool primary; final VoidCallback onTap;
+  const _Btn(this.label, this.fn, this.primary, this.onTap);
+  @override State<_Btn> createState() => _BtnState();
+}
+class _BtnState extends State<_Btn> {
+  bool _f = false;
+  static const _o = Color(0xFFFF8C00);
+  @override
+  Widget build(BuildContext context) => Focus(focusNode: widget.fn, onFocusChange: (v) => setState(() => _f = v),
+    onKeyEvent: (_, e) { if (e is KeyDownEvent && (e.logicalKey == LogicalKeyboardKey.select || e.logicalKey == LogicalKeyboardKey.enter)) { widget.onTap(); return KeyEventResult.handled; } if (e is KeyDownEvent && (e.logicalKey == LogicalKeyboardKey.arrowLeft || e.logicalKey == LogicalKeyboardKey.arrowRight)) { FocusScope.of(context).nextFocus(); return KeyEventResult.handled; } return KeyEventResult.ignored; },
+    child: GestureDetector(onTap: widget.onTap, child: AnimatedContainer(duration: const Duration(milliseconds: 150),
+      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+      decoration: BoxDecoration(color: _f ? (widget.primary ? _o : Colors.white24) : (widget.primary ? _o.withOpacity(0.15) : Colors.transparent), borderRadius: BorderRadius.circular(10), border: Border.all(color: _f ? (widget.primary ? _o : Colors.white) : (widget.primary ? _o.withOpacity(0.4) : Colors.white24), width: 2), boxShadow: _f ? [BoxShadow(color: (widget.primary ? _o : Colors.white).withOpacity(0.35), blurRadius: 10)] : null),
+      child: Text(widget.label, style: TextStyle(color: _f ? Colors.white : (widget.primary ? _o : Colors.white54), fontSize: 14, fontWeight: FontWeight.bold)))));
 }
