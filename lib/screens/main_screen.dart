@@ -100,6 +100,8 @@ class _MainState extends State<MainScreen> {
         ])))));
 
   void _showExitDialog() async {
+    if (_exitDialogOpen) return;
+    _exitDialogOpen = true;
     final exit = await showDialog<bool>(
       context: context,
       builder: (c) => RawKeyboardListener(
@@ -165,6 +167,7 @@ class _MainState extends State<MainScreen> {
             ]),
           ]),
         ))));
+    _exitDialogOpen = false;
     if (exit == true && mounted) SystemNavigator.pop();
   }
 
