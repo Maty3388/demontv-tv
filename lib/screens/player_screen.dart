@@ -67,6 +67,26 @@ class _State extends State<PlayerScreen> {
   void _initPlayer(Channel ch) {
     if (mounted) setState(() { _isLoading = true; _showControls = false; _isPlaying = false; _hasError = false; });
     final url = ch.streamUrl.split('|')[0].trim();
+    // Si ya existe controller, solo cambiar la fuente sin destruirlo
+    if (_ctrl != null) {
+      final headers = <String, String>{
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36',
+        'Accept': '*/*', 'Accept-Encoding': 'gzip, deflate', 'Connection': 'keep-alive',
+      };
+      headers.addAll(ch.headers);
+      BetterPlayerDataSource ds;
+      final urlLower = url.toLowerCase();
+      if (urlLower.contains('.mpd')) {
+        ds = BetterPlayerDataSource(BetterPlayerDataSourceType.network, url, headers: headers, liveStream: ch.isLive, videoFormat: BetterPlayerVideoFormat.dash);
+      } else if (urlLower.contains('.m3u8') || urlLower.contains('hls')) {
+        ds = BetterPlayerDataSource(BetterPlayerDataSourceType.network, url, headers: headers, liveStream: ch.isLive, videoFormat: BetterPlayerVideoFormat.hls);
+      } else {
+        ds = BetterPlayerDataSource(BetterPlayerDataSourceType.network, url, headers: headers, liveStream: ch.isLive);
+      }
+      _ctrl!.setupDataSource(ds);
+      WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _focusNode.requestFocus(); });
+      return;
+    }
     final headers = <String, String>{
       'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36',
       'Accept': '*/*',
