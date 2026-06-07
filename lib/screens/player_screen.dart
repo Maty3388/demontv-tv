@@ -17,6 +17,8 @@ class PlayerScreen extends StatefulWidget {
 class _State extends State<PlayerScreen> {
   BetterPlayerController? _ctrl;
   int _zapToken = 0;
+  bool _showZapOverlay = false;
+  Timer? _zapOverlayTimer;
   late int _idx;
   late List<Channel> _playlist;
   bool _showControls = false;
@@ -133,15 +135,25 @@ class _State extends State<PlayerScreen> {
   void _showControlsTemporary() {
     setState(() => _showControls = true);
     _hideTimer?.cancel();
+    _zapOverlayTimer?.cancel();
     _hideTimer = Timer(const Duration(seconds: 4), () { if (mounted) setState(() => _showControls = false); });
+  }
+
+  void _showZapInfo() {
+    _zapOverlayTimer?.cancel();
+    setState(() => _showZapOverlay = true);
+    _zapOverlayTimer = Timer(const Duration(seconds: 3), () {
+      if (mounted) setState(() => _showZapOverlay = false);
+    });
   }
 
   void _nextChannel() {
     final next = (_idx + 1) % _playlist.length;
-    setState(() { _idx = next; _isFavorite = _favorites.contains(_playlist[next].id); _showControls = true; });
+    setState(() { _idx = next; _isFavorite = _favorites.contains(_playlist[next].id); _showControls = false; });
     _hideTimer?.cancel();
     _ctrl?.dispose();
     _ctrl = null;
+    _showZapInfo();
     final token = ++_zapToken;
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted && token == _zapToken) _initPlayer(_playlist[next]);
@@ -150,10 +162,11 @@ class _State extends State<PlayerScreen> {
 
   void _prevChannel() {
     final prev = (_idx - 1 + _playlist.length) % _playlist.length;
-    setState(() { _idx = prev; _isFavorite = _favorites.contains(_playlist[prev].id); _showControls = true; });
+    setState(() { _idx = prev; _isFavorite = _favorites.contains(_playlist[prev].id); _showControls = false; });
     _hideTimer?.cancel();
     _ctrl?.dispose();
     _ctrl = null;
+    _showZapInfo();
     final token = ++_zapToken;
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted && token == _zapToken) _initPlayer(_playlist[prev]);
@@ -225,6 +238,51 @@ class _State extends State<PlayerScreen> {
                 const SizedBox(height: 24),
                 const CircularProgressIndicator(color: _orange, strokeWidth: 2),
               ]))),
+            // Overlay de zapping estilo Netflix
+            if (_showZapOverlay && !_isLoading) AnimatedOpacity(
+              opacity: _showZapOverlay ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 300),
+              child: Positioned(
+                left: 0, right: 0, bottom: 0,
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter, end: Alignment.topCenter,
+                      colors: [Color(0xEE000000), Color(0x00000000)])),
+                  child: Row(children: [
+                    if (_playlist[_idx].logoUrl.isNotEmpty) Container(
+                      width: 64, height: 64,
+                      margin: const EdgeInsets.only(right: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white10,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: _orange.withOpacity(0.5))),
+                      child: Padding(padding: const EdgeInsets.all(8),
+                        child: CachedNetworkImage(imageUrl: _playlist[_idx].logoUrl, fit: BoxFit.contain,
+                          errorWidget: (_, __, ___) => const Icon(Icons.tv, color: Colors.white54)))),
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text(_playlist[_idx].name,
+                        style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold,
+                          shadows: [Shadow(color: Colors.black, blurRadius: 8)])),
+                      const SizedBox(height: 4),
+                      Row(children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(color: _orange, borderRadius: BorderRadius.circular(4)),
+                          child: Text(_playlist[_idx].category,
+                            style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold))),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(4)),
+                          child: const Text('EN VIVO', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold))),
+                        const SizedBox(width: 8),
+                        Text('${_idx + 1} / ${_playlist.length}',
+                          style: const TextStyle(color: Colors.white54, fontSize: 11)),
+                      ]),
+                    ])),
+                  ])))),
             if (_showControls) Positioned.fill(child: Container(
               decoration: const BoxDecoration(gradient: LinearGradient(
                 begin: Alignment.topCenter, end: Alignment.bottomCenter,
