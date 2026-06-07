@@ -21,7 +21,7 @@ jobs:
           java-version: '17'
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.4'
+          flutter-version: '3.22.0'
       - name: Setup project
         run: |
           flutter create --org com.demontv --project-name demon_tv_plus tmp_app
