@@ -108,15 +108,22 @@ class _UpdateDialogState extends State<_UpdateDialog> {
     setState(() { _downloading = false; _progress = 0; });
   }
 
+  final _btnUpdate = FocusNode();
+  final _btnLater = FocusNode();
+
+  @override
+  void dispose() {
+    _btnUpdate.dispose();
+    _btnLater.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) => RawKeyboardListener(
     focusNode: FocusNode()..requestFocus(),
-    autofocus: true,
+    autofocus: false,
     onKey: (event) {
       if (event is RawKeyDownEvent) {
-        if (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter) {
-          if (!_downloading) _download();
-        }
         if (event.logicalKey == LogicalKeyboardKey.escape || event.logicalKey == LogicalKeyboardKey.goBack) {
           if (!widget.forceUpdate && !_downloading) Navigator.pop(context);
         }
@@ -200,33 +207,89 @@ class _UpdateDialogState extends State<_UpdateDialog> {
           ],
           const SizedBox(height: 24),
           if (!_downloading) Row(children: [
-            if (!widget.forceUpdate) Expanded(child: TextButton(
-              onPressed: () => Navigator.pop(context),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12),
-                  side: const BorderSide(color: Colors.white24)),
-                backgroundColor: Colors.white10),
-              child: const Text('Más tarde', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)))),
-            if (!widget.forceUpdate) const SizedBox(width: 12),
-            Expanded(child: ElevatedButton(
+            if (!widget.forceUpdate) ...[
+              Expanded(child: _UpdateBtn(
+                label: 'Más tarde',
+                focusNode: _btnLater,
+                primary: false,
+                onTap: () => Navigator.pop(context),
+                siblingFocus: _btnUpdate,
+              )),
+              const SizedBox(width: 12),
+            ],
+            Expanded(child: _UpdateBtn(
+              label: 'ACTUALIZAR',
+              focusNode: _btnUpdate,
+              primary: true,
               autofocus: true,
-              onPressed: _download,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                backgroundColor: const Color(0xFFFF8C00),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                shadowColor: const Color(0xFFFF8C00)),
-              child: const Text('ACTUALIZAR', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)))),
-          ]) else ElevatedButton(
-            onPressed: _cancel,
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 48),
-              backgroundColor: Colors.white10,
-              foregroundColor: Colors.white60,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-            child: const Text('Cancelar', style: TextStyle(fontWeight: FontWeight.w600))),
+              onTap: _download,
+              siblingFocus: widget.forceUpdate ? null : _btnLater,
+            )),
+          ]) else _UpdateBtn(
+            label: 'Cancelar',
+            focusNode: FocusNode()..requestFocus(),
+            primary: false,
+            autofocus: true,
+            onTap: _cancel,
+          ),
         ]),
       ))));
+}
+
+
+class _UpdateBtn extends StatefulWidget {
+  final String label;
+  final FocusNode focusNode;
+  final bool primary;
+  final bool autofocus;
+  final VoidCallback onTap;
+  final FocusNode? siblingFocus;
+  const _UpdateBtn({required this.label, required this.focusNode, required this.primary, required this.onTap, this.autofocus = false, this.siblingFocus});
+  @override State<_UpdateBtn> createState() => _UpdateBtnState();
+}
+
+class _UpdateBtnState extends State<_UpdateBtn> {
+  bool _focused = false;
+  static const _orange = Color(0xFFFF8C00);
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.autofocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) FocusScope.of(context).requestFocus(widget.focusNode);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Focus(
+    focusNode: widget.focusNode,
+    onFocusChange: (v) => setState(() => _focused = v),
+    onKeyEvent: (_, e) {
+      if (e is KeyDownEvent && (e.logicalKey == LogicalKeyboardKey.select || e.logicalKey == LogicalKeyboardKey.enter)) {
+        widget.onTap(); return KeyEventResult.handled;
+      }
+      if (e is KeyDownEvent && (e.logicalKey == LogicalKeyboardKey.arrowLeft || e.logicalKey == LogicalKeyboardKey.arrowRight)) {
+        if (widget.siblingFocus != null) { FocusScope.of(context).requestFocus(widget.siblingFocus!); return KeyEventResult.handled; }
+      }
+      return KeyEventResult.ignored;
+    },
+    child: GestureDetector(onTap: widget.onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: _focused
+            ? (widget.primary ? _orange : Colors.white30)
+            : (widget.primary ? _orange.withOpacity(0.85) : Colors.white10),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: _focused ? Colors.white : (widget.primary ? _orange : Colors.white24),
+            width: _focused ? 2.5 : 1),
+          boxShadow: _focused ? [BoxShadow(color: (widget.primary ? _orange : Colors.white).withOpacity(0.5), blurRadius: 16, spreadRadius: 2)] : null),
+        child: Center(child: Text(widget.label,
+          style: TextStyle(
+            color: _focused ? Colors.white : (widget.primary ? Colors.white : Colors.white70),
+            fontWeight: FontWeight.bold, fontSize: 14))))));
 }

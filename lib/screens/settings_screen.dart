@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
+import '../services/update_checker.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -117,7 +118,7 @@ class _State extends State<SettingsScreen> {
           })),
         ]),
         _sec('Información', [
-          _item(9, 'Versión', Icons.info_outline, sub: 'DemonTV Plus'),
+          _item(9, 'Versión', Icons.info_outline, sub: 'DemonTV Plus v\${UpdateChecker.currentVersion}'),
         ]),
         const SizedBox(height: 16),
         Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Focus(

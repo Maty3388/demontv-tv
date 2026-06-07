@@ -143,29 +143,7 @@ class _MainState extends State<MainScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white54, fontSize: 13)),
             const SizedBox(height: 28),
-            Row(children: [
-              Expanded(child: GestureDetector(
-                onTap: () => Navigator.pop(c, false),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white10,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white24)),
-                  child: const Center(child: Text("Cancelar",
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)))))),
-              const SizedBox(width: 12),
-              Expanded(child: GestureDetector(
-                onTap: () => Navigator.pop(c, true),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Color(0xFFFF8C00), Color(0xFFFFB347)]),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [BoxShadow(color: const Color(0xFFFF8C00).withOpacity(0.4), blurRadius: 8)]),
-                  child: const Center(child: Text("Salir",
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))))),
-            ]),
+            _ExitDialogButtons(onCancel: () => Navigator.pop(c, false), onExit: () => Navigator.pop(c, true)),
           ]),
         ))));
     _exitDialogOpen = false;
@@ -191,7 +169,7 @@ class _MainState extends State<MainScreen> {
       case 5: _showAdultPin(); break;
       
       case 6: _clearCache(); break;
-      case 7: Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())); break;
+      case 7: Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())).then((_) { _backHandled = true; Future.delayed(const Duration(milliseconds: 500), () => _backHandled = false); }); break;
       case 8: _showLogoutDialog(); break;
       default: setState(() => _inContent = true);
     }
@@ -245,7 +223,9 @@ class _MainState extends State<MainScreen> {
     child: WillPopScope(
       onWillPop: () async {
         if (_backHandled) { _backHandled = false; return false; }
-        if (_inContent) { setState(() => _inContent = false); return false; }
+        if (_inContent) { setState(() { _inContent = false; _sideIdx = 1; }); return false; }
+        // Si no estamos en el sidebar (sideIdx != 1 = Inicio), volver al inicio
+        if (_sideIdx != 1) { setState(() => _sideIdx = 1); return false; }
         _showExitDialog();
         return false;
       },
@@ -721,4 +701,64 @@ class _ChannelCardState extends State<_ChannelCard> {
       ]),
     ),
   );
+}
+
+class _ExitDialogButtons extends StatefulWidget {
+  final VoidCallback onCancel, onExit;
+  const _ExitDialogButtons({required this.onCancel, required this.onExit});
+  @override State<_ExitDialogButtons> createState() => _ExitDialogButtonsState();
+}
+
+class _ExitDialogButtonsState extends State<_ExitDialogButtons> {
+  final _cancelFocus = FocusNode();
+  final _exitFocus = FocusNode();
+  static const _orange = Color(0xFFFF8C00);
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) FocusScope.of(context).requestFocus(_exitFocus);
+    });
+  }
+
+  @override
+  void dispose() { _cancelFocus.dispose(); _exitFocus.dispose(); super.dispose(); }
+
+  Widget _btn(String label, FocusNode fn, bool primary, VoidCallback onTap, FocusNode sibling) {
+    return StatefulBuilder(builder: (ctx, ss) {
+      bool focused = false;
+      return Focus(
+        focusNode: fn,
+        onFocusChange: (v) => ss(() => focused = v),
+        onKeyEvent: (_, e) {
+          if (e is KeyDownEvent && (e.logicalKey == LogicalKeyboardKey.select || e.logicalKey == LogicalKeyboardKey.enter)) {
+            onTap(); return KeyEventResult.handled;
+          }
+          if (e is KeyDownEvent && (e.logicalKey == LogicalKeyboardKey.arrowLeft || e.logicalKey == LogicalKeyboardKey.arrowRight)) {
+            FocusScope.of(ctx).requestFocus(sibling); return KeyEventResult.handled;
+          }
+          return KeyEventResult.ignored;
+        },
+        child: GestureDetector(onTap: onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            padding: const EdgeInsets.symmetric(vertical: 13),
+            decoration: BoxDecoration(
+              color: focused ? (primary ? _orange : Colors.white30) : (primary ? _orange.withOpacity(0.85) : Colors.white10),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: focused ? Colors.white : (primary ? _orange : Colors.white24), width: focused ? 2.5 : 1),
+              boxShadow: focused ? [BoxShadow(color: (primary ? _orange : Colors.white).withOpacity(0.5), blurRadius: 16)] : null),
+            child: Center(child: Text(label,
+              style: TextStyle(color: focused ? Colors.white : (primary ? Colors.white : Colors.white70),
+                fontWeight: FontWeight.bold, fontSize: 15))))));
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => Row(children: [
+    Expanded(child: _btn('Cancelar', _cancelFocus, false, widget.onCancel, _exitFocus)),
+    const SizedBox(width: 12),
+    Expanded(child: _btn('Salir', _exitFocus, true, widget.onExit, _cancelFocus)),
+  ]);
 }
