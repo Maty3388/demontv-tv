@@ -80,10 +80,13 @@ class _State extends State<LiveTvScreen> {
       if (av != bv) return av.compareTo(bv);
       return (a.number ?? 999).compareTo(b.number ?? 999);
     });
+    // Disponer FocusNodes anteriores antes de crear nuevos
+    for (final f in _catFocusNodes) f.dispose();
+    for (final row in _chFocusNodes) for (final f in row) f.dispose();
+    _catFocusNodes.clear();
+    _chFocusNodes.clear();
     setState(() {
       _channels = filtered;
-      _catFocusNodes.clear();
-      _chFocusNodes.clear();
       for (int i = 0; i < _grouped.length; i++) {
         _catFocusNodes.add(FocusNode());
         _chFocusNodes.add(List.generate(_grouped.values.elementAt(i).length, (_) => FocusNode()));
@@ -257,7 +260,7 @@ class _State extends State<LiveTvScreen> {
       if (_showSearch && _allChannels.isNotEmpty) SizedBox(height: 36, child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        children: ['Todos', ..._allChannels.map((c) => c.category).toSet().toList()..sort()].map((cat) =>
+        children: () { const catOrder = ['EVENTOS','ARGENTINA','ARGENTINA INTERIOR','DEPORTES','NOTICIAS','MÚSICA','RELIGIÓN','INFANTILES','CINE','CANALES 24/7','PLUTOTV','PARAGUAY','BRASIL','CHILE','URUGUAY','MEXICO','COLOMBIA','INTERNACIONAL','DESTACADOS','DOCUMENTALES','ADULTOS']; final cats = _allChannels.map((c) => c.category).toSet().toList(); cats.sort((a, b) { final ai = catOrder.indexOf(a); final bi = catOrder.indexOf(b); return (ai == -1 ? 999 : ai).compareTo(bi == -1 ? 999 : bi); }); return ['Todos', ...cats]; }().map((cat) =>
           GestureDetector(onTap: () { setState(() => _catFilter = cat); _applyFilter(); },
             child: Container(
               margin: const EdgeInsets.only(right: 6),
@@ -302,22 +305,32 @@ class _State extends State<LiveTvScreen> {
                             width: isFocused ? 140 : 120,
                             margin: const EdgeInsets.symmetric(horizontal: 4),
                             decoration: BoxDecoration(
-                            decoration: BoxDecoration(
                               gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight,
                                 colors: isFocused ? [_channelColor(ch.name), _channelColorLight(ch.name)] : [_channelColor(ch.name).withOpacity(0.7), _channelColorLight(ch.name).withOpacity(0.5)]),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: isFocused ? Colors.white : Colors.transparent, width: isFocused ? 2 : 0),
                               boxShadow: isFocused ? [BoxShadow(color: _channelColor(ch.name).withOpacity(0.5), blurRadius: 16)] : null),
-                              SizedBox(width: 70, height: 70, child: ClipRRect(borderRadius: BorderRadius.circular(10),
-                                child: ch.logoUrl.isNotEmpty
-                                  ? CachedNetworkImage(imageUrl: ch.logoUrl, fit: BoxFit.contain,
-                                      placeholder: (_, __) => Container(color: AppTheme.surfaceAlt, child: const Icon(Icons.tv, color: AppTheme.textHint)),
-                                      errorWidget: (_, __, ___) => Container(color: AppTheme.surfaceAlt, child: const Icon(Icons.tv, color: AppTheme.textHint)))
-                                  : Container(color: AppTheme.surfaceAlt, child: const Icon(Icons.tv, color: AppTheme.textHint, size: 30)))),
-                              const SizedBox(height: 8),
-                              Padding(padding: const EdgeInsets.symmetric(horizontal: 6),
-                                child: Text(ch.name, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(color: isFocused ? Colors.white : AppTheme.textSecondary, fontSize: 11, fontWeight: isFocused ? FontWeight.bold : FontWeight.w500))),
+                            child: Stack(children: [
+                              Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                const SizedBox(height: 8),
+                                SizedBox(width: 70, height: 70, child: ClipRRect(borderRadius: BorderRadius.circular(10),
+                                  child: ch.logoUrl.isNotEmpty
+                                    ? CachedNetworkImage(imageUrl: ch.logoUrl, fit: BoxFit.contain,
+                                        placeholder: (_, __) => Container(color: AppTheme.surfaceAlt, child: Center(child: Text(ch.name.isNotEmpty ? ch.name[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)))),
+                                        errorWidget: (_, __, ___) => Container(color: AppTheme.surfaceAlt, child: Center(child: Text(ch.name.isNotEmpty ? ch.name[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)))))
+                                    : Container(color: AppTheme.surfaceAlt, child: Center(child: Text(ch.name.isNotEmpty ? ch.name[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)))))),
+                                const SizedBox(height: 6),
+                                Padding(padding: const EdgeInsets.symmetric(horizontal: 6),
+                                  child: Text(ch.name, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(color: isFocused ? Colors.white : AppTheme.textSecondary, fontSize: 11, fontWeight: isFocused ? FontWeight.bold : FontWeight.w500))),
+                                const SizedBox(height: 6),
+                              ]),
+                              // Número de canal
+                              if (ch.number != null && ch.number! > 0) Positioned(top: 6, left: 6,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                  decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(4)),
+                                  child: Text('${ch.number}', style: const TextStyle(color: Colors.white70, fontSize: 9, fontWeight: FontWeight.bold)))),
                             ])),
                         ),
                       );

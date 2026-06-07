@@ -233,15 +233,30 @@ class _State extends State<PlayerScreen> {
                 const Text('Cargando canal...', style: TextStyle(color: Colors.white54, fontSize: 12)),
               ]))),
             if (_hasError) Positioned.fill(child: Container(
-              color: Colors.black87,
+              color: Colors.black,
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                const Icon(Icons.signal_wifi_off, color: Colors.white54, size: 64),
-                const SizedBox(height: 16),
-                const Text('Canal no disponible', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                // Logo del canal
+                if (_playlist[_idx].logoUrl.isNotEmpty) Container(
+                  width: 80, height: 80, margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(16)),
+                  child: Padding(padding: const EdgeInsets.all(12),
+                    child: CachedNetworkImage(imageUrl: _playlist[_idx].logoUrl, fit: BoxFit.contain,
+                      errorWidget: (_, __, ___) => const Icon(Icons.tv, color: Colors.white54, size: 40)))),
+                Text(_playlist[_idx].name, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                const Text('Reconectando...', style: TextStyle(color: Colors.white54, fontSize: 14)),
-                const SizedBox(height: 24),
-                const CircularProgressIndicator(color: _orange, strokeWidth: 2),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(color: Colors.red.withOpacity(0.2), borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red.withOpacity(0.5))),
+                  child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                    Icon(Icons.signal_wifi_off, color: Colors.red, size: 14),
+                    SizedBox(width: 6),
+                    Text('Señal no disponible', style: TextStyle(color: Colors.red, fontSize: 13)),
+                  ])),
+                const SizedBox(height: 20),
+                const Text('Reconectando automáticamente...', style: TextStyle(color: Colors.white38, fontSize: 12)),
+                const SizedBox(height: 12),
+                const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: _orange, strokeWidth: 2)),
               ]))),
             // Overlay de zapping estilo Netflix
             if (_showZapOverlay && !_isLoading) AnimatedOpacity(

@@ -85,7 +85,7 @@ class _VodState extends State<VodScreen> {
       _listCtrl.animateTo(_catIdx * 180.0, duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
     } else if (event.logicalKey == LogicalKeyboardKey.select || event.logicalKey == LogicalKeyboardKey.enter) {
       final c = items[_itemIdx];
-      Navigator.push(context, MaterialPageRoute(builder: (_) => ContentPlayerScreen(content: c)));
+      Navigator.push(context, MaterialPageRoute(builder: (_) => ContentPlayerScreen(content: c))).then((_) { if (mounted) _focusNode.requestFocus(); });
     } else if (event.logicalKey == LogicalKeyboardKey.escape || event.logicalKey == LogicalKeyboardKey.goBack) {
       widget.onBack?.call();
     }

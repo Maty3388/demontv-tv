@@ -117,7 +117,11 @@ class _HomeState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
     SizedBox(height: 180,
       child: PageView.builder(
         controller: _pageCtrl,
-        onPageChanged: (i) => setState(() => _pageIdx = i),
+        onPageChanged: (i) {
+          setState(() => _pageIdx = i);
+          // Reiniciar timer al cambiar pagina manualmente
+          _startAutoScroll();
+        },
         itemCount: _featured.length,
         itemBuilder: (ctx, i) {
           final ch = _featured[i];
