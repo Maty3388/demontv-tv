@@ -72,9 +72,6 @@ class _State extends State<PlayerScreen> {
       'Connection': 'keep-alive',
     };
     headers.addAll(ch.headers);
-    // Disponer controller anterior
-    _ctrl?.dispose();
-    _ctrl = null;
 
     // Detectar formato por URL
     final urlLower = url.toLowerCase();
@@ -142,14 +139,22 @@ class _State extends State<PlayerScreen> {
     final next = (_idx + 1) % _playlist.length;
     setState(() { _idx = next; _isFavorite = _favorites.contains(_playlist[next].id); _showControls = true; });
     _hideTimer?.cancel();
-    _initPlayer(_playlist[next]);
+    _ctrl?.dispose();
+    _ctrl = null;
+    Future.delayed(const Duration(milliseconds: 400), () {
+      if (mounted) _initPlayer(_playlist[next]);
+    });
   }
 
   void _prevChannel() {
     final prev = (_idx - 1 + _playlist.length) % _playlist.length;
     setState(() { _idx = prev; _isFavorite = _favorites.contains(_playlist[prev].id); _showControls = true; });
     _hideTimer?.cancel();
-    _initPlayer(_playlist[prev]);
+    _ctrl?.dispose();
+    _ctrl = null;
+    Future.delayed(const Duration(milliseconds: 400), () {
+      if (mounted) _initPlayer(_playlist[prev]);
+    });
   }
 
   @override
