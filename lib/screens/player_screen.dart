@@ -104,13 +104,14 @@ class _State extends State<PlayerScreen> {
           bufferForPlaybackMs: 1000, bufferForPlaybackAfterRebufferMs: 2000),
       );
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _focusNode.requestFocus(); });
     _ctrl = BetterPlayerController(
       BetterPlayerConfiguration(
         autoPlay: true, looping: false,
         fullScreenByDefault: true, allowedScreenSleep: false,
         controlsConfiguration: const BetterPlayerControlsConfiguration(showControls: false),
         autoDetectFullscreenAspectRatio: true,
+        placeholderOnTop: true,
+        placeholder: Container(color: Colors.black),
         eventListener: (e) {
           if (e.betterPlayerEventType == BetterPlayerEventType.play) {
             if (mounted) setState(() => _isPlaying = true);
@@ -122,7 +123,7 @@ class _State extends State<PlayerScreen> {
               if (mounted) { setState(() => _hasError = false); _initPlayer(_playlist[_idx]); }
             });
           } else if (e.betterPlayerEventType == BetterPlayerEventType.initialized) {
-            if (mounted) { Future.delayed(const Duration(milliseconds: 200), () { if (mounted) setState(() { _hasError = false; _isLoading = false; _isPlaying = true; }); }); _showControlsTemporary(); }
+            if (mounted) { Future.delayed(const Duration(milliseconds: 200), () { if (mounted) { setState(() { _hasError = false; _isLoading = false; _isPlaying = true; }); _focusNode.requestFocus(); } }); _showControlsTemporary(); }
           }
         },
       ),
