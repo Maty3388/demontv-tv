@@ -210,9 +210,13 @@ class _State extends State<PlayerScreen> {
             return KeyEventResult.ignored;
           },
           child: Stack(children: [
-            // Fondo negro siempre presente para evitar pantalla blanca
+            // Fondo negro siempre presente
             Container(color: Colors.black),
-            if (_ctrl != null) BetterPlayer(controller: _ctrl!),
+            // Player con fade para evitar pantalla blanca
+            if (_ctrl != null) AnimatedOpacity(
+              opacity: _isLoading ? 0.0 : 1.0,
+              duration: const Duration(milliseconds: 300),
+              child: BetterPlayer(controller: _ctrl!)),
             if (_isLoading && !_hasError) Positioned.fill(child: Container(
               color: Colors.black87,
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
