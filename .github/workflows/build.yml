@@ -70,6 +70,8 @@ jobs:
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/demontv.keystore
           printf "storePassword=${{ secrets.KEYSTORE_PASSWORD }}\nkeyPassword=${{ secrets.KEY_PASSWORD }}\nkeyAlias=${{ secrets.KEY_ALIAS }}\nstoreFile=demontv.keystore\n" > android/key.properties
+      - name: Patch dependencies
+        run: find $HOME/.pub-cache -name "build.gradle" -path "*screen_brightness_android*" | xargs -I{} sed -i 's/compilerOptions {/kotlinOptions {/g' {}
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
         env:
