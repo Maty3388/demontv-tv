@@ -65,6 +65,22 @@ class _HomeState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
     return Color(colors[idx]);
   }
 
+  void _startAutoScroll() {
+    _autoScrollTimer?.cancel();
+    _autoScrollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (!mounted || _featured.isEmpty) return;
+      final next = (_pageIdx + 1) % _featured.length;
+      _pageCtrl.animateToPage(next, duration: const Duration(milliseconds: 600), curve: Curves.easeInOut);
+    });
+  }
+
+  @override
+  void dispose() {
+    _autoScrollTimer?.cancel();
+    _pageCtrl.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
