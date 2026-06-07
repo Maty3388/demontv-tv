@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../theme/app_theme.dart';
@@ -17,6 +18,9 @@ class _HomeState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
   List<Content> _series = [];
   List<Channel> _deportes = [];
   List<Channel> _featured = [];
+  final PageController _pageCtrl = PageController(viewportFraction: 0.85);
+  int _pageIdx = 0;
+  Timer? _autoScrollTimer;
   bool _loading = true;
   static const _orange = Color(0xFFFF8C00);
   static const _orangeLight = Color(0xFFFFB347);
@@ -41,6 +45,7 @@ class _HomeState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
         _series   = series;
         _deportes = deportes.take(15).toList();
         _featured = featured.take(10).toList();
+        _startAutoScroll();
         _loading  = false;
       });
     } catch (e) {
@@ -94,9 +99,9 @@ class _HomeState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
         Expanded(child: Container(height: 2, decoration: const BoxDecoration(gradient: LinearGradient(colors: [_orange, Colors.transparent])))),
       ])),
     SizedBox(height: 180,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: PageView.builder(
+        controller: _pageCtrl,
+        onPageChanged: (i) => setState(() => _pageIdx = i),
         itemCount: _featured.length,
         itemBuilder: (ctx, i) {
           final ch = _featured[i];
@@ -105,7 +110,7 @@ class _HomeState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
           return GestureDetector(
             onTap: () => Navigator.push(ctx, MaterialPageRoute(builder: (_) => PlayerScreen(channel: ch, playlist: _featured, initialIndex: i))),
             child: Container(
-              width: 150, margin: const EdgeInsets.only(right: 12),
+              margin: const EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [c1, c2]),
@@ -130,6 +135,17 @@ class _HomeState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
                     child: const Text('EN VIVO', style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)))),
               ])));
         })),
+    const SizedBox(height: 8),
+    // Dots indicadores
+    Row(mainAxisAlignment: MainAxisAlignment.center, children: List.generate(_featured.length, (i) =>
+      AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        margin: const EdgeInsets.symmetric(horizontal: 3),
+        width: _pageIdx == i ? 16 : 6,
+        height: 6,
+        decoration: BoxDecoration(
+          color: _pageIdx == i ? _orange : Colors.white24,
+          borderRadius: BorderRadius.circular(3))))),
     const SizedBox(height: 8),
   ]);
 
