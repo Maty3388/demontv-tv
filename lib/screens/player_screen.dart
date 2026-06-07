@@ -16,6 +16,7 @@ class PlayerScreen extends StatefulWidget {
 
 class _State extends State<PlayerScreen> {
   BetterPlayerController? _ctrl;
+  int _zapToken = 0;
   late int _idx;
   late List<Channel> _playlist;
   bool _showControls = false;
@@ -141,8 +142,9 @@ class _State extends State<PlayerScreen> {
     _hideTimer?.cancel();
     _ctrl?.dispose();
     _ctrl = null;
-    Future.delayed(const Duration(milliseconds: 400), () {
-      if (mounted) _initPlayer(_playlist[next]);
+    final token = ++_zapToken;
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted && token == _zapToken) _initPlayer(_playlist[next]);
     });
   }
 
@@ -152,8 +154,9 @@ class _State extends State<PlayerScreen> {
     _hideTimer?.cancel();
     _ctrl?.dispose();
     _ctrl = null;
-    Future.delayed(const Duration(milliseconds: 400), () {
-      if (mounted) _initPlayer(_playlist[prev]);
+    final token = ++_zapToken;
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted && token == _zapToken) _initPlayer(_playlist[prev]);
     });
   }
 
