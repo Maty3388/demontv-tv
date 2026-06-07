@@ -305,32 +305,46 @@ class _State extends State<LiveTvScreen> {
                             width: isFocused ? 140 : 120,
                             margin: const EdgeInsets.symmetric(horizontal: 4),
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight,
-                                colors: isFocused ? [_channelColor(ch.name), _channelColorLight(ch.name)] : [_channelColor(ch.name).withOpacity(0.7), _channelColorLight(ch.name).withOpacity(0.5)]),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: isFocused ? Colors.white : Colors.transparent, width: isFocused ? 2 : 0),
-                              boxShadow: isFocused ? [BoxShadow(color: _channelColor(ch.name).withOpacity(0.5), blurRadius: 16)] : null),
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft, end: Alignment.bottomRight,
+                                colors: isFocused
+                                  ? [_channelColor(ch.name), _channelColorLight(ch.name)]
+                                  : [_channelColor(ch.name).withOpacity(0.85), _channelColorLight(ch.name).withOpacity(0.7)]),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: isFocused ? Colors.white : Colors.transparent, width: 2.5),
+                              boxShadow: isFocused ? [BoxShadow(color: _channelColor(ch.name).withOpacity(0.6), blurRadius: 20, spreadRadius: 2)] : null),
                             child: Stack(children: [
                               Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                const SizedBox(height: 8),
-                                SizedBox(width: 70, height: 70, child: ClipRRect(borderRadius: BorderRadius.circular(10),
+                                const SizedBox(height: 10),
+                                Container(
+                                  width: 76, height: 76,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 8, offset: const Offset(0,2))]),
                                   child: ch.logoUrl.isNotEmpty
-                                    ? CachedNetworkImage(imageUrl: ch.logoUrl, fit: BoxFit.contain,
-                                        placeholder: (_, __) => Container(color: AppTheme.surfaceAlt, child: Center(child: Text(ch.name.isNotEmpty ? ch.name[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)))),
-                                        errorWidget: (_, __, ___) => Container(color: AppTheme.surfaceAlt, child: Center(child: Text(ch.name.isNotEmpty ? ch.name[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)))))
-                                    : Container(color: AppTheme.surfaceAlt, child: Center(child: Text(ch.name.isNotEmpty ? ch.name[0].toUpperCase() : '?', style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)))))),
-                                const SizedBox(height: 6),
+                                    ? Padding(padding: const EdgeInsets.all(8),
+                                        child: CachedNetworkImage(imageUrl: ch.logoUrl, fit: BoxFit.contain,
+                                          placeholder: (_, __) => Center(child: Text(ch.name.isNotEmpty ? ch.name[0].toUpperCase() : '?', style: TextStyle(color: _channelColor(ch.name), fontSize: 28, fontWeight: FontWeight.bold))),
+                                          errorWidget: (_, __, ___) => Center(child: Text(ch.name.isNotEmpty ? ch.name[0].toUpperCase() : '?', style: TextStyle(color: _channelColor(ch.name), fontSize: 28, fontWeight: FontWeight.bold)))))
+                                    : Center(child: Text(ch.name.isNotEmpty ? ch.name[0].toUpperCase() : '?', style: TextStyle(color: _channelColor(ch.name), fontSize: 28, fontWeight: FontWeight.bold)))),
+                                const SizedBox(height: 8),
                                 Padding(padding: const EdgeInsets.symmetric(horizontal: 6),
                                   child: Text(ch.name, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(color: isFocused ? Colors.white : AppTheme.textSecondary, fontSize: 11, fontWeight: isFocused ? FontWeight.bold : FontWeight.w500))),
-                                const SizedBox(height: 6),
+                                    style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold,
+                                      shadows: [Shadow(color: Colors.black45, blurRadius: 4)]))),
+                                const SizedBox(height: 8),
                               ]),
-                              // Número de canal
                               if (ch.number != null && ch.number! > 0) Positioned(top: 6, left: 6,
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                                  decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(4)),
-                                  child: Text('${ch.number}', style: const TextStyle(color: Colors.white70, fontSize: 9, fontWeight: FontWeight.bold)))),
+                                  decoration: BoxDecoration(color: Colors.black38, borderRadius: BorderRadius.circular(4)),
+                                  child: Text('${ch.number}', style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)))),
+                              if (isFocused) Positioned(top: 6, right: 6,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                  decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(4)),
+                                  child: const Text('● VIVO', style: TextStyle(color: Colors.white, fontSize: 7, fontWeight: FontWeight.bold)))),
                             ])),
                         ),
                       );
