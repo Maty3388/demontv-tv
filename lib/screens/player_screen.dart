@@ -207,11 +207,16 @@ class _State extends State<PlayerScreen> {
           child: Stack(children: [
             // Fondo negro siempre presente
             Container(color: Colors.black),
-            // Player con fade para evitar pantalla blanca
-            if (_ctrl != null) AnimatedOpacity(
-              opacity: _isLoading ? 0.0 : 1.0,
-              duration: const Duration(milliseconds: 300),
-              child: BetterPlayer(controller: _ctrl!)),
+            if (_ctrl != null) BetterPlayer(controller: _ctrl!),
+            // Overlay negro que se desvanece cuando el video carga
+            if (_isLoading && !_hasError) AnimatedOpacity(
+              opacity: 1.0,
+              duration: Duration.zero,
+              child: Container(color: Colors.black)),
+            if (!_isLoading && !_hasError) AnimatedOpacity(
+              opacity: 0.0,
+              duration: const Duration(milliseconds: 400),
+              child: Container(color: Colors.black)),
             if (_isLoading && !_hasError) Positioned.fill(child: Container(
               decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF0D0D0D), Color(0xFF1A0800), Color(0xFF0D0D0D)])),
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
