@@ -28,6 +28,8 @@ jobs:
           cp -r tmp_app/android .
           sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/' android/app/build.gradle
           sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 36/' android/app/build.gradle
+          sed -i 's/ext.kotlin_version.*/ext.kotlin_version = "2.0.21"/' android/build.gradle
+          sed -i 's/org.jetbrains.kotlin.android.*$/org.jetbrains.kotlin.android" version "2.0.21"/' android/settings.gradle
           sed -i 's/signingConfig = signingConfigs.debug/signingConfig = signingConfigs.release/' android/app/build.gradle
           sed -i '/buildTypes {/i\    signingConfigs { release { def p=new Properties(); p.load(new FileInputStream(rootProject.file("key.properties"))); storeFile file(p["storeFile"]); storePassword p["storePassword"]; keyAlias p["keyAlias"]; keyPassword p["keyPassword"] } }' android/app/build.gradle
           rm -rf tmp_app
