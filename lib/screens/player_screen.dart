@@ -104,6 +104,7 @@ class _State extends State<PlayerScreen> {
           bufferForPlaybackMs: 1000, bufferForPlaybackAfterRebufferMs: 2000),
       );
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _focusNode.requestFocus(); });
     _ctrl = BetterPlayerController(
       BetterPlayerConfiguration(
         autoPlay: true, looping: false,
