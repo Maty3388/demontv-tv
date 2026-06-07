@@ -16,12 +16,13 @@ class _State extends State<SettingsScreen> {
   int _focusedIndex = 0;
   static const _orange = Color(0xFFFF8C00);
   final _focusNodes = List.generate(12, (_) => FocusNode());
+  final _scrollCtrl = ScrollController();
 
   @override
   void initState() { super.initState(); _loadPrefs(); WidgetsBinding.instance.addPostFrameCallback((_) { FocusScope.of(context).requestFocus(_focusNodes[0]); }); }
 
   @override
-  void dispose() { for (final f in _focusNodes) f.dispose(); super.dispose(); }
+  void dispose() { for (final f in _focusNodes) f.dispose(); _scrollCtrl.dispose(); super.dispose(); }
 
   Future<void> _loadPrefs() async {
     final prefs = await SharedPreferences.getInstance();
@@ -68,13 +69,24 @@ class _State extends State<SettingsScreen> {
     ApiService.clearToken(); Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
   });
 
+  void _scrollToFocus(int idx) {
+    final itemHeight = 56.0;
+    final offset = idx * itemHeight;
+    _scrollCtrl.animateTo(offset.clamp(0, _scrollCtrl.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+  }
+
   KeyEventResult _handleKey(KeyEvent e, int idx) {
     if (e is! KeyDownEvent) return KeyEventResult.ignored;
     if (e.logicalKey == LogicalKeyboardKey.arrowDown && idx < _focusNodes.length - 1) {
-      setState(() => _focusedIndex = idx + 1); FocusScope.of(context).requestFocus(_focusNodes[idx + 1]); return KeyEventResult.handled;
+      setState(() => _focusedIndex = idx + 1); FocusScope.of(context).requestFocus(_focusNodes[idx + 1]);
+      Future.delayed(const Duration(milliseconds: 50), () => _scrollToFocus(idx + 1));
+      return KeyEventResult.handled;
     }
     if (e.logicalKey == LogicalKeyboardKey.arrowUp) {
-      if (idx > 0) { setState(() => _focusedIndex = idx - 1); FocusScope.of(context).requestFocus(_focusNodes[idx - 1]); return KeyEventResult.handled; }
+      if (idx > 0) { setState(() => _focusedIndex = idx - 1); FocusScope.of(context).requestFocus(_focusNodes[idx - 1]);
+        Future.delayed(const Duration(milliseconds: 50), () => _scrollToFocus(idx - 1));
+        return KeyEventResult.handled; }
       Navigator.pop(context); return KeyEventResult.handled;
     }
     if (e.logicalKey == LogicalKeyboardKey.goBack || e.logicalKey == LogicalKeyboardKey.escape) { Navigator.pop(context); return KeyEventResult.handled; }
@@ -94,7 +106,7 @@ class _State extends State<SettingsScreen> {
           const SizedBox(width: 8),
           const Text('Configuración', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
         ])),
-      Expanded(child: SingleChildScrollView(child: Column(children: [
+      Expanded(child: SingleChildScrollView(controller: _scrollCtrl, child: Column(children: [
         _card(_userEmail.isEmpty ? 'Sin email' : _userEmail, _userExpiry),
         _sec('Reproducción', [
           _item(0, 'Calidad de video', Icons.hd, sub: _quality, onTap: _showQualityPicker),
