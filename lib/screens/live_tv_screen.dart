@@ -15,6 +15,8 @@ class _State extends State<LiveTvScreen> {
   List<Channel> _channels = [];
   bool _loading = true;
   String _search = '';
+  String _catFilter = 'Todos';
+  List<Channel> _allChannels = [];
   final _searchCtrl = TextEditingController();
   final _searchFocus = FocusNode();
   bool _showSearch = false;
@@ -58,10 +60,41 @@ class _State extends State<LiveTvScreen> {
     return Color(colors[idx]);
   }
 
+  void _applyFilter() {
+    const catOrder = [
+      'EVENTOS', 'ARGENTINA', 'ARGENTINA INTERIOR', 'DEPORTES', 'NOTICIAS',
+      'MÚSICA', 'RELIGIÓN', 'INFANTILES', 'CINE', 'CANALES 24/7', 'PLUTOTV',
+      'PARAGUAY', 'BRASIL', 'CHILE', 'URUGUAY', 'MEXICO', 'COLOMBIA',
+      'INTERNACIONAL', 'DESTACADOS', 'DOCUMENTALES', 'ADULTOS',
+    ];
+    var filtered = _allChannels.where((c) {
+      final matchSearch = _search.isEmpty || c.name.toLowerCase().contains(_search.toLowerCase());
+      final matchCat = _catFilter == 'Todos' || c.category == _catFilter;
+      return matchSearch && matchCat;
+    }).toList();
+    filtered.sort((a, b) {
+      final ai = catOrder.indexWhere((c) => c.toLowerCase() == a.category.toLowerCase());
+      final bi = catOrder.indexWhere((c) => c.toLowerCase() == b.category.toLowerCase());
+      final av = ai == -1 ? 999 : ai;
+      final bv = bi == -1 ? 999 : bi;
+      if (av != bv) return av.compareTo(bv);
+      return (a.number ?? 999).compareTo(b.number ?? 999);
+    });
+    setState(() {
+      _channels = filtered;
+      _catFocusNodes.clear();
+      _chFocusNodes.clear();
+      for (int i = 0; i < _grouped.length; i++) {
+        _catFocusNodes.add(FocusNode());
+        _chFocusNodes.add(List.generate(_grouped.values.elementAt(i).length, (_) => FocusNode()));
+      }
+    });
+  }
+
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final channels = await ApiService.getChannels(search: _search.isEmpty ? null : _search);
+      final channels = await ApiService.getChannels(search: null);
       const catOrder = [
         'EVENTOS', 'ARGENTINA', 'ARGENTINA INTERIOR', 'DEPORTES', 'NOTICIAS',
         'MÚSICA', 'RELIGIÓN', 'INFANTILES', 'CINE', 'CANALES 24/7', 'PLUTOTV',
@@ -76,6 +109,7 @@ class _State extends State<LiveTvScreen> {
         if (av != bv) return av.compareTo(bv);
         return (a.number ?? 999).compareTo(b.number ?? 999);
       });
+      _allChannels = channels;
       setState(() {
         _channels = channels;
         _catFocusNodes.clear();
@@ -210,7 +244,7 @@ class _State extends State<LiveTvScreen> {
       if (_showSearch) Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: TextField(
           controller: _searchCtrl, focusNode: _searchFocus,
-          onChanged: (v) { setState(() => _search = v); _load(); },
+          onChanged: (v) { setState(() => _search = v); _applyFilter(); },
           onSubmitted: (_) { setState(() => _showSearch = false); if (_chFocusNodes.isNotEmpty && _chFocusNodes[0].isNotEmpty) FocusScope.of(context).requestFocus(_chFocusNodes[0][0]); },
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
@@ -218,7 +252,21 @@ class _State extends State<LiveTvScreen> {
             hintText: 'Buscar canal...',
             filled: true, fillColor: AppTheme.surface,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-            suffixIcon: _search.isNotEmpty ? IconButton(onPressed: () { _searchCtrl.clear(); setState(() => _search = ''); _load(); }, icon: const Icon(Icons.close, color: AppTheme.textHint)) : null))),
+            suffixIcon: _search.isNotEmpty ? IconButton(onPressed: () { _searchCtrl.clear(); setState(() => _search = ''); _applyFilter(); }, icon: const Icon(Icons.close, color: AppTheme.textHint)) : null))),
+      // Filtros por categoría
+      if (_showSearch && _allChannels.isNotEmpty) SizedBox(height: 36, child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        children: ['Todos', ..._allChannels.map((c) => c.category).toSet().toList()..sort()].map((cat) =>
+          GestureDetector(onTap: () { setState(() => _catFilter = cat); _applyFilter(); },
+            child: Container(
+              margin: const EdgeInsets.only(right: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: _catFilter == cat ? const Color(0xFFFF8C00).withOpacity(0.2) : AppTheme.surface,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: _catFilter == cat ? const Color(0xFFFF8C00) : Colors.transparent)),
+              child: Text(cat, style: TextStyle(color: _catFilter == cat ? const Color(0xFFFF8C00) : AppTheme.textSecondary, fontSize: 11, fontWeight: _catFilter == cat ? FontWeight.bold : FontWeight.normal))))).toList())),
       const SizedBox(height: 8),
       // Lista de canales
       Expanded(child: _loading
