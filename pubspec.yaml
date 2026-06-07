@@ -44,3 +44,4 @@ flutter_launcher_icons:
 
 dependency_overrides:
   package_info_plus: ^8.0.0
+  screen_brightness_android: 2.0.0
