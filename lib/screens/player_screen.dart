@@ -122,7 +122,7 @@ class _State extends State<PlayerScreen> {
               if (mounted) { setState(() => _hasError = false); _initPlayer(_playlist[_idx]); }
             });
           } else if (e.betterPlayerEventType == BetterPlayerEventType.initialized) {
-            if (mounted) { setState(() { _hasError = false; _isLoading = false; _isPlaying = true; }); _showControlsTemporary(); }
+            if (mounted) { Future.delayed(const Duration(milliseconds: 200), () { if (mounted) setState(() { _hasError = false; _isLoading = false; _isPlaying = true; }); }); _showControlsTemporary(); }
           }
         },
       ),
