@@ -21,7 +21,7 @@ jobs:
           java-version: '17'
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.0'
+          flutter-version: '3.24.5'
       - name: Setup project
         run: |
           flutter create --org com.demontv --project-name demon_tv_plus tmp_app
@@ -70,13 +70,6 @@ jobs:
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/demontv.keystore
           printf "storePassword=${{ secrets.KEYSTORE_PASSWORD }}\nkeyPassword=${{ secrets.KEY_PASSWORD }}\nkeyAlias=${{ secrets.KEY_ALIAS }}\nstoreFile=demontv.keystore\n" > android/key.properties
-      - name: Patch dependencies
-        run: |
-          FILE=$(find $HOME/.pub-cache -name "build.gradle" -path "*screen_brightness_android*" | head -1)
-          if [ -f "$FILE" ]; then
-            sed -i '/compilerOptions/,/^    }$/d' "$FILE"
-            echo "Patched $FILE"
-          fi
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
         env:

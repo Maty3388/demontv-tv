@@ -150,9 +150,7 @@ class _PlayerState extends State<PlayerScreen> {
             return KeyEventResult.ignored;
           },
           child: Stack(children: [
-            // Video player
             Video(controller: _videoCtrl, fill: Colors.black),
-            // Loading overlay
             if (_isLoading && !_hasError) Positioned.fill(child: Container(
               color: Colors.black,
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -170,7 +168,6 @@ class _PlayerState extends State<PlayerScreen> {
                 const SizedBox(height: 12),
                 const Text('Cargando canal...', style: TextStyle(color: Colors.white38, fontSize: 12)),
               ]))),
-            // Error overlay
             if (_hasError) Positioned.fill(child: Container(
               color: Colors.black,
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -191,10 +188,9 @@ class _PlayerState extends State<PlayerScreen> {
                     Text('Señal no disponible', style: TextStyle(color: Colors.red, fontSize: 13)),
                   ])),
                 const SizedBox(height: 20),
-                Text(_retryCount < 2 ? 'Reconectando automáticamente...' : 'Canal no disponible', style: const TextStyle(color: Colors.white38, fontSize: 12)),
+                Text(_retryCount < 2 ? 'Reconectando...' : 'Canal no disponible', style: const TextStyle(color: Colors.white38, fontSize: 12)),
                 if (_retryCount < 2) ...[const SizedBox(height: 12), const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: _orange, strokeWidth: 2))],
               ]))),
-            // Zap overlay
             if (_showZapOverlay && !_isLoading) Positioned(left: 0, right: 0, bottom: 0,
               child: Container(
                 padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
@@ -216,7 +212,6 @@ class _PlayerState extends State<PlayerScreen> {
                     ]),
                   ])),
                 ]))),
-            // Controls overlay
             if (_showControls) Positioned.fill(child: Container(
               decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xCC000000), Colors.transparent, Colors.transparent, Color(0xCC000000)], stops: [0.0, 0.3, 0.7, 1.0])),
               child: Column(children: [
