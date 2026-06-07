@@ -210,8 +210,9 @@ class _State extends State<PlayerScreen> {
             return KeyEventResult.ignored;
           },
           child: Stack(children: [
-            if (_ctrl != null) BetterPlayer(controller: _ctrl!)
-            else const Center(child: CircularProgressIndicator(color: _orange)),
+            // Fondo negro siempre presente para evitar pantalla blanca
+            Container(color: Colors.black),
+            if (_ctrl != null) BetterPlayer(controller: _ctrl!),
             if (_isLoading && !_hasError) Positioned.fill(child: Container(
               color: Colors.black87,
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
