@@ -25,6 +25,7 @@ class _State extends State<PlayerScreen> {
   Timer? _hideTimer;
   final FocusNode _focusNode = FocusNode();
   bool _hasError = false;
+  int _retryCount = 0;
   bool _isLoading = true;
   bool _isPlaying = true;
   bool _isFavorite = false;
@@ -64,7 +65,7 @@ class _State extends State<PlayerScreen> {
   }
 
   void _initPlayer(Channel ch) {
-    if (mounted) setState(() { _isLoading = true; _showControls = false; _isPlaying = false; });
+    if (mounted) setState(() { _isLoading = true; _showControls = false; _isPlaying = false; _hasError = false; });
     final url = ch.streamUrl.split('|')[0].trim();
     final headers = <String, String>{
       'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36',
@@ -119,9 +120,12 @@ class _State extends State<PlayerScreen> {
             if (mounted) setState(() => _isPlaying = false);
           } else if (e.betterPlayerEventType == BetterPlayerEventType.exception) {
             if (mounted) setState(() => _hasError = true);
-            Future.delayed(const Duration(seconds: 5), () {
-              if (mounted) { setState(() => _hasError = false); _initPlayer(_playlist[_idx]); }
-            });
+            if (_retryCount < 2) {
+              _retryCount++;
+              Future.delayed(const Duration(seconds: 5), () {
+                if (mounted && _hasError) { setState(() => _hasError = false); _initPlayer(_playlist[_idx]); }
+              });
+            }
           } else if (e.betterPlayerEventType == BetterPlayerEventType.initialized) {
             if (mounted) { Future.delayed(const Duration(milliseconds: 200), () { if (mounted) { setState(() { _hasError = false; _isLoading = false; _isPlaying = true; }); _focusNode.requestFocus(); } }); _showControlsTemporary(); }
           }
@@ -149,6 +153,7 @@ class _State extends State<PlayerScreen> {
 
   void _changeChannel(int newIdx) {
     _hideTimer?.cancel();
+    _retryCount = 0;
     final old = _ctrl;
     _ctrl = null;
     setState(() { _idx = newIdx; _isFavorite = _favorites.contains(_playlist[newIdx].id); _showControls = false; _isLoading = true; });
