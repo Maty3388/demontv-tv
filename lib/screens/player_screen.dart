@@ -23,7 +23,6 @@ class _State extends State<PlayerScreen> {
   late List<Channel> _playlist;
   bool _showControls = false;
   Timer? _hideTimer;
-  Timer? _focusTimer;
   final FocusNode _focusNode = FocusNode();
   bool _hasError = false;
   bool _isLoading = true;
@@ -41,7 +40,6 @@ class _State extends State<PlayerScreen> {
     _idx = widget.initialIndex;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
-      _focusTimer = Timer.periodic(const Duration(milliseconds: 300), (_) { if (mounted && !_focusNode.hasFocus) _focusNode.requestFocus(); });
     });
     _initPlayer(_playlist[_idx]);
     _loadFavorites();
@@ -177,7 +175,6 @@ class _State extends State<PlayerScreen> {
   void dispose() {
     _ctrl?.dispose();
     _hideTimer?.cancel();
-    _focusTimer?.cancel();
     _focusNode.dispose();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
@@ -218,7 +215,7 @@ class _State extends State<PlayerScreen> {
               duration: const Duration(milliseconds: 300),
               child: BetterPlayer(controller: _ctrl!)),
             if (_isLoading && !_hasError) Positioned.fill(child: Container(
-              color: Colors.black87,
+              decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF0D0D0D), Color(0xFF1A0800), Color(0xFF0D0D0D)])),
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                 if (_playlist[_idx].logoUrl.isNotEmpty) SizedBox(width: 80, height: 80,
                   child: CachedNetworkImage(imageUrl: _playlist[_idx].logoUrl, fit: BoxFit.contain,
