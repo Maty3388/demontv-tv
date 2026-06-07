@@ -147,31 +147,22 @@ class _State extends State<PlayerScreen> {
     });
   }
 
-  void _nextChannel() {
-    final next = (_idx + 1) % _playlist.length;
-    setState(() { _idx = next; _isFavorite = _favorites.contains(_playlist[next].id); _showControls = false; });
+  void _changeChannel(int newIdx) {
     _hideTimer?.cancel();
-    _ctrl?.dispose();
+    final old = _ctrl;
     _ctrl = null;
+    setState(() { _idx = newIdx; _isFavorite = _favorites.contains(_playlist[newIdx].id); _showControls = false; _isLoading = true; });
+    try { old?.videoPlayerController?.pause(); } catch (_) {}
+    Future.delayed(const Duration(milliseconds: 150), () { try { old?.dispose(); } catch (_) {} });
     _showZapInfo();
     final token = ++_zapToken;
-    Future.delayed(const Duration(milliseconds: 300), () {
-      if (mounted && token == _zapToken) _initPlayer(_playlist[next]);
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted && token == _zapToken) _initPlayer(_playlist[newIdx]);
     });
   }
 
-  void _prevChannel() {
-    final prev = (_idx - 1 + _playlist.length) % _playlist.length;
-    setState(() { _idx = prev; _isFavorite = _favorites.contains(_playlist[prev].id); _showControls = false; });
-    _hideTimer?.cancel();
-    _ctrl?.dispose();
-    _ctrl = null;
-    _showZapInfo();
-    final token = ++_zapToken;
-    Future.delayed(const Duration(milliseconds: 300), () {
-      if (mounted && token == _zapToken) _initPlayer(_playlist[prev]);
-    });
-  }
+  void _nextChannel() => _changeChannel((_idx + 1) % _playlist.length);
+  void _prevChannel() => _changeChannel((_idx - 1 + _playlist.length) % _playlist.length);
 
   @override
   void dispose() {
