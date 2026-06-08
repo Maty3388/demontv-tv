@@ -4,7 +4,9 @@ class Channel {
   final bool isLive;
   final String? epgNow, epgNext;
   final int? number;
-  const Channel({required this.id, required this.name, required this.category, required this.logoUrl, required this.streamUrl, this.headers = const {}, this.isLive = true, this.epgNow, this.epgNext, this.number});
+  final String? drmLicenseUrl;
+  final Map<String, String> drmHeaders;
+  const Channel({required this.id, required this.name, required this.category, required this.logoUrl, required this.streamUrl, this.headers = const {}, this.isLive = true, this.epgNow, this.epgNext, this.number, this.drmLicenseUrl, this.drmHeaders = const {}});
 }
 
 enum ContentType { movie, series }

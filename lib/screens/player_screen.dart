@@ -76,12 +76,20 @@ class _State extends State<PlayerScreen> {
       headers.addAll(ch.headers);
       BetterPlayerDataSource ds;
       final urlLower = url.toLowerCase();
+      BetterPlayerDrmConfiguration? drmConfig;
+      if (ch.drmLicenseUrl != null && ch.drmLicenseUrl!.isNotEmpty) {
+        drmConfig = BetterPlayerDrmConfiguration(
+          drmType: BetterPlayerDrmType.clearKey,
+          clearKey: ch.drmLicenseUrl,
+          headers: ch.drmHeaders.isNotEmpty ? ch.drmHeaders : null,
+        );
+      }
       if (urlLower.contains('.mpd')) {
-        ds = BetterPlayerDataSource(BetterPlayerDataSourceType.network, url, headers: headers, liveStream: ch.isLive, videoFormat: BetterPlayerVideoFormat.dash);
+        ds = BetterPlayerDataSource(BetterPlayerDataSourceType.network, url, headers: headers, liveStream: ch.isLive, videoFormat: BetterPlayerVideoFormat.dash, drmConfiguration: drmConfig);
       } else if (urlLower.contains('.m3u8') || urlLower.contains('hls')) {
-        ds = BetterPlayerDataSource(BetterPlayerDataSourceType.network, url, headers: headers, liveStream: ch.isLive, videoFormat: BetterPlayerVideoFormat.hls);
+        ds = BetterPlayerDataSource(BetterPlayerDataSourceType.network, url, headers: headers, liveStream: ch.isLive, videoFormat: BetterPlayerVideoFormat.hls, drmConfiguration: drmConfig);
       } else {
-        ds = BetterPlayerDataSource(BetterPlayerDataSourceType.network, url, headers: headers, liveStream: ch.isLive);
+        ds = BetterPlayerDataSource(BetterPlayerDataSourceType.network, url, headers: headers, liveStream: ch.isLive, drmConfiguration: drmConfig);
       }
       _ctrl!.setupDataSource(ds);
       WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _focusNode.requestFocus(); });
@@ -98,11 +106,20 @@ class _State extends State<PlayerScreen> {
     // Detectar formato por URL
     final urlLower = url.toLowerCase();
     BetterPlayerDataSource dataSource;
+    BetterPlayerDrmConfiguration? drmConfig;
+    if (ch.drmLicenseUrl != null && ch.drmLicenseUrl!.isNotEmpty) {
+      drmConfig = BetterPlayerDrmConfiguration(
+        drmType: BetterPlayerDrmType.clearKey,
+        clearKey: ch.drmLicenseUrl,
+        headers: ch.drmHeaders.isNotEmpty ? ch.drmHeaders : null,
+      );
+    }
     if (urlLower.contains('.mpd')) {
       dataSource = BetterPlayerDataSource(
         BetterPlayerDataSourceType.network, url,
         headers: headers, liveStream: ch.isLive,
         videoFormat: BetterPlayerVideoFormat.dash,
+        drmConfiguration: drmConfig,
         bufferingConfiguration: const BetterPlayerBufferingConfiguration(
           minBufferMs: 2000, maxBufferMs: 10000,
           bufferForPlaybackMs: 1000, bufferForPlaybackAfterRebufferMs: 2000),
@@ -112,6 +129,7 @@ class _State extends State<PlayerScreen> {
         BetterPlayerDataSourceType.network, url,
         headers: headers, liveStream: ch.isLive,
         videoFormat: BetterPlayerVideoFormat.hls,
+        drmConfiguration: drmConfig,
         bufferingConfiguration: const BetterPlayerBufferingConfiguration(
           minBufferMs: 3000, maxBufferMs: 15000,
           bufferForPlaybackMs: 1500, bufferForPlaybackAfterRebufferMs: 3000),
@@ -120,6 +138,7 @@ class _State extends State<PlayerScreen> {
       dataSource = BetterPlayerDataSource(
         BetterPlayerDataSourceType.network, url,
         headers: headers, liveStream: ch.isLive,
+        drmConfiguration: drmConfig,
         bufferingConfiguration: const BetterPlayerBufferingConfiguration(
           minBufferMs: 2000, maxBufferMs: 10000,
           bufferForPlaybackMs: 1000, bufferForPlaybackAfterRebufferMs: 2000),

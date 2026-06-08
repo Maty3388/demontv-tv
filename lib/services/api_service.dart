@@ -164,7 +164,9 @@ class ApiService {
         if (idx > 0) headers[kv.substring(0, idx).trim()] = kv.substring(idx + 1).trim();
       }
     }
-    return Channel(id: (j['_id'] ?? j['id'] ?? '').toString(), name: j['name'], category: j['category'], logoUrl: j['logo'] ?? '', streamUrl: url, headers: headers, isLive: j['is_live'] ?? true, epgNow: j['epg_now'], epgNext: j['epg_next'], number: j['number']);
+    final drmHeaders = <String, String>{};
+if (j['drm_headers'] is Map) { (j['drm_headers'] as Map).forEach((k, v) => drmHeaders[k.toString()] = v.toString()); }
+return Channel(id: (j['_id'] ?? j['id'] ?? '').toString(), name: j['name'], category: j['category'], logoUrl: j['logo'] ?? '', streamUrl: url, headers: headers, isLive: j['is_live'] ?? true, epgNow: j['epg_now'], epgNext: j['epg_next'], number: j['number'], drmLicenseUrl: j['drm_license_url'], drmHeaders: drmHeaders);
   }
 
   static Content _movieFromJson(Map<String, dynamic> j) => Content(
