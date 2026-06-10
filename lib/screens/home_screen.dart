@@ -48,7 +48,9 @@ class _HomeState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
         _startAutoScroll();
         _loading  = false;
       });
-    } catch (e) {
+    } catch (e, st) {
+      print("HOME ERROR: $e");
+      print(st);
       if (mounted) setState(() => _loading = false);
     }
   }
