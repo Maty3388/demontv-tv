@@ -199,9 +199,8 @@ class _State extends State<PlayerScreen> {
     _retryCount = 0;
     final old = _ctrl;
     _ctrl = null;
+    try { old?.videoPlayerController?.pause(); old?.dispose(); } catch (_) {}
     setState(() { _idx = newIdx; _isFavorite = _favorites.contains(_playlist[newIdx].id); _showControls = false; _isLoading = true; });
-    try { old?.videoPlayerController?.pause(); } catch (_) {}
-    Future.delayed(const Duration(milliseconds: 150), () { try { old?.dispose(); } catch (_) {} });
     _showZapInfo();
     final token = ++_zapToken;
     Future.delayed(const Duration(milliseconds: 500), () {
@@ -252,15 +251,8 @@ class _State extends State<PlayerScreen> {
             // Fondo negro siempre presente
             Container(color: Colors.black),
             if (_ctrl != null) BetterPlayer(controller: _ctrl!),
-            // Overlay negro que se desvanece cuando el video carga
-            if (_isLoading && !_hasError) AnimatedOpacity(
-              opacity: 1.0,
-              duration: Duration.zero,
-              child: Container(color: Colors.black)),
-            if (!_isLoading && !_hasError) AnimatedOpacity(
-              opacity: 0.0,
-              duration: const Duration(milliseconds: 400),
-              child: Container(color: Colors.black)),
+            // Overlay negro durante carga
+            if (_isLoading && !_hasError) Container(color: Colors.black),
             if (_isLoading && !_hasError) Positioned.fill(child: Container(
               decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF0D0D0D), Color(0xFF1A0800), Color(0xFF0D0D0D)])),
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
