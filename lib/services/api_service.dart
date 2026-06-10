@@ -111,7 +111,7 @@ class ApiService {
 
   static Future<List<Channel>> getChannels({String? search, String? category, bool featured = false}) async {
     // Usar cache si tiene menos de 5 minutos y no hay filtros
-    if (search == null && category == null) {
+    if (search == null && category == null && !featured) {
       if (_cachedChannels != null && _cacheTime != null && DateTime.now().difference(_cacheTime!).inMinutes < 5) {
         return _cachedChannels!;
       }
@@ -126,7 +126,7 @@ class ApiService {
     final res = await http.get(Uri.parse(url), headers: _headers);
     final data = jsonDecode(res.body);
     var channels = (data['channels'] as List).map((c) => _channelFromJson(c)).toList();
-    if (search == null && category == null) { channels = channels.where((c) => c.category != 'ADULTOS').toList(); _cachedChannels = channels; _cacheTime = DateTime.now(); _saveChannelCache(channels); }
+    if (search == null && category == null && !featured) { channels = channels.where((c) => c.category != 'ADULTOS').toList(); _cachedChannels = channels; _cacheTime = DateTime.now(); _saveChannelCache(channels); }
     return channels;
   }
 
