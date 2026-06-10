@@ -251,22 +251,26 @@ class _State extends State<PlayerScreen> {
             // Fondo negro siempre presente
             Container(color: Colors.black),
             if (_ctrl != null) BetterPlayer(controller: _ctrl!),
-            // Overlay negro durante carga
-            if (_isLoading && !_hasError) Container(color: Colors.black),
+            // Overlay zapping estilo broadcast
             if (_isLoading && !_hasError) Positioned.fill(child: Container(
-              decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF0D0D0D), Color(0xFF1A0800), Color(0xFF0D0D0D)])),
+              color: Colors.black,
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                if (_playlist[_idx].logoUrl.isNotEmpty) SizedBox(width: 80, height: 80,
+                if (_playlist[_idx].logoUrl.isNotEmpty) Container(
+                  width: 70, height: 70,
+                  decoration: BoxDecoration(color: const Color(0xFF1A1A1A), borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.all(10),
                   child: CachedNetworkImage(imageUrl: _playlist[_idx].logoUrl, fit: BoxFit.contain,
-                    errorWidget: (_, __, ___) => const Icon(Icons.tv, color: Colors.white54, size: 48))),
+                    errorWidget: (_, __, ___) => const Icon(Icons.tv, color: Colors.white54, size: 40))),
                 const SizedBox(height: 16),
-                Text(_playlist[_idx].name, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 6),
-                Text(_playlist[_idx].category, style: const TextStyle(color: Colors.white54, fontSize: 13)),
-                const SizedBox(height: 24),
-                const CircularProgressIndicator(color: _orange, strokeWidth: 2),
-                const SizedBox(height: 12),
-                const Text('Cargando canal...', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                Text('${_idx + 1}', style: const TextStyle(color: _orange, fontSize: 72, fontWeight: FontWeight.w900, height: 1)),
+                const SizedBox(height: 8),
+                Text(_playlist[_idx].name, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                Text(_playlist[_idx].category, style: const TextStyle(color: Colors.white38, fontSize: 13)),
+                const SizedBox(height: 28),
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: List.generate(5, (i) =>
+                  Container(margin: const EdgeInsets.symmetric(horizontal: 4), width: 8, height: 8,
+                    decoration: BoxDecoration(color: i < 3 ? _orange : const Color(0xFF333333), shape: BoxShape.circle)))),
               ]))),
             if (_hasError) Positioned.fill(child: Container(
               color: Colors.black,
