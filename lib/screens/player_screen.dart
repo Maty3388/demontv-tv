@@ -170,7 +170,7 @@ class _State extends State<PlayerScreen> {
               });
             }
           } else if (e.betterPlayerEventType == BetterPlayerEventType.initialized) {
-            if (mounted) { Future.delayed(const Duration(milliseconds: 200), () { if (mounted) { setState(() { _hasError = false; _isLoading = false; _isPlaying = true; }); _focusNode.requestFocus(); } }); _showControlsTemporary(); }
+            if (mounted) { Future.delayed(const Duration(milliseconds: 800), () { if (mounted) { setState(() { _hasError = false; _isLoading = false; _isPlaying = true; }); _focusNode.requestFocus(); } }); _showControlsTemporary(); }
           }
         },
       ),
