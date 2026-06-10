@@ -36,6 +36,10 @@ class _State extends State<PlayerScreen> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      systemNavigationBarColor: Colors.black,
+      statusBarColor: Colors.black,
+    ));
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     _playlist = widget.playlist.isEmpty ? [widget.channel] : widget.playlist;
     _idx = widget.initialIndex;
@@ -222,6 +226,7 @@ class _State extends State<PlayerScreen> {
     canPop: true,
     child: Scaffold(
       backgroundColor: Colors.black,
+      // Fondo siempre negro
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () { _focusNode.requestFocus(); _showControlsTemporary(); },
