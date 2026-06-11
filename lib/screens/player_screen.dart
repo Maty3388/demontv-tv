@@ -252,7 +252,7 @@ class _State extends State<PlayerScreen> {
             Container(color: Colors.black),
             if (_ctrl != null) BetterPlayer(controller: _ctrl!),
             // Overlay zapping estilo broadcast
-            if (_isLoading && !_hasError) Positioned.fill(child: Container(
+            if (_isLoading && !_hasError) Positioned.fill(child: Material(elevation: 999, color: Colors.transparent, child: Container(
               color: Colors.black,
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                 if (_playlist[_idx].logoUrl.isNotEmpty) Container(
@@ -271,7 +271,7 @@ class _State extends State<PlayerScreen> {
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: List.generate(5, (i) =>
                   Container(margin: const EdgeInsets.symmetric(horizontal: 4), width: 8, height: 8,
                     decoration: BoxDecoration(color: i < 3 ? _orange : const Color(0xFF333333), shape: BoxShape.circle)))),
-              ]))),
+              ])))),
             if (_hasError) Positioned.fill(child: Container(
               color: Colors.black,
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
