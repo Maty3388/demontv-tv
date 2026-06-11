@@ -77,7 +77,14 @@ jobs:
           printf "storePassword=${{ secrets.KEYSTORE_PASSWORD }}\nkeyPassword=${{ secrets.KEY_PASSWORD }}\nkeyAlias=${{ secrets.KEY_ALIAS }}\nstoreFile=demontv.keystore\n" > android/key.properties
       - name: Build APK
         run: |
-          find $HOME/.pub-cache -path "*/better_player*/*.java" -exec grep -l "SurfaceView" {} \; 2>/dev/null | xargs -I{} sed -i 's/SurfaceView/TextureView/g' {} || true
+          BP_PATH=$(find $HOME/.pub-cache -path "*/better_player*/BetterPlayerView.java" 2>/dev/null | head -1)
+          if [ -n "$BP_PATH" ]; then
+            sed -i 's/new SurfaceView(context)/new TextureView(context)/g' "$BP_PATH" || true
+            sed -i 's/SurfaceView surfaceView/TextureView surfaceView/g' "$BP_PATH" || true
+            sed -i 's/import android.view.SurfaceView/import android.view.TextureView/g' "$BP_PATH" || true
+            sed -i 's/import android.view.SurfaceHolder/\/\/import android.view.SurfaceHolder/g' "$BP_PATH" || true
+            echo "Patched: $BP_PATH"
+          fi
           flutter build apk --release --no-tree-shake-icons
         env:
           KEYSTORE_PATH: android/app/demontv.keystore
