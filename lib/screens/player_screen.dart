@@ -156,6 +156,7 @@ class _State extends State<PlayerScreen> {
         autoDetectFullscreenAspectRatio: true,
         placeholderOnTop: true,
         placeholder: Container(color: Colors.black),
+        rendererType: BetterPlayerRendererType.TEXTURE,
         eventListener: (e) {
           if (e.betterPlayerEventType == BetterPlayerEventType.play) {
             if (mounted) setState(() => _isPlaying = true);
