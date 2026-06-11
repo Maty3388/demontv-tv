@@ -76,10 +76,9 @@ jobs:
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/demontv.keystore
           printf "storePassword=${{ secrets.KEYSTORE_PASSWORD }}\nkeyPassword=${{ secrets.KEY_PASSWORD }}\nkeyAlias=${{ secrets.KEY_ALIAS }}\nstoreFile=demontv.keystore\n" > android/key.properties
       - name: Build APK
-          # Patch better_player para usar TextureView (fondo negro)
-          find $HOME/.pub-cache -name "BetterPlayerView.java" 2>/dev/null | xargs -I{} sed -i 's/new SurfaceView/new TextureView/g; s/SurfaceView surfaceView/TextureView surfaceView/g' {} || true
-          find $HOME/.pub-cache -path "*/better_player*/*.java" -exec grep -l "SurfaceView" {} \; | xargs -I{} sed -i 's/SurfaceView/TextureView/g' {} 2>/dev/null || true
-        run: flutter build apk --release --no-tree-shake-icons
+        run: |
+          find $HOME/.pub-cache -path "*/better_player*/*.java" -exec grep -l "SurfaceView" {} \; 2>/dev/null | xargs -I{} sed -i 's/SurfaceView/TextureView/g' {} || true
+          flutter build apk --release --no-tree-shake-icons
         env:
           KEYSTORE_PATH: android/app/demontv.keystore
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
