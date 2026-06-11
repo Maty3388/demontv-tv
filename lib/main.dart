@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:media_kit/media_kit.dart';
 import 'services/stream_proxy.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:flutter/services.dart';
