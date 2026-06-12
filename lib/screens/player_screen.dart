@@ -284,7 +284,7 @@ class _State extends State<PlayerScreen> {
                         Container(margin: const EdgeInsets.only(right: 6), width: 8, height: 8,
                           decoration: BoxDecoration(color: i < 3 ? const Color(0xFF00E5FF) : const Color(0xFF333333), shape: BoxShape.circle)))),
                     ])))
-                ]))))),
+                ])))))),
             if (_hasError) Positioned.fill(child: Container(
               color: Colors.black,
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
