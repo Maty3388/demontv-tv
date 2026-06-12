@@ -68,6 +68,10 @@ jobs:
           cp android_icons/mipmap-xxxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
       - name: Set version
         run: python3 -c "import re,subprocess; v=subprocess.check_output(['grep','version:','pubspec.yaml']).decode().split('+')[0].split()[-1]; c=open('lib/services/update_checker.dart').read(); c=re.sub(r\"static const _currentVersion = '[^']*'\",f\"static const _currentVersion = '{v}'\",c); open('lib/services/update_checker.dart','w').write(c)"
+      - name: Install SDK components
+        run: |
+          echo "y" | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "build-tools;30.0.3" || true
+          echo "y" | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platforms;android-33" || true
       - run: flutter pub get
       - name: Debug gradle
         run: cat android/app/build.gradle | grep -A5 "buildTypes\|signingConfig"
