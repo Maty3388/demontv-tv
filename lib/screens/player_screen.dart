@@ -251,40 +251,19 @@ class _State extends State<PlayerScreen> {
             // Fondo negro siempre presente
             Container(color: Colors.black),
             if (_ctrl != null) BetterPlayer(controller: _ctrl!),
-            // Overlay zapping card centrada cian
+            // Overlay logo centrado fondo negro
             if (_isLoading && !_hasError) Positioned.fill(child: Material(elevation: 999, color: Colors.transparent, child: Container(
               color: Colors.black,
-              child: Center(child: Container(
-                width: 380, height: 170,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                    colors: [Color(0xFF001830), Color(0xFF000A18)]),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFF00E5FF), width: 2),
-                ),
-                child: Row(children: [
-                  Container(width: 100, alignment: Alignment.center,
-                    child: Text('${_idx + 1}', style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 64, fontWeight: FontWeight.w900))),
-                  Container(width: 1, height: 100, color: const Color(0xFF001A2E)),
-                  Expanded(child: Padding(padding: const EdgeInsets.all(16), child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (_playlist[_idx].logoUrl.isNotEmpty) Container(
-                        width: 48, height: 48, margin: const EdgeInsets.only(bottom: 8),
-                        decoration: BoxDecoration(color: const Color(0xFF001525), borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.all(6),
-                        child: CachedNetworkImage(imageUrl: _playlist[_idx].logoUrl, fit: BoxFit.contain,
-                          errorWidget: (_, __, ___) => const Icon(Icons.tv, color: Colors.white54))),
-                      Text(_playlist[_idx].name, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
-                      const SizedBox(height: 4),
-                      Text(_playlist[_idx].category, style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 12)),
-                      const SizedBox(height: 10),
-                      Row(children: List.generate(5, (i) =>
-                        Container(margin: const EdgeInsets.only(right: 6), width: 8, height: 8,
-                          decoration: BoxDecoration(color: i < 3 ? const Color(0xFF00E5FF) : const Color(0xFF333333), shape: BoxShape.circle)))),
-                    ])))
-                ])))))),
+              child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                if (_playlist[_idx].logoUrl.isNotEmpty) Container(
+                  width: 120, height: 120,
+                  decoration: BoxDecoration(color: const Color(0xFF0A0A0A), borderRadius: BorderRadius.circular(16)),
+                  padding: const EdgeInsets.all(16),
+                  child: CachedNetworkImage(imageUrl: _playlist[_idx].logoUrl, fit: BoxFit.contain,
+                    errorWidget: (_, __, ___) => const Icon(Icons.tv, color: Colors.white24, size: 60))),
+                const SizedBox(height: 16),
+                Text(_playlist[_idx].name, style: const TextStyle(color: Colors.white54, fontSize: 14)),
+              ]))))),
             if (_hasError) Positioned.fill(child: Container(
               color: Colors.black,
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
